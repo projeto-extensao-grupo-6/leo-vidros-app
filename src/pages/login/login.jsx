@@ -9,7 +9,24 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import './login.css'
 import '../../shared/css/initial.css'
 
-function Login() {
+function Login(){
+
+    try{
+      const response = await fetch("http://localhost:3000/login", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({email, senha})
+      })
+
+      if (!response.ok) {
+        throw new Error("ERRO NO LOGIN");
+      }
+
+    }catch(error){
+    
+    }
   return (
     <div className="content">
       <FormControl variant="standard">
