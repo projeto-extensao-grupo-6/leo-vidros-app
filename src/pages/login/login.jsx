@@ -9,8 +9,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import './login.css'
 import '../../shared/css/initial.css'
 
-function Login(){
-
+async function Login(){
     try{
       const response = await fetch("http://localhost:3000/login", {
         method: "GET",

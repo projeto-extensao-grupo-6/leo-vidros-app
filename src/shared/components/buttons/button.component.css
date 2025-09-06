@@ -1,0 +1,92 @@
+/* Base do botão */
+.btn {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.15s ease;
+  font-family: "Inter", sans-serif;
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 0.9rem;
+  margin-top: 0.5rem;
+  background: #4f46e5;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  animation: fadeInUp 1s ease forwards;
+  opacity: 0;
+  animation-delay: 1s;
+}
+
+button[type="submit"]:hover {
+  background: #4338ca;
+  transform: translateY(-2px);
+}
+
+/* Tamanhos */
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.btn-md {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+}
+
+.btn-lg {
+  padding: 0.8rem 1.6rem;
+  font-size: 1.1rem;
+}
+
+/* Variantes usando suas variáveis de cor */
+.btn-primary {
+  background: var(--primary-color);
+  color: var(--neutral-color-0);
+}
+
+.btn-primary:hover {
+  background: var(--secondary-color);
+}
+
+.btn-secondary {
+  background: var(--quaternary-color);
+  color: var(--neutral-color-1);
+}
+
+.btn-secondary:hover {
+  background: var(--tertiary-color);
+  color: var(--neutral-color-0);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-outline:hover {
+  background: var(--primary-color);
+  color: var(--neutral-color-0);
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: var(--neutral-color-0);
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* Efeito ao clicar */
+.btn:active {
+  transform: scale(0.97);
+}

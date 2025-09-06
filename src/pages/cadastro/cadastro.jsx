@@ -1,10 +1,40 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import InputText from "../../shared/components/inputs/inputText/inputText.component";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import EmailIcon from "@mui/icons-material/Email";
+import BadgeIcon from "@mui/icons-material/Badge";
+import PhoneIcon from "@mui/icons-material/Phone";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "../../shared/components/buttons/button.component";
+import "./cadastro.css";
 
-function cadastro(){
-  const [nome, setNome] = useState("")
-  const [email, setEmail] = useState("")
-  const [cpf, setCpf] = useState("")
+function Cadastro() {
+  const [step, setStep] = useState(1);
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [celular, setCelular] = useState("");
   const [error, setError] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (step === 1 && !nome) return setError("Digite o nome");
+    if (step === 2 && !email) return setError("Digite o email");
+    if (step === 3 && !cpf) return setError("Digite o CPF");
+    if (step === 4 && !celular) return setError("Digite o celular");
+
+    if (step < 4) {
+      setStep(step + 1);
+    } else {
+      handleCadastro(e);
+    }
+  };
 
   const handleCadastro = async (e) => {
     e.preventDefault();
@@ -14,58 +44,170 @@ function cadastro(){
       const response = await fetch("http://localhost:3000/solicitacoes", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nome, email, cpf })
+        body: JSON.stringify({ nome, email, cpf, celular }),
       });
 
-      if (!response.ok) {
-        throw new Error("Erro ao cadastrar");
-      }
+      if (!response.ok) throw new Error("Erro ao cadastrar");
 
       const data = await response.json();
       console.log(data);
-      window.location.href = "/FlowController";
-    }catch(error){
+
+      setModalOpen(true);
+
+      setTimeout(() => {
+        setModalOpen(false);
+        window.location.href = "/FlowController";
+      }, 2000);
+    } catch (error) {
       setError(error.message);
     }
-  }
+  };
+
+  // Animação padrão
+  const variants = {
+    initial: { opacity: 0.3, x: 50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0.3, x: -50 },
+  };
+
   return (
-    <div>
-      <h1>Cadastro</h1>
-      <form onSubmit={handleCadastro}>
-        <div>
-          <label>Nome:</label>
-          <input
-            type="text"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>CPF:</label>
-          <input
-            type="text"
-            value={cpf}
-            onChange={(e) => setCpf(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Cadastrar</button>
-      </form>
+    <div className="main-container">
+      <div className="image"></div>
+      <div className="form-container">
+        <h1>Cadastro</h1>
+        <form onSubmit={handleNext}
+          className="form"
+          >
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4 }}
+              >
+                <InputText
+                  id="nome"
+                  label="Nome"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  icon={<AccountCircle />}
+                />
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4 }}
+              >
+                <InputText
+                  id="email"
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<EmailIcon />}
+                />
+              </motion.div>
+            )}
+
+            {step === 3 && (
+              <motion.div
+                key="step3"
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4 }}
+              >
+                <InputText
+                  id="cpf"
+                  label="CPF"
+                  value={cpf}
+                  onChange={(e) => setCpf(e.target.value)}
+                  icon={<BadgeIcon />}
+                />
+              </motion.div>
+            )}
+
+            {step === 4 && (
+              <motion.div
+                key="step4"
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4 }}
+              >
+                <InputText
+                  id="celular"
+                  label="Celular"
+                  value={celular}
+                  onChange={(e) => setCelular(e.target.value)}
+                  icon={<PhoneIcon />}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {error && <p style={{ color: "red" }}>{error}</p>}
+
+          <div>
+            <Button 
+              type="submit"  
+              variant="primary"
+              class="mt-l2">
+              {step < 4 ? "Próximo" : "Cadastrar"}
+            </Button>
+            {step > 1 && (
+              <Button
+                type="button" 
+                variant="primary" 
+                size="md" 
+                onClick={() => setStep(step - 1)}
+                class="mt-l2"
+                >
+                Voltar
+              </Button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Cadastro realizado com sucesso!
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Aguarde a aprovação do administrador.
+          </Typography>
+        </Box>
+      </Modal>
     </div>
-  )
+  );
 }
 
-export default cadastro;
+export default Cadastro;
