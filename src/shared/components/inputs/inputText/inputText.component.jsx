@@ -5,7 +5,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import FormControl from "@mui/material/FormControl";
 import "./inputText.component.css"
 
-export default function InputText({ id, label, type = "text", value, onChange, icon }) {
+export default function InputText({ id, label, type = "text", value, placeholder, onChange, icon }) {
   return (
     <FormControl variant="standard"
       className="formControl">
@@ -14,6 +14,7 @@ export default function InputText({ id, label, type = "text", value, onChange, i
         id={id}
         type={type}
         value={value}
+        placeholder={placeholder}
         onChange={onChange}
         startAdornment={
           icon ? <InputAdornment position="start">{icon}</InputAdornment> : null

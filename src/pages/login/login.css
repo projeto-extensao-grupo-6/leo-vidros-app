@@ -1,0 +1,6 @@
+@import url(/src/shared/css/commons.css);
+@import url(/src/shared/css/colors.css);
+
+.form{
+  gap: 1.5rem;
+}

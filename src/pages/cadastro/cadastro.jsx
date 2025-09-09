@@ -10,6 +10,13 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "../../shared/components/buttons/button.component";
 import "./cadastro.css";
+import Login from "../login/login.jsx";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+// IMPORTS DO STEPPER
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import { QontoConnector, QontoStepIcon } from "../../shared/components/steppers/QontoStepper.jsx";
 
 function Cadastro() {
   const [step, setStep] = useState(1);
@@ -19,6 +26,8 @@ function Cadastro() {
   const [celular, setCelular] = useState("");
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+
+  const steps = ["Nome", "Email", "CPF", "Celular"]; // labels no stepper
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -58,14 +67,13 @@ function Cadastro() {
 
       setTimeout(() => {
         setModalOpen(false);
-        window.location.href = "/FlowController";
+        window.location.href = "/Login";
       }, 2000);
     } catch (error) {
       setError(error.message);
     }
   };
 
-  // Animação padrão
   const variants = {
     initial: { opacity: 0.3, x: 50 },
     animate: { opacity: 1, x: 0 },
@@ -73,13 +81,36 @@ function Cadastro() {
   };
 
   return (
-    <div className="main-container">
+    <div className="main-container m-32">
       <div className="image"></div>
-      <div className="form-container">
-        <h1>Cadastro</h1>
-        <form onSubmit={handleNext}
-          className="form"
+      <div className="form-container m-4">
+        <div className="header-back">
+          <span
+            className="back-icon"
+            onClick={() => window.location.href = "/Login"} // ou setMode("login") se estiver no mesmo container
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
           >
+            <ArrowBackIosNewIcon fontSize="small" />
+            <span>Voltar para Login</span>
+          </span>
+        </div>
+        <h1>Criar conta</h1>
+
+        {/* STEPPER */}
+        <Stepper
+          alternativeLabel
+          activeStep={step - 1}
+          connector={<QontoConnector />}
+          sx={{ mb: 4 }}
+        >
+          {steps.map((label) => (
+            <Step key={label}>
+              <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+
+        <form onSubmit={handleNext} className="form">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -94,6 +125,7 @@ function Cadastro() {
                   id="nome"
                   label="Nome"
                   value={nome}
+                  placeholder={"Digite seu nome"}
                   onChange={(e) => setNome(e.target.value)}
                   icon={<AccountCircle />}
                 />
@@ -113,6 +145,7 @@ function Cadastro() {
                   id="email"
                   label="Email"
                   type="email"
+                  placeholder={"Digite seu email"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   icon={<EmailIcon />}
@@ -133,6 +166,7 @@ function Cadastro() {
                   id="cpf"
                   label="CPF"
                   value={cpf}
+                  placeholder={"Digite seu CPF"}
                   onChange={(e) => setCpf(e.target.value)}
                   icon={<BadgeIcon />}
                 />
@@ -152,6 +186,7 @@ function Cadastro() {
                   id="celular"
                   label="Celular"
                   value={celular}
+                  placeholder={"Digite seu celular"}
                   onChange={(e) => setCelular(e.target.value)}
                   icon={<PhoneIcon />}
                 />
@@ -159,30 +194,26 @@ function Cadastro() {
             )}
           </AnimatePresence>
 
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p style={{ color: "red", margin: "4px" }}>{error}</p>}
 
           <div>
-            <Button 
-              type="submit"  
-              variant="primary"
-              class="mt-l2">
-              {step < 4 ? "Próximo" : "Cadastrar"}
+            <Button type="submit" variant="primary" size="md" class="mt-l2">
+              {step < 4 ? "Próximo" : "Solicitar cadastro"}
             </Button>
             {step > 1 && (
-              <Button
-                type="button" 
-                variant="primary" 
-                size="md" 
+              <a
                 onClick={() => setStep(step - 1)}
-                class="mt-l2"
-                >
+                style={{ margin: "10px", cursor: "pointer" }}
+                className="mx-2"
+              >
                 Voltar
-              </Button>
+              </a>
             )}
           </div>
         </form>
       </div>
 
+      {/* MODAL DE SUCESSO */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{

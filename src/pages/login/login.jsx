@@ -1,61 +1,143 @@
-import * as React from 'react';
-import Input from '@mui/material/Input';
-import InputLabel from '@mui/material/InputLabel';
-import InputAdornment from '@mui/material/InputAdornment';
-import FormControl from '@mui/material/FormControl';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import InputText from "../../shared/components/inputs/inputText/inputText.component";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import LockIcon from "@mui/icons-material/Lock";
+import Modal from "@mui/material/Modal";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Button from "../../shared/components/buttons/button.component";
+import "./login.css";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
-import './login.css'
-import '../../shared/css/initial.css'
+function Login() {
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [error, setError] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
 
-async function Login(){
-    try{
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
       const response = await fetch("http://localhost:3000/login", {
-        method: "GET",
+        method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, senha})
-      })
+        body: JSON.stringify({ email, senha }),
+      });
 
-      if (!response.ok) {
-        throw new Error("ERRO NO LOGIN");
-      }
+      if (!response.ok) throw new Error("Erro no login");
 
-    }catch(error){
-    
+      const data = await response.json();
+      console.log("Login OK:", data);
+
+      setModalOpen(true);
+
+      setTimeout(() => {
+        setModalOpen(false);
+        // exemplo: window.location.href = "/dashboard";
+      }, 2000);
+    } catch (error) {
+      setError(error.message);
     }
-  return (
-    <div className="content">
-      <FormControl variant="standard">
-        <InputLabel htmlFor="input-with-icon-adornment">
-          Login
-        </InputLabel>
-        <Input
-          id="input-with-icon-adornment"
-          startAdornment={
-            <InputAdornment position="start">
-              <AccountCircle />
-            </InputAdornment>
-          }
-        />
-      </FormControl>
-      <FormControl>
-         <InputLabel htmlFor="input-lock">
-          Senha
-        </InputLabel>
-        <Input
-          id="input-lock"
-          startAdornment={
-            <InputAdornment position="start">
-              <RemoveRedEyeIcon />
-            </InputAdornment>
-          }
-        />
-      </FormControl>
-    </div>
+  };
 
+  const variants = {
+    initial: { opacity: 0.3, x: 50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0.3, x: -50 },
+  };
+
+  return (
+    <div className="main-container m-32">
+      <div className="form-container m-4">
+        <div className="header-back">
+          <span
+            className="back-icon"
+            onClick={() => window.location.href = "/Cadastro"} // ou setMode("login") se estiver no mesmo container
+            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+          >
+            <ArrowBackIosNewIcon fontSize="small" />
+            <span>Voltar para Cadastro</span>
+          </span>
+        </div>
+        <h1>Entrar</h1>
+
+        <form onSubmit={handleLogin}>
+          <div className="form">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key="login"
+                variants={variants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.4 }}
+              >
+                <InputText
+                  id="email"
+                  label="Email"
+                  type="email"
+                  placeholder="Digite seu email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<AccountCircle />}
+                />
+                <InputText
+                  id="senha"
+                  label="Senha"
+                  type="password"
+                  placeholder="Digite sua senha"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  icon={<LockIcon />}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {error && <p style={{ color: "red", margin: "4px" }}>{error}</p>}
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            className="mt-l2"
+          >
+            Entrar
+          </Button>
+        </form>
+      </div>
+      <div className="image"></div>
+
+      {/* MODAL DE SUCESSO */}
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Login realizado com sucesso!
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Bem-vindo de volta 🚀
+          </Typography>
+        </Box>
+      </Modal>
+    </div>
   );
 }
 

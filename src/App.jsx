@@ -6,11 +6,11 @@ import Cadastro from './pages/cadastro/cadastro.jsx'
 
 function App() {
   return (
-      <Routes>
-        <Route path="" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastro" element={<Cadastro />} />
-      </Routes>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/cadastro" element={<Cadastro />} />
+    </Routes>
   )
 }
 

@@ -1,7 +1,10 @@
+@import '../../css/colors.css';
 /* Base do botão */
 .btn {
   border: none;
+  width: 100%;
   border-radius: 8px;
+  margin-bottom: 16px;
   cursor: pointer;
   font-weight: 500;
   transition: background 0.2s ease, transform 0.15s ease;
@@ -9,10 +12,11 @@
 }
 
 button[type="submit"] {
+
   width: 100%;
   padding: 0.9rem;
-  margin-top: 0.5rem;
-  background: #4f46e5;
+  margin-top: 2rem;
+  background: var(--button-color);
   border: none;
   border-radius: 8px;
   color: #fff;
@@ -26,7 +30,8 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  background: #4338ca;
+  background: #005f73;
+  color: var(--neutral-color-0);
   transform: translateY(-2px);
 }
 
@@ -48,6 +53,7 @@ button[type="submit"]:hover {
 
 /* Variantes usando suas variáveis de cor */
 .btn-primary {
+  margin-top: 1rem;
   background: var(--primary-color);
   color: var(--neutral-color-0);
 }
