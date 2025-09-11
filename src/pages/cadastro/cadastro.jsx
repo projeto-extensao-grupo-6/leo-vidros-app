@@ -12,6 +12,7 @@ import Button from "../../shared/components/buttons/button.component";
 import "./cadastro.css";
 import Login from "../login/login.jsx";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import InputMask from "react-input-mask";
 // IMPORTS DO STEPPER
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
@@ -35,8 +36,8 @@ function Cadastro() {
 
     if (step === 1 && !nome) return setError("Digite o nome");
     if (step === 2 && !email) return setError("Digite o email");
-    if (step === 3 && !cpf) return setError("Digite o CPF");
-    if (step === 4 && !celular) return setError("Digite o celular");
+    if (step === 3 && (!cpf || cpf.length !== 14)) return setError("Digite um CPF válido");
+    if (step === 4 && (!celular || celular.length !== 15)) return setError("Digite um celular válido");
 
     if (step < 4) {
       setStep(step + 1);
@@ -125,7 +126,7 @@ function Cadastro() {
                   id="nome"
                   label="Nome"
                   value={nome}
-                  placeholder={"Digite seu nome"}
+                  placeholder="Digite seu nome"
                   onChange={(e) => setNome(e.target.value)}
                   icon={<AccountCircle />}
                 />
@@ -145,8 +146,8 @@ function Cadastro() {
                   id="email"
                   label="Email"
                   type="email"
-                  placeholder={"Digite seu email"}
                   value={email}
+                  placeholder="Digite seu email"
                   onChange={(e) => setEmail(e.target.value)}
                   icon={<EmailIcon />}
                 />
@@ -166,9 +167,10 @@ function Cadastro() {
                   id="cpf"
                   label="CPF"
                   value={cpf}
-                  placeholder={"Digite seu CPF"}
+                  placeholder="Digite seu CPF"
                   onChange={(e) => setCpf(e.target.value)}
                   icon={<BadgeIcon />}
+                  mask="000.000.000-00"
                 />
               </motion.div>
             )}
@@ -186,9 +188,10 @@ function Cadastro() {
                   id="celular"
                   label="Celular"
                   value={celular}
-                  placeholder={"Digite seu celular"}
+                  placeholder="Digite seu celular"
                   onChange={(e) => setCelular(e.target.value)}
                   icon={<PhoneIcon />}
+                  mask="(00) 00000-0000"
                 />
               </motion.div>
             )}

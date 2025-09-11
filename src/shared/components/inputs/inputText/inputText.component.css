@@ -5,3 +5,7 @@
   border-radius: 4px;
   box-sizing: border-box;
 }
+
+.input-spacing {
+  margin-bottom: 24px;
+}

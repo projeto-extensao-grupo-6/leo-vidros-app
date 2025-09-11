@@ -57,14 +57,17 @@ function Login() {
         <div className="header-back">
           <span
             className="back-icon"
-            onClick={() => window.location.href = "/Cadastro"} // ou setMode("login") se estiver no mesmo container
+            onClick={() => window.location.href = "/Cadastro"} 
             style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
           >
             <ArrowBackIosNewIcon fontSize="small" />
             <span>Voltar para Cadastro</span>
           </span>
         </div>
-        <h1>Entrar</h1>
+        <div className="header-title">
+          <h1>Entre na sua conta</h1>
+          <h3>Entre em sua conta para gerenciar seu negócio</h3>
+        </div>
 
         <form onSubmit={handleLogin}>
           <div className="form">
@@ -100,7 +103,7 @@ function Login() {
           </div>
 
           {error && <p style={{ color: "red", margin: "4px" }}>{error}</p>}
-
+          <a className="forgot-password" onClick={() => setForgotPassword(true)}>Esqueci minha senha</a>
           <Button
             type="submit"
             variant="primary"
