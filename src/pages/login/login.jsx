@@ -21,7 +21,7 @@ function Login() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,16 +54,6 @@ function Login() {
   return (
     <div className="main-container m-32">
       <div className="form-container m-4">
-        <div className="header-back">
-          <span
-            className="back-icon"
-            onClick={() => window.location.href = "/Cadastro"} 
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
-          >
-            <ArrowBackIosNewIcon fontSize="small" />
-            <span>Voltar para Cadastro</span>
-          </span>
-        </div>
         <div className="header-title">
           <h1>Entre na sua conta</h1>
           <h3>Entre em sua conta para gerenciar seu negócio</h3>
@@ -113,6 +103,15 @@ function Login() {
             Entrar
           </Button>
         </form>
+        <div className="account-back">
+          <div className="separator"></div>
+          <span
+            className="back-icon"
+            onClick={() => window.location.href = "/Cadastro"} 
+          > 
+            <span>Voltar para Cadastro</span>
+          </span>
+        </div>
       </div>
       <div className="image"></div>
 

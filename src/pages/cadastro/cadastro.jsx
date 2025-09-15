@@ -51,7 +51,7 @@ function Cadastro() {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/solicitacoes", {
+      const response = await fetch("http://localhost:3000/api/solicitacoes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -85,16 +85,6 @@ function Cadastro() {
     <div className="main-container m-32">
       <div className="image"></div>
       <div className="form-container m-4">
-        <div className="header-back">
-          <span
-            className="back-icon"
-            onClick={() => window.location.href = "/Login"} // ou setMode("login") se estiver no mesmo container
-            style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
-          >
-            <ArrowBackIosNewIcon fontSize="small" />
-            <span>Voltar para Login</span>
-          </span>
-        </div>
         <h1>Criar conta</h1>
 
         {/* STEPPER */}
@@ -214,6 +204,14 @@ function Cadastro() {
             )}
           </div>
         </form>
+        <div className="account-back">
+          <div className="separator"></div>
+          <span
+            onClick={() => window.location.href = "/Login"} 
+          >
+            <span>Voltar para Login</span>
+          </span>
+        </div>
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>

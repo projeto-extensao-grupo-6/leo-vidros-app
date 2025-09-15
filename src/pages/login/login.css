@@ -24,3 +24,18 @@ h3{
 InputText label{
   color: #000;
 }
+
+.forgot-password{
+  display: block;
+  text-align: right !important;
+  margin-left: auto;
+  margin-top: -30px !important;
+  margin-bottom: -15px !important;
+  color: var(--neutral-color-2);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.forgot-password:hover{
+  text-decoration: underline;
+}
