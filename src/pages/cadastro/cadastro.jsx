@@ -24,11 +24,11 @@ function Cadastro() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
-  const [celular, setCelular] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
 
-  const steps = ["Nome", "Email", "CPF", "Celular"]; // labels no stepper
+  const steps = ["Nome", "Email", "CPF", "Telefone"]; // labels no stepper
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -37,7 +37,7 @@ function Cadastro() {
     if (step === 1 && !nome) return setError("Digite o nome");
     if (step === 2 && !email) return setError("Digite o email");
     if (step === 3 && (!cpf || cpf.length !== 14)) return setError("Digite um CPF válido");
-    if (step === 4 && (!celular || celular.length !== 15)) return setError("Digite um celular válido");
+    if (step === 4 && (!telefone || telefone.length !== 15)) return setError("Digite um telefone válido");
 
     if (step < 4) {
       setStep(step + 1);
@@ -56,13 +56,24 @@ function Cadastro() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nome, email, cpf, celular }),
+        body: JSON.stringify({ nome, email, cpf, telefone }),
+      });
+
+      const responseJsonServer = await fetch("http://localhost:8080/solicitacoes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nome, email, cpf, telefone }),
       });
 
       if (!response.ok) throw new Error("Erro ao cadastrar");
+      if(!responseJsonServer.ok) throw new Error("Erro ao cadastrar no json server");
 
+      const dataJsonServer = await responseJsonServer.json();
       const data = await response.json();
       console.log(data);
+      console.log(dataJsonServer);
 
       setModalOpen(true);
 
@@ -175,11 +186,11 @@ function Cadastro() {
                 transition={{ duration: 0.4 }}
               >
                 <InputText
-                  id="celular"
-                  label="Celular"
-                  value={celular}
-                  placeholder="Digite seu celular"
-                  onChange={(e) => setCelular(e.target.value)}
+                  id="telefone"
+                  label="Telefone"
+                  value={telefone}
+                  placeholder="Digite seu telefone"
+                  onChange={(e) => setTelefone(e.target.value)}
                   icon={<PhoneIcon />}
                   mask="(00) 00000-0000"
                 />
