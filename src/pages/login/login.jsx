@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import InputText from "../../shared/components/inputs/inputText/inputText.component";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
@@ -93,7 +93,7 @@ function Login() {
           </div>
 
           {error && <p style={{ color: "red", margin: "4px" }}>{error}</p>}
-          <a className="forgot-password" onClick={() => setForgotPassword(true)}>Esqueci minha senha</a>
+          <a className="forgot-password">Esqueci minha senha</a>
           <Button
             type="submit"
             variant="primary"
