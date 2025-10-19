@@ -6,6 +6,8 @@ import BtnExport from "../../shared/components/clienteComponents/buttonsContaine
 import SearchBar from "../../shared/components/clienteComponents/buttonsContainer/searchBar/searchBar";
 import FilterDropdown from "../../shared/components/clienteComponents/buttonsContainer/filterDropdown/filterDropdown";
 import TableContainer from "../../shared/components/clienteComponents/tableContainer/tableContainer";
+import PaginationContainer from "../../shared/components/clienteComponents/paginationContainer/paginationContainer";
+import BtnSwitchPages from "../../shared/components/clienteComponents/buttonsContainer/buttons/btnSwitchPages/btnSwitchPages";
 import "./historico-clientes.css";
 
 // Dados mockados para teste
@@ -27,7 +29,7 @@ const mockData = [
         valor: "250.00",
         formaPagamento: "Pix",
         funcionario: "Carlos Oliveira",
-        desconto: "10",
+        desconto: "10"
       },
       {
         servico: "Troca de Disjuntores",
@@ -36,9 +38,9 @@ const mockData = [
         valor: "450.00",
         formaPagamento: "Cartão",
         funcionario: "Maria Santos",
-        desconto: "5",
-      },
-    ],
+        desconto: "5"
+      }
+    ]
   },
   {
     id: 2,
@@ -57,9 +59,9 @@ const mockData = [
         valor: "180.00",
         formaPagamento: "Dinheiro",
         funcionario: "Pedro Costa",
-        desconto: "0",
-      },
-    ],
+        desconto: "0"
+      }
+    ]
   },
   {
     id: 3,
@@ -70,7 +72,7 @@ const mockData = [
     endereco: "Rua Augusta, 500",
     cidade: "São Paulo",
     uf: "SP",
-    historicoServicos: [],
+    historicoServicos: []
   },
   {
     id: 4,
@@ -89,7 +91,7 @@ const mockData = [
         valor: "3500.00",
         formaPagamento: "Transferência",
         funcionario: "João Almeida",
-        desconto: "15",
+        desconto: "15"
       },
       {
         servico: "Pintura de Paredes",
@@ -98,7 +100,7 @@ const mockData = [
         valor: "1200.00",
         formaPagamento: "Pix",
         funcionario: "Carlos Oliveira",
-        desconto: "10",
+        desconto: "10"
       },
       {
         servico: "Troca de Piso",
@@ -107,9 +109,9 @@ const mockData = [
         valor: "2800.00",
         formaPagamento: "Cartão",
         funcionario: "Maria Santos",
-        desconto: "8",
-      },
-    ],
+        desconto: "8"
+      }
+    ]
   },
   {
     id: 5,
@@ -128,9 +130,9 @@ const mockData = [
         valor: "650.00",
         formaPagamento: "Pix",
         funcionario: "Pedro Costa",
-        desconto: "5",
-      },
-    ],
+        desconto: "5"
+      }
+    ]
   },
   {
     id: 6,
@@ -141,7 +143,7 @@ const mockData = [
     endereco: "Av. Rebouças, 1500",
     cidade: "São Paulo",
     uf: "SP",
-    historicoServicos: [],
+    historicoServicos: []
   },
   {
     id: 7,
@@ -160,9 +162,9 @@ const mockData = [
         valor: "320.00",
         formaPagamento: "Dinheiro",
         funcionario: "João Almeida",
-        desconto: "0",
-      },
-    ],
+        desconto: "0"
+      }
+    ]
   },
   {
     id: 8,
@@ -181,7 +183,7 @@ const mockData = [
         valor: "280.00",
         formaPagamento: "Pix",
         funcionario: "Carlos Oliveira",
-        desconto: "12",
+        desconto: "12"
       },
       {
         servico: "Manutenção Mensal",
@@ -190,27 +192,26 @@ const mockData = [
         valor: "280.00",
         formaPagamento: "Pix",
         funcionario: "Carlos Oliveira",
-        desconto: "12",
-      },
-    ],
-  },
+        desconto: "12"
+      }
+    ]
+  }
 ];
 
 function HistoricoClientes() {
-  const [historico, setHistorico] = useState(mockData); // Usando dados mockados
+  const [historico, setHistorico] = useState(mockData);
   const [erro, setErro] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
 
-  // Comentado temporariamente para usar dados mockados
-  // useEffect(() => {
-  //   fetch("http://localhost:5173/historico-clientes")
-  //     .then((r) => {
-  //       if (!r.ok) throw new Error("Falha ao buscar histórico");
-  //       return r.json();
-  //     })
-  //     .then(setHistorico)
-  //     .catch((e) => setErro(e.message));
-  // }, []);
+  const totalItems = historico.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  // Paginação
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = historico.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleNovoCliente = () => {
     console.log("Novo cliente clicado");
@@ -236,6 +237,18 @@ function HistoricoClientes() {
     console.log("Excluir cliente:", id);
   };
 
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <MainBox>
       <ButtonsContainer>
@@ -259,10 +272,27 @@ function HistoricoClientes() {
       </ButtonsContainer>
 
       <TableContainer
-        data={historico}
+        data={currentItems}
         onEdit={handleEdit}
         onDelete={handleDelete}
       />
+
+      <PaginationContainer
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        totalItems={totalItems}
+      >
+        <BtnSwitchPages 
+          direction="prev" 
+          onClick={handlePrevPage}
+          disabled={currentPage == 1}
+        />
+        <BtnSwitchPages 
+          direction="next" 
+          onClick={handleNextPage}
+          disabled={currentPage == totalPages}
+        />
+      </PaginationContainer>
     </MainBox>
   );
 }
