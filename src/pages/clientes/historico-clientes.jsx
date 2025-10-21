@@ -13,7 +13,8 @@ import ExportModal from "../../shared/components/clienteComponents/modal/exportM
 import CalendarModal from "../../shared/components/clienteComponents/modal/calendarModal/calendarModal";
 
 import "./historico-clientes.css";
-
+import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/components/header/header";
 
 const mockData = [
   {
@@ -212,7 +213,9 @@ function HistoricoClientes() {
   const [selectedCliente, setSelectedCliente] = useState(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
 
   const itemsPerPage = 7;
 
@@ -301,9 +304,13 @@ function HistoricoClientes() {
 
   const handleSelectDate = (date) => {
     console.log("Data selecionada:", date);
-    // Aqui você adiciona a lógica de filtrar por data
   };
+
   return (
+    <>
+    <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+    <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+
     <MainBox>
       <ButtonsContainer>
         <BtnNovoCliente onClick={handleNovoCliente} />
@@ -362,6 +369,7 @@ function HistoricoClientes() {
         onSelectDate={handleSelectDate}
       />
     </MainBox>
+  </>
   );
 }
 
