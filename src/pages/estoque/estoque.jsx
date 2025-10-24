@@ -1,161 +1,368 @@
-import React, { useState } from 'react';
-import { Package, X, ChevronDown } from 'lucide-react';
+import React, { useState } from "react";
+// Assumindo que Header e Sidebar estão em um local compartilhado
+import Header from "../../shared/components/header/header"; 
+import Sidebar from "../../shared/components/sidebar/sidebar";
+import {
+  Package,
+  ArrowUp,
+  Search,
+  CalendarDays, 
+  Filter, // Ícone do Filtro
+  Download,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
-/**
- * Componente Modal para criação de um Novo Produto
- * Implementa os campos: Nome, Unidade de Medida, Preço e Descrição.
- * @param {object} props
- * @param {boolean} props.isOpen - Estado para controlar se o modal está aberto.
- * @param {function} props.onClose - Função para fechar o modal.
- */
-const NovoProdutoModal = ({ isOpen, onClose }) => {
-    // Estado para os dados do formulário (simulação)
-    const [formData, setFormData] = useState({
-        nome: '',
-        unidade: 'Unidade',
-        preco: 'R$ 0,00',
-        descricao: ''
-    });
+// Importa seus componentes existentes
+import NovoProdutoModal from '../../shared/components/modalEstoque/NovoProdutoModal'; 
+import SucessoModal from '../../shared/components/modalEstoque/SucessoModal';
+import ExportarModal from '../../shared/components/modalEstoque/ExportarModal'; 
+import EstoqueItemRow from "../../shared/components/estoque/EstoqueItemRow";
+import CalendarDropdown from '../../shared/components/estoque/CalendarDropdown'; 
+import FilterDropdown from '../../shared/components/estoque/FilterDropdown'; 
 
-    if (!isOpen) return null;
 
-    // Função de exemplo para simular o salvamento
-    const handleSave = () => {
-        console.log("Salvando novo produto:", formData);
-        onClose(); 
-    };
+// --- Componente Principal Estoque ---
+export default function Estoque() {
+  // ... (Estados e funções existentes) ...
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  
+  // ESTADOS DOS MODAIS
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-    // Previne que o modal feche se o usuário clicar dentro do conteúdo
-    const handleModalContentClick = (e) => {
-        e.stopPropagation();
-    };
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+  
+  const openExportModal = () => setIsExportModalOpen(true);
+  const closeExportModal = () => setIsExportModalOpen(false);
+  
+  const handleSaveSuccess = () => {
+      setIsModalOpen(false);
+      setIsSuccessModalOpen(true);
+      setTimeout(() => {
+          setIsSuccessModalOpen(false);
+      }, 3000); 
+  };
+  const closeSuccessModal = () => setIsSuccessModalOpen(false);
 
-    return (
-        // Overlay com Escurecimento Suave (CORRIGIDO: Sem Blur, apenas opacidade)
-        // bg-black/50 cria o fundo escuro e semi-transparente, como no protótipo.
-        <div 
-            className="fixed inset-0 bg-black/100 flex items-center justify-center z-50 p-4"
-            onClick={onClose} 
-        >
-            {/* Conteúdo do Modal (com sombra forte para dar ênfase) */}
-            <div 
-                className="bg-white rounded-lg shadow-2xl w-full max-w-lg mx-auto"
-                onClick={handleModalContentClick}
-            >
-                
-                {/* Cabeçalho do Modal */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-3">
-                        <Package className="w-6 h-6 text-[#003d6b]" />
-                        <h2 className="text-xl font-bold text-gray-900">Novo produto</h2>
+  // ESTADOS DO CALENDÁRIO
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedFilterDate, setSelectedFilterDate] = useState(null); 
+
+  const handleDateFilterChange = (date) => {
+    setSelectedFilterDate(date);
+    if (date) {
+        console.log("Filtrando a lista por data:", date.toLocaleDateString('pt-BR'));
+    } else {
+        console.log("Filtro de data removido.");
+    }
+    // Mantemos o calendário aberto para permitir a navegação de meses ou fechamos aqui.
+    // setIsCalendarOpen(false); 
+  };
+
+  // NOVO: Estados para o Filtro
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // Estado para armazenar os filtros ativos (ex: {situacao: ['Disponível', 'Abaixo do normal']})
+  const [activeFilters, setActiveFilters] = useState({});
+
+  const handleFilterChange = (newFilters) => {
+    setActiveFilters(newFilters);
+    console.log("Novos Filtros Ativos:", newFilters);
+    // Aqui você adicionaria a lógica para filtrar a lista 'itensEstoque'
+  };
+
+  // Função auxiliar para verificar se há algum filtro ativo (para mudar a cor do botão)
+  const hasActiveFilters = Object.values(activeFilters).some(arr => arr.length > 0);
+
+  // ... (Seus dados existentes - itensEstoque e kpiData) ...
+  const itensEstoque = [
+    // Seus dados de estoque... (mantidos por brevidade)
+    { 
+      nome: "Vidro", 
+      descricao: "-", 
+      preco: "R$ 8,50", 
+      quantidade: 8, 
+      situacao: "Disponível", 
+      checked: false,
+      detalhes: {
+        espessura: "4 mm",
+        unidadeMedida: "m²",
+        tipoVidro: "Temperado",
+        cor: "Incolor",
+        aplicacao: "Janelas, portas, fachadas, box de banheiro, divisórias",
+        acabamento: "Corte reto",
+        valorCompra: "R$ 2,00",
+        valorVenda: "R$ 8,50",
+        movimentos: [
+          {
+            tipo: "Saída",
+            data: "06/02/2025",
+            unidade: "m²",
+            quantidade: "4",
+            observacao: "Porta de giro/Porta de vidro de correr/Manutenção de 2 vitrôs do quarto",
+            funcionario: "Junior Silva"
+          },
+          {
+            tipo: "Entrada",
+            data: "05/02/2025",
+            unidade: "m²",
+            quantidade: "6",
+            observacao: "-",
+            funcionario: "Junior Silva"
+          }
+        ]
+      }
+    },
+    { 
+      nome: "Parafusadeira Canhão", 
+      descricao: "Para parafusadeira com ímã", 
+      preco: "R$ 26,50", 
+      quantidade: 2, 
+      situacao: "Abaixo do normal", 
+      checked: false 
+    },
+    { 
+      nome: "Protetor auditivo", 
+      descricao: "-", 
+      preco: "R$ 5,00", 
+      quantidade: 10, 
+      situacao: "Disponível", 
+      checked: true 
+    },
+    { 
+      nome: "Roldana mini preta", 
+      descricao: "-", 
+      preco: "R$ 3,00", 
+      quantidade: 9, 
+      situacao: "Disponível", 
+      checked: false 
+    },
+    { 
+      nome: "Tucano grande", 
+      descricao: "Suporte de prateleira", 
+      preco: "R$ 23,00", 
+      quantidade: 2, 
+      situacao: "Abaixo do normal", 
+      checked: true 
+    },
+    { 
+      nome: "Fecho para porta", 
+      descricao: "Branco", 
+      preco: "R$ 10,00", 
+      quantidade: 1, 
+      situacao: "Abaixo do normal", 
+      checked: true 
+    },
+  ];
+
+  const [selectedItems, setSelectedItems] = useState(itensEstoque.filter(item => item.checked).map(item => item.nome));
+
+  const handleCheckboxChange = (nome) => {
+    setSelectedItems(prev =>
+      prev.includes(nome)
+        ? prev.filter(item => item !== nome)
+        : [...prev, nome]
+    );
+  };
+    
+  const kpiData = [
+    { title: "Total de produtos em estoque", value: "0,00", caption: "+00% este mês", captionColor: 'green' },
+    { title: "Itens com baixo estoque", value: "0,00", caption: "0 atualmente" },
+    { title: "Produto em alta", value: "0,00", caption: "0 atualmente" },
+    { title: "Itens fora de estoque", value: "0,00", caption: "0 atualmente" },
+  ];
+
+
+  return (
+    <div className="flex bg-gray-50 min-h-screen">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex-1 flex flex-col min-h-screen">
+        <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+        <div className="pt-20 lg:pt-[80px]" /> 
+        
+        <main className="flex-1 p-4 md:p-8">
+          <div className="max-w-[1800px] mx-auto">
+            {/* KPIs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {kpiData.map((stat, index) => (
+                    <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col justify-between">
+                        <div className="flex items-start justify-between mb-4">
+                            <h3 className="text-sm font-medium text-gray-600">{stat.title}</h3>
+                            <div className="bg-[#003d6b] p-2 rounded">
+                                <Package className="w-5 h-5 text-white" />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                            {stat.caption && (
+                                <p className="mt-2 text-sm text-gray-600 flex items-center">
+                                    {stat.captionColor === 'green' && <ArrowUp className="w-4 h-4 mr-1 text-green-500" />}
+                                    {stat.caption}
+                                </p>
+                            )}
+                        </div>
                     </div>
-                    {/* Botão Fechar (X) */}
-                    <button 
-                        onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full"
-                        aria-label="Fechar"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
+                ))}
+            </div>
+
+            {/* Tabela de Estoque */}
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+              
+              {/* Barra de Ações e Pesquisa */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                 
-                {/* Corpo do Formulário */}
-                <div className="p-6 space-y-5">
-                    
-                    {/* Linha 1: Nome do produto */}
-                    <div>
-                        <label htmlFor="nomeProduto" className="block text-sm font-medium text-gray-700 mb-1">
-                            Nome do produto
-                        </label>
+                {/* Botão Novo Item */}
+                <button 
+                    onClick={openModal} 
+                    className="w-full md:w-auto bg-[#007EA7] text-white font-medium py-2.5 px-5 rounded-md hover:bg-[#006891] transition-colors flex items-center justify-center whitespace-nowrap"
+                >
+                  Novo Item
+                </button>
+
+                {/* Container de Pesquisa e Filtros */}
+                <div className="flex items-center gap-3 w-full justify-end">
+                  
+                  {/* Campo de Pesquisa com Filtro ativo */}
+                  <div className="relative w-full max-w-lg"> 
+                    <div className="relative">
                         <input
                             type="text"
-                            id="nomeProduto"
-                            placeholder="Nome do produto"
-                            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-[#003d6b] focus:border-[#003d6b] text-sm"
-                            onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                            placeholder="Busque Por..."
+                            className="w-full pl-28 pr-10 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] text-sm"
+                        />
+                        {/* Filtro Vidro */}
+                        <div className="absolute top-1/2 transform -translate-y-1/2 left-3">
+                            <span className="flex items-center bg-gray-200 text-gray-700 text-xs font-medium px-2.5 py-1 rounded">
+                                Vidro
+                                <button className="ml-1.5 text-gray-600 hover:text-gray-900 font-bold">
+                                    ×
+                                </button>
+                            </span>
+                        </div>
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    </div>
+                  </div>
+
+                  {/* Botões de Filtro */}
+                  <div className="flex gap-2 w-auto whitespace-nowrap">
+                    
+                    {/* Botão de Data com Dropdown do Calendário */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                            className="flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                        >
+                            <CalendarDays className="w-4 h-4" /> 
+                            {selectedFilterDate ? selectedFilterDate.toLocaleDateString('pt-BR') : 'Data'}
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isCalendarOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        <CalendarDropdown 
+                            isOpen={isCalendarOpen}
+                            onClose={() => setIsCalendarOpen(false)}
+                            onDateSelect={handleDateFilterChange}
                         />
                     </div>
 
-                    {/* Linha 2: Unidade de medida e Preço do produto */}
-                    <div className="flex space-x-4">
-                        {/* Unidade de medida */}
-                        <div className="flex-1">
-                            <label htmlFor="unidadeMedida" className="block text-sm font-medium text-gray-700 mb-1">
-                                Unidade de medida
-                            </label>
-                            <div className="relative">
-                                <select 
-                                    id="unidadeMedida"
-                                    className="w-full border border-gray-300 rounded-md shadow-sm p-3 appearance-none focus:ring-[#003d6b] focus:border-[#003d6b] text-sm bg-white"
-                                    defaultValue="Unidade"
-                                    onChange={(e) => setFormData({...formData, unidade: e.target.value})}
-                                >
-                                    <option>Unidade</option>
-                                    <option>Metro</option>
-                                    <option>Kg</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                            </div>
-                        </div>
+                    {/* Botão de Filtro com Dropdown de Filtros */}
+                    <div className="relative">
+                        <button 
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            className={`flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors ${hasActiveFilters ? 'border-[#003d6b] text-[#003d6b] bg-[#e6f0f5]' : ''}`}
+                        >
+                            <Filter className="w-4 h-4" /> 
+                            Filtrar
+                            <ChevronDown className={`w-4 h-4 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+                        </button>
                         
-                        {/* Preço do produto */}
-                        <div className="flex-1">
-                            <label htmlFor="precoProduto" className="block text-sm font-medium text-gray-700 mb-1">
-                                Preço do produto
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    id="precoProduto"
-                                    placeholder="0,00"
-                                    defaultValue="R$ 0,00"
-                                    className="w-full border border-gray-300 rounded-md shadow-sm pl-8 pr-3 py-3 focus:ring-[#003d6b] focus:border-[#003d6b] text-sm"
-                                    onChange={(e) => setFormData({...formData, preco: e.target.value})}
-                                />
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">R$</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Linha 3: Descrição do produto */}
-                    <div>
-                        <label htmlFor="descricaoProduto" className="block text-sm font-medium text-gray-700 mb-1">
-                            Descrição do produto
-                        </label>
-                        <textarea
-                            id="descricaoProduto"
-                            rows="2"
-                            placeholder="Adicione sua descrição"
-                            className="w-full border border-gray-300 rounded-md shadow-sm p-3 focus:ring-[#003d6b] focus:border-[#003d6b] text-sm resize-none"
-                            onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                        {/* Chamada do componente FilterDropdown */}
+                        <FilterDropdown 
+                            isOpen={isFilterOpen}
+                            onClose={() => setIsFilterOpen(false)}
+                            selectedFilters={activeFilters}
+                            onFilterChange={handleFilterChange}
                         />
                     </div>
                     
-                    {/* Adicionar mais especificações */}
-                    <button className="flex items-center gap-2 text-[#007EA7] hover:text-[#003d6b] font-semibold text-sm transition-colors">
-                        <span className="text-xl leading-none">+</span> Adicionar mais especificações
+                    <button 
+                      onClick={openExportModal}
+                      className="flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    >
+                      <Download className="w-4 h-4" /> Exportar
                     </button>
-
+                  </div>
+                </div>
+              </div>
+              
+              {/* Tabela */}
+              <div className="overflow-x-auto">
+                {/* Cabeçalho da Tabela */}
+                <div className="flex items-center bg-gray-50 border-b border-gray-200 mb-2 min-h-[48px] rounded-t-md">
+                    <div className="py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[5%] pl-4 pr-1">
+                        <input type="checkbox" className="w-4 h-4 text-[#003d6b] border-gray-300 rounded focus:ring-[#003d6b]" />
+                    </div>
+                    <div className="py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%] pl-2 pr-1 flex items-center">Nome</div>
+                    <div className="py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider w-[25%] px-4 flex items-center">Descrição</div>
+                    <div className="py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider w-[10%]">Preço</div>
+                    <div className="py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">Quantidade em estoque</div>
+                    <div className="py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%]">Situação</div>
+                    <div className="py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider w-[15%] pr-4">Ações</div>
                 </div>
 
-                {/* Rodapé do Modal (Botões de Ação) */}
-                <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-                    <button 
-                        onClick={onClose}
-                        className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-semibold text-sm"
-                    >
-                        Cancelar
+                {/* Corpo da Tabela: Chama o componente EstoqueItemRow */}
+                <div>
+                    {itensEstoque.map((item, index) => (
+                        <EstoqueItemRow
+                            key={index}
+                            item={item}
+                            isSelected={selectedItems.includes(item.nome)}
+                            onToggle={handleCheckboxChange}
+                        />
+                    ))}
+                </div>
+              </div>
+              
+              {/* Paginação */}
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
+                <p className="text-sm text-gray-600">
+                  Mostrando <span className="font-medium">1-6</span> de <span className="font-medium">10</span> resultados
+                </p>
+                <div className="flex gap-2">
+                    <button className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+                        <ChevronLeft className="w-4 h-4" /> Anterior
                     </button>
-                    <button 
-                        onClick={handleSave}
-                        className="px-4 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#003d6b] transition-colors font-semibold text-sm"
-                    >
-                        Salvar Produto
+                    <button className="flex items-center gap-1 bg-[#003d6b] text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-[#002a4d] transition-colors">
+                        Próximo <ChevronRight className="w-4 h-4" />
                     </button>
                 </div>
+              </div>
+
             </div>
-        </div>
-    );
-};
+          </div>
+        </main>
+      </div>
+      
+      {/* Modais */}
+      <NovoProdutoModal 
+          isOpen={isModalOpen} 
+          onClose={closeModal} 
+          onSaveSuccess={handleSaveSuccess}
+      />
+      
+      <SucessoModal 
+          isOpen={isSuccessModalOpen} 
+          onClose={closeSuccessModal}
+      />
 
-export default NovoProdutoModal;
+      <ExportarModal 
+          isOpen={isExportModalOpen} 
+          onClose={closeExportModal}
+      />
+
+    </div>
+  );
+}
