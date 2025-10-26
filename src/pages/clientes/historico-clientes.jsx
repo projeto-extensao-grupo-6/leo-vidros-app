@@ -10,7 +10,6 @@ import PaginationContainer from "../../shared/components/clienteComponents/pagin
 import BtnSwitchPages from "../../shared/components/clienteComponents/buttonsContainer/buttons/btnSwitchPages/btnSwitchPages";
 import ClienteModal from "../../shared/components/clienteComponents/modal/clienteModal";
 import ExportModal from "../../shared/components/clienteComponents/modal/exportModal/exportModal";
-import CalendarModal from "../../shared/components/clienteComponents/modal/calendarModal/calendarModal";
 import Sidebar from "../../shared/components/sidebar/sidebar";
 import Header from "../../shared/components/header/header";
 import SuccessModal from "../../shared/components/clienteComponents/modal/successModal/successModal"; 
@@ -374,12 +373,6 @@ function HistoricoClientes() {
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         onExport={handleExportSubmit}
-      />
-      
-      <CalendarModal
-        isOpen={isCalendarModalOpen}
-        onClose={() => setIsCalendarModalOpen(false)}
-        onSelectDate={handleSelectDate}
       />
 
       <SuccessModal
