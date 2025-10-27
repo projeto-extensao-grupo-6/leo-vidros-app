@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import InputText from "../../shared/components/inputs/inputText/inputText.component";
+import Input from "../../shared/components/Ui/Input.jsx";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import EmailIcon from "@mui/icons-material/Email";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -105,7 +105,7 @@ function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#ffffff] to-[#f3f4f6] p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-[#ffffff] to-[#f3f4f6] p-4">
       <div className="w-full max-w-6xl flex items-center justify-center gap-12">
         <div
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"

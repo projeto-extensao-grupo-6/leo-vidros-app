@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import InputText from "../../shared/components/inputs/inputText/inputText.component";
+import Input from "../../shared/components/Ui/Input";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "../../shared/components/buttons/button.component";
@@ -48,7 +48,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#ffffff] to-[#f3f4f6] p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-[#ffffff] to-[#f3f4f6] p-4">
       <div className="w-full max-w-6xl flex items-center justify-center gap-12">
         {/* Imagem lateral */}
         <div

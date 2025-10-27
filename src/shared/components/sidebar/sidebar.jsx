@@ -38,7 +38,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[1399] cursor-pointer"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-1399 cursor-pointer"
             style={{
               position: "fixed",
               top: 0,
@@ -54,7 +54,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
       <motion.aside
         animate={{ x: sidebarOpen ? 0 : "-100%" }}
         transition={{ type: "spring", stiffness: 260, damping: 28 }}
-        className="fixed top-0 left-0 h-full w-[270px] bg-white text-gray-700 shadow-2xl z-[1400] flex flex-col border-r border-gray-200"
+        className="fixed top-0 left-0 h-full w-[270px] bg-white text-gray-700 shadow-2xl z-1400 flex flex-col border-r border-gray-200"
       >
         {/* Logo e botão fechar */}
         <div className="relative flex flex-col items-center px-4 pt-6 pb-8">
@@ -73,7 +73,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </div>
 
         {/* Menu principal */}
-        <nav className="flex-grow overflow-y-auto w-full">
+        <nav className="grow overflow-y-auto w-full">
           <ul className="flex flex-col gap-2 px-6">
             {menuItems.map((item, i) => {
               const isActive = location.pathname === item.path;

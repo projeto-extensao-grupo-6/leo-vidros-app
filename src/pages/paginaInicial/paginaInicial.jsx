@@ -60,7 +60,7 @@
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         {/* Conteúdo principal */}
-        <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center px-8 py-12 gap-10 font-[Inter]">
+        <div className="relative bg-[#f8fafc] flex flex-col items-center justify-center px-8 py-12 gap-10 font-[Inter]">
           {/* Título */}
           <div className="text-center mb-4">
             <h1 className="text-3xl font-semibold text-gray-800 mb-4">

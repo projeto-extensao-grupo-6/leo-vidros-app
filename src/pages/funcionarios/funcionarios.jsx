@@ -92,11 +92,11 @@ export default function Funcionarios() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="h-[80px]" />
+        <div className="h-80px" />
 
         <main className="flex-1 p-8">
-          <div className="max-w-[1800px] mx-auto">
-            <div className="mb-10 text-center">
+          <div className="mx-auto">
+            <div className="mb-10 text-center pb-7">
               <h1 className="text-3xl font-bold text-gray-800">Controle de funcionário</h1>
               <p className="text-gray-500 text-lg">
                 Visualize todos os funcionários de sua empresa
@@ -160,7 +160,7 @@ export default function Funcionarios() {
                                 : "default"
                             }
                             variant="outlined"
-                            className="!font-medium"
+                            className="font-medium!"
                             size="small"
                           />
                         </TableCell>

@@ -22,10 +22,10 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
 
 return (
     <AppBar
-        position="fixed"
-        className="!bg-[#003d6b] !shadow-lg z-[1100]"
+        position=""
+        className="bg-[#003d6b]! shadow-lg! z-1100"
     >
-        <Toolbar className="!min-h-[75px] flex justify-between">
+        <Toolbar className="min-h-[75px]! flex justify-between">
             <div className="flex items-center">
                 <IconButton
                     color="inherit"
@@ -47,7 +47,7 @@ return (
                     <p className="text-sm font-semibold">Julio Cesar</p>
                     <p className="text-sm text-gray-300">Cargo</p>
                 </div>
-                <Avatar src={UserImg} className="!w-14 !h-14" />
+                <Avatar src={UserImg} className="w-14! h-14!" />
                 <ExpandMore
                     className={`text-white transition-transform duration-300 ${
                         open ? "rotate-180" : "rotate-0"
