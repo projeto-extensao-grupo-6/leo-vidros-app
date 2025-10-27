@@ -311,5 +311,91 @@
       "contrato": "Fixo",
       "status": "Ativo"
     }
+  ],
+  "estoque": [
+    {
+      "nome": "Vidro",
+      "descricao": "-",
+      "preco": 85,
+      "quantidade": 30,
+      "estoqueMinimo": 5,
+      "tipo": "Vidros",
+      "detalhes": {
+        "espessura": "4 mm",
+        "unidadeMedida": "m²",
+        "tipoVidro": "Temperado",
+        "cor": "Incolor",
+        "aplicacao": "Janelas, portas, fachadas, box de banheiro, divisórias",
+        "acabamento": "Corte reto",
+        "valorCompra": 2,
+        "valorVenda": 85,
+        "movimentos": [
+          {
+            "id": "m1",
+            "tipo": "Saída",
+            "data": "2025-02-06",
+            "unidade": "m²",
+            "quantidade": 4,
+            "observacao": "Porta de giro/Porta de vidro de correr/Manutenção de 2 vitrôs do quarto",
+            "funcionario": "Junior Silva"
+          },
+          {
+            "id": "m2",
+            "tipo": "Entrada",
+            "data": "2025-02-05",
+            "unidade": "m²",
+            "quantidade": 6,
+            "observacao": "-",
+            "funcionario": "Junior Silva"
+          },
+          {
+            "id": "mov-1761551820951-16a78268f67398",
+            "tipo": "Saída",
+            "data": "2025-10-27",
+            "quantidade": 10,
+            "observacao": "Teste Saida",
+            "funcionario": "Maria Souza"
+          },
+          {
+            "id": "mov-1761551840926-eacd3d4bc39888",
+            "tipo": "Entrada",
+            "data": "2025-10-27",
+            "quantidade": 30,
+            "observacao": "Teste entrada",
+            "funcionario": "João Silva"
+          }
+        ]
+      },
+      "id": "1"
+    },
+    {
+      "id": "369a",
+      "nome": "Óculos de Proteção",
+      "descricao": "Óculos para Proteção Ocular",
+      "preco": 150,
+      "quantidade": 20,
+      "estoqueMinimo": 50,
+      "tipo": "EPIS",
+      "detalhes": {
+        "espessura": "20",
+        "unidadeMedida": "Unidade",
+        "tipoVidro": "",
+        "cor": "Cinza",
+        "aplicacao": "",
+        "acabamento": "",
+        "valorCompra": 70,
+        "valorVenda": 150,
+        "movimentos": [
+          {
+            "id": "mov-1761551749046-598b54f4d30c7",
+            "tipo": "Entrada",
+            "data": "2025-10-27",
+            "quantidade": 20,
+            "observacao": "Teste de entrada",
+            "funcionario": "Eros Nicolino da Rocha"
+          }
+        ]
+      }
+    }
   ]
 }
