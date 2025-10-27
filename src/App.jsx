@@ -15,6 +15,7 @@ import CalendarDashboard from './pages/calendar-dashboard.jsx/index.jsx';
 function App() {
   return (
     <Routes>
+      <Route path="/paginaInicial" element={<PaginaInicial />} />
       <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
@@ -25,6 +26,7 @@ function App() {
       <Route path="/pedidos" element={<Pedidos />} />
       <Route path="/acesso" element={<Acesso />} />
       <Route path='/agendamentos' element={<CalendarDashboard />} />
+      <Route path="/servicos" element={<Pedidos />} />
     </Routes>
   );
 }
