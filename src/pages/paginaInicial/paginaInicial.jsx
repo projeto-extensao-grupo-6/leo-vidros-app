@@ -52,12 +52,21 @@ export default function PaginaInicial() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8fafc] font-[Inter]">
-      <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-      <div className="h-20 sm:h-[90px] md:h-[100px]" />
+      {/* Header com ref para medir altura */}
+      <div ref={headerRef}>
+        <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
+        <div className="h-[40px] sm:h-[45px] md:h-[50px]" />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      </div>
+
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <main className="flex flex-col items-center justify-start px-6 sm:px-8 md:px-10 pb-12 gap-10 transition-all duration-300">
-        {/* Título da página*/}
+      {/* Conteúdo principal com padding dinâmico */}
+      <main
+        className="flex flex-col items-center justify-start px-6 sm:px-8 md:px-10 pb-12 gap-10 transition-all duration-300"
+        style={{ paddingTop: `${headerHeight + 20}px` }}
+      >
+        {/* Título */}
         <div className="text-center mb-4 px-2">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2">
             Painel de Controle
@@ -95,10 +104,11 @@ export default function PaginaInicial() {
                   </div>
                   <div className="flex items-center gap-3 mt-4 md:mt-0">
                     <span
-                      className={`text-xs font-medium px-4 py-2 rounded-md ${produto.status === "Crítico"
+                      className={`text-xs font-medium px-4 py-2 rounded-md ${
+                        produto.status === "Crítico"
                           ? "bg-red-100 text-red-700"
                           : "bg-yellow-100 text-yellow-700"
-                        }`}
+                      }`}
                     >
                       {produto.status}
                     </span>
