@@ -539,5 +539,95 @@
       "dataCompra": "2025-01-10",
       "formaPagamento": "Pix"
     }
+  ],
+  "solicitacoesAcesso": [
+    {
+      "id": 1,
+      "nome": "Ana Beatriz Silva",
+      "cpf": "123.456.789-00",
+      "telefone": "(11) 98765-4321",
+      "cargo": "Analista de Sistemas",
+      "situacao": "Pendente"
+    },
+    {
+      "id": 2,
+      "nome": "Carlos Eduardo Santos",
+      "cpf": "987.654.321-00",
+      "telefone": "(21) 98888-7777",
+      "cargo": "Técnico de Suporte",
+      "situacao": "Pendente"
+    },
+    {
+      "id": 3,
+      "nome": "Fernanda Costa",
+      "cpf": "456.789.123-99",
+      "telefone": "(31) 99999-8888",
+      "cargo": "Gerente de Projetos",
+      "situacao": "Aprovado"
+    },
+    {
+      "id": 4,
+      "nome": "Rafael Pereira",
+      "cpf": "111.222.333-44",
+      "telefone": "(47) 97777-6666",
+      "cargo": "Estagiário",
+      "situacao": "Pendente"
+    },
+    {
+      "id": 5,
+      "nome": "Mariana Oliveira",
+      "cpf": "555.666.777-88",
+      "telefone": "(19) 95555-4444",
+      "cargo": "Coordenadora de RH",
+      "situacao": "Recusado"
+    },
+    {
+      "id": 6,
+      "nome": "Pedro Henrique",
+      "cpf": "222.333.444-55",
+      "telefone": "(85) 96666-5555",
+      "cargo": "Desenvolvedor Frontend",
+      "situacao": "Aprovado"
+    },
+    {
+      "id": 7,
+      "nome": "Laura Mendes",
+      "cpf": "333.444.555-66",
+      "telefone": "(67) 97777-4444",
+      "cargo": "Desenvolvedora Backend",
+      "situacao": "Pendente"
+    },
+    {
+      "id": 8,
+      "nome": "João Almeida",
+      "cpf": "444.555.666-77",
+      "telefone": "(12) 98888-9999",
+      "cargo": "Designer UX/UI",
+      "situacao": "Recusado"
+    },
+    {
+      "id": 9,
+      "nome": "Camila Rocha",
+      "cpf": "777.888.999-00",
+      "telefone": "(16) 97777-2222",
+      "cargo": "Analista Financeira",
+      "situacao": "Pendente"
+    },
+    {
+      "id": 10,
+      "nome": "Lucas Martins",
+      "cpf": "888.999.000-11",
+      "telefone": "(84) 94444-3333",
+      "cargo": "Engenheiro de Dados",
+      "situacao": "Aprovado"
+    },
+    {
+      "id": 11,
+      "nome": "Beatriz Souza",
+      "cpf": "999.000.111-22",
+      "telefone": "(51) 95555-6666",
+      "cargo": "Assistente Administrativo",
+      "situacao": "Pendente"
+    }
   ]
 }
