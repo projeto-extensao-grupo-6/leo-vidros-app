@@ -421,5 +421,123 @@
         ]
       }
     }
+  ],
+  "servicos": [
+    {
+      "id": "10",
+      "clienteId": "4",
+      "clienteNome": "Pedro Alves",
+      "data": "2025-10-12",
+      "descricao": "Instalação de porta de vidro temperado",
+      "status": "Ativo",
+      "etapa": "Aguardando orçamento",
+      "progresso": [
+        1,
+        6
+      ]
+    },
+    {
+      "id": "9",
+      "clienteId": "5",
+      "clienteNome": "Juliana Fernandes",
+      "data": "2025-10-11",
+      "descricao": "Troca de janela basculante",
+      "status": "Ativo",
+      "etapa": "Orçamento aprovado",
+      "progresso": [
+        3,
+        6
+      ]
+    },
+    {
+      "id": "8",
+      "clienteId": "1",
+      "clienteNome": "Ana Silva",
+      "data": "2025-10-10",
+      "descricao": "Conserto de box de banheiro",
+      "status": "Finalizado",
+      "etapa": "Concluído",
+      "progresso": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "7",
+      "clienteId": "2",
+      "clienteNome": "Lucas Pereira",
+      "data": "2025-10-09",
+      "descricao": "Instalação de vitrine comercial",
+      "status": "Ativo",
+      "etapa": "Execução em andamento",
+      "progresso": [
+        4,
+        6
+      ]
+    },
+    {
+      "id": "6",
+      "clienteId": "3",
+      "clienteNome": "Mariana Costa",
+      "data": "2025-10-08",
+      "descricao": "Troca de vidro de porta pivotante",
+      "status": "Ativo",
+      "etapa": "Aguardando peças",
+      "progresso": [
+        2,
+        6
+      ]
+    },
+    {
+      "id": "5",
+      "clienteId": "11",
+      "clienteNome": "Jão Gomes da Silva",
+      "data": "2025-10-07",
+      "descricao": "Divisórias de vidro fosco",
+      "status": "Ativo",
+      "etapa": "Orçamento aprovado",
+      "progresso": [
+        3,
+        6
+      ]
+    }
+  ],
+  "pedidos": [
+    {
+      "id": "1",
+      "itensCount": 3,
+      "valorTotal": 120,
+      "produtosDesc": "Ventosa dupla",
+      "descricao": "Ferramenta para manuseio de vidro",
+      "dataCompra": "2025-01-13",
+      "formaPagamento": "Pix"
+    },
+    {
+      "id": "2",
+      "itensCount": 5,
+      "valorTotal": 250,
+      "produtosDesc": "Silicone neutro",
+      "descricao": "Silicone para vedação",
+      "dataCompra": "2025-01-12",
+      "formaPagamento": "Cartão de crédito"
+    },
+    {
+      "id": "3",
+      "itensCount": 1,
+      "valorTotal": 60,
+      "produtosDesc": "Espaçador 8mm",
+      "descricao": "Espaçador para box",
+      "dataCompra": "2025-01-11",
+      "formaPagamento": "Dinheiro"
+    },
+    {
+      "id": "4",
+      "itensCount": 2,
+      "valorTotal": 46,
+      "produtosDesc": "Tucano grande",
+      "descricao": "Suporte de prateleira",
+      "dataCompra": "2025-01-10",
+      "formaPagamento": "Pix"
+    }
   ]
 }
