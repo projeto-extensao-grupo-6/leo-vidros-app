@@ -15,7 +15,7 @@ import Solicitacoes from './pages/solicitacoes/Solicitacoes.jsx';
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<PaginaInicial />} />
+      <Route path="/" element={<Login />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
       <Route path="/paginaInicial" element={<PaginaInicial />} />

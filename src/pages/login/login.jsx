@@ -34,6 +34,7 @@ function Login() {
       setTimeout(() => {
         setModalOpen(false);
       }, 2000);
+      window.location.href = "./paginaInicial";
     } catch (error) {
       setError(error.message);
     } finally {

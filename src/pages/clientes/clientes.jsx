@@ -29,7 +29,7 @@ import {
 } from "@mui/icons-material";
 import ClienteFormModal from "../../shared/components/clienteComponents/ClienteFormModal";
 
-const API_URL = "http://localhost:3000/clientes";
+const API_URL = "http://localhost:3001/clientes";
 
 const formatCurrency = (value) => {
   if (value == null || isNaN(value)) return "R$ 0,00";

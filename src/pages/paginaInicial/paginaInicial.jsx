@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import Kpis from "../../shared/components/kpis/kpis";
 
-const API_ESTOQUE_URL = "http://localhost:3000/estoque";
-const API_CLIENTES_URL = "http://localhost:3000/clientes";
+const API_ESTOQUE_URL = "http://localhost:3001/estoque";
+const API_CLIENTES_URL = "http://localhost:3001/clientes";
 
 const isToday = (date) => {
     if (!date) return false;

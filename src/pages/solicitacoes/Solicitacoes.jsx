@@ -3,7 +3,7 @@ import Header from "../../shared/components/header/header";
 import Sidebar from "../../shared/components/sidebar/sidebar";
 import { Search, Check, X, CheckCheck, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
-const API_URL = "http://localhost:3000/solicitacoes";
+const API_URL = "http://localhost:3000/api/solicitacoes";
 const ITENS_POR_PAGINA = 10;
 
 export default function Acesso() {
@@ -17,10 +17,10 @@ export default function Acesso() {
   const [pagina, setPagina] = useState(1);
   const [activeTab, setActiveTab] = useState('Pendentes'); // Estado para a aba ativa
 
-  const fetchSolicitacoes = async () => {
+  async function fetchSolicitacoes() {
     setLoading(true);
     try {
-      const response = await fetch(API_URL);
+      const response = await fetch(`${API_URL}/listar-pendentes`);
       const data = await response.json();
       setSolicitacoes(data);
     } catch (error) {
@@ -36,7 +36,7 @@ export default function Acesso() {
 
   const updateSolicitacaoStatus = async (ids, novoStatus) => {
     const promises = ids.map(id =>
-      fetch(`${API_URL}/${id}`, {
+      fetch(`${API_URL}/aceitar/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ situacao: novoStatus }),
