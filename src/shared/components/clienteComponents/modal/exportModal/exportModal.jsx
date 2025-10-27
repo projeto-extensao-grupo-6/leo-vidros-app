@@ -61,15 +61,36 @@ function ExportModal({ isOpen, onClose, onExport }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[1000] opacity-100" onClick={handleClose}>
-      <div className="w-[459px] h-auto max-h-[90vh] overflow-y-auto bg-white rounded-lg border border-gray-200 p-6 box-border opacity-100 shadow-[0_10px_25px_rgba(0,0,0,0.2)]" onClick={(e) => e.stopPropagation()}>
+    // OVERLAY: Fundo preto com 50% de opacidade (bg-black/50) + Filtro Grayscale no que está atrás
+    <div 
+      className="fixed inset-0 bg-black/50 backdrop-grayscale flex items-center justify-center z-[1000]" 
+      onClick={handleClose}
+    >
+      {/* Modal centralizado */}
+      <div 
+        // Adicionei relative aqui para o botão de fechar funcionar
+        className="relative w-[459px] h-auto max-h-[90vh] overflow-y-auto bg-white rounded-lg border border-gray-200 p-6 box-border shadow-[0_10px_25px_rgba(0,0,0,0.2)]" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        
+        {/* Botão de fechar (X) - mantido para usabilidade */}
+        <div className="absolute top-2 right-2">
+            <button 
+                type="button" 
+                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={handleClose}
+            >
+                <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
+            </button>
+        </div>
+        
         <div className="flex items-center gap-3 mb-6">
           <FontAwesomeIcon icon={faDownload} className="w-10 h-10 text-blue-500" />
         </div>
 
         <div className="flex flex-col text-left gap-4">
           <h2 className="font-roboto font-bold text-lg text-gray-800">Exportar Planilha</h2>
- 
+  
           <input
             ref={fileInputRef}
             type="file"

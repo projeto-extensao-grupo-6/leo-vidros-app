@@ -11,15 +11,20 @@ import Estoque from './pages/estoque/estoque.jsx';
 import Pedidos from './pages/pedidos/pedidos.jsx';
 import Agendamentos from './pages/agendamentos/agendamentos.jsx';
 import Acesso from './pages/acesso/acesso.jsx';
-import HistoricoClientes from './pages/clientes/historico-clientes.jsx'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<PaginaInicial />} />
       <Route path="/login" element={<Login />} />
       <Route path="/cadastro" element={<Cadastro />} />
-      <Route path="/historico-clientes" element={<HistoricoClientes />} />
+      <Route path="/paginaInicial" element={<PaginaInicial />} />
+      <Route path="/funcionarios" element={<Funcionarios />} />
+      <Route path="/clientes" element={<Clientes />} />
+      <Route path="/estoque" element={<Estoque />} />
+      <Route path="/pedidos" element={<Pedidos />} />
+      <Route path="/agendamentos" element={<Agendamentos />} />
+      <Route path="/acesso" element={<Acesso />} />
     </Routes>
   );
 }

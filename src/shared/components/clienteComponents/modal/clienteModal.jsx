@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faXmark } from "@fortawesome/free-solid-svg-icons";
+// IMPORTANTE: Adicionei faTrashCan aqui
+import { faUser, faXmark, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 function ClienteModal({ isOpen, onClose, onSubmit, cliente = null, mode = "create" }) {
   const [formData, setFormData] = useState({
@@ -94,7 +95,7 @@ function ClienteModal({ isOpen, onClose, onSubmit, cliente = null, mode = "creat
     }
   };
 
-  const handleSubmit = () => {
+  const handleModalSubmit = () => {
     const servicosFiltrados = servicosPrestados.filter(s => s.trim() !== "");
     
     const dataToSubmit = {
@@ -117,8 +118,28 @@ function ClienteModal({ isOpen, onClose, onSubmit, cliente = null, mode = "creat
   const submitButtonText = mode === "edit" ? "Salvar" : "Criar";
 
   return (
-    <div className="fixed inset-0 w-screen h-screen bg-black bg-opacity-50 flex items-center justify-center z-[1000] opacity-100" onClick={onClose}>
-      <div className="w-[459px] h-auto max-h-[90vh] overflow-y-auto bg-white rounded-lg border border-gray-200 p-6 box-border opacity-100 shadow-[0_10px_25px_rgba(0,0,0,0.2)]" onClick={(e) => e.stopPropagation()}>
+    // OVERLAY: Centralizado, com padding e filtro
+    <div 
+        className="fixed inset-0 bg-black/50 backdrop-grayscale flex items-center justify-center z-[1000] p-4" 
+        onClick={onClose}
+    >
+      <div 
+        // Modal com altura máxima ajustada
+        className="relative w-[459px] h-auto max-h-[calc(100vh-2rem)] overflow-y-auto bg-white rounded-lg border border-gray-200 p-6 box-border shadow-[0_10px_25px_rgba(0,0,0,0.2)]" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        
+        {/* Botão de Fechar no canto superior direito */}
+        <div className="absolute top-4 right-4">
+            <button 
+                type="button" 
+                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={onClose}
+            >
+                <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
+            </button>
+        </div>
+
         <div className="flex items-center gap-3 mb-6">
           <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-blue-500" />
           <h2 className="font-roboto font-bold text-lg text-gray-800">{modalTitle}</h2>
@@ -227,10 +248,11 @@ function ClienteModal({ isOpen, onClose, onSubmit, cliente = null, mode = "creat
                   {servicosPrestados.length > 1 && (
                     <button
                       type="button"
-                      className="min-w-8 h-10 p-0 bg-red-100 text-red-600 border border-red-300 rounded-md flex items-center justify-center cursor-pointer transition-all hover:bg-red-200 hover:text-red-800"
+                      // Substituí faXmark por faTrashCan
+                      className="min-w-10 h-10 p-0 bg-red-100 text-red-600 border border-red-300 rounded-md flex items-center justify-center cursor-pointer transition-all hover:bg-red-200 hover:text-red-800"
                       onClick={() => removerServico(index)}
                     >
-                      <FontAwesomeIcon icon={faXmark} />
+                      <FontAwesomeIcon icon={faTrashCan} />
                     </button>
                   )}
                 </div>
@@ -247,11 +269,20 @@ function ClienteModal({ isOpen, onClose, onSubmit, cliente = null, mode = "creat
           )}
 
           <div className="flex gap-3 mt-6 justify-end">
-            <button type="button" className="px-6 py-2.5 border-none rounded-md font-roboto font-semibold text-sm cursor-pointer transition-colors bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200" onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="button" className="px-6 py-2.5 border-none rounded-md font-roboto font-semibold text-sm cursor-pointer transition-colors bg-blue-500 text-white hover:bg-blue-600" onClick={handleSubmit}>
+            {/* Ordem dos botões já ajustada */}
+            <button 
+              type="button" 
+              className="px-6 py-2.5 border-none rounded-md font-roboto font-semibold text-sm cursor-pointer transition-colors bg-blue-500 text-white hover:bg-blue-600" 
+              onClick={handleModalSubmit}
+            >
               {submitButtonText}
+            </button>
+            <button 
+              type="button" 
+              className="px-6 py-2.5 border-none rounded-md font-roboto font-semibold text-sm cursor-pointer transition-colors bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200" 
+              onClick={onClose}
+            >
+              Cancelar
             </button>
           </div>
         </form>

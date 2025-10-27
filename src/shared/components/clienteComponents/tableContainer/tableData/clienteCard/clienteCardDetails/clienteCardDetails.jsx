@@ -18,12 +18,17 @@ function ClienteCardDetails({ cliente }) {
         </div>
       </div>
 
-      <div className="mt-4">
-        <h4 className="font-roboto font-semibold text-sm text-gray-800 mb-3">Histórico de Serviços</h4>
+      <div className="mt-6 border-t border-gray-300 pt-3">
+        <h4 className="font-roboto font-semibold text-sm text-gray-800 mb-3 text-left">
+          Histórico de Serviços
+        </h4>
         <div className="max-h-[200px] overflow-y-auto border border-gray-200 rounded-md p-2">
           {cliente.historicoServicos && cliente.historicoServicos.length > 0 ? (
             cliente.historicoServicos.map((servico, index) => (
-              <div key={index} className="p-3 border-b border-gray-200 mb-2 bg-white rounded last:border-b-0 last:mb-0">
+              <div
+                key={index}
+                className="p-3 border-b border-gray-200 mb-2 bg-white rounded last:border-b-0 last:mb-0"
+              >
                 <div className="grid grid-cols-4 gap-2">
                   <div className="flex flex-col gap-1">
                     <span className="font-roboto font-semibold text-[11px] text-gray-500">Serviço</span>
@@ -57,10 +62,13 @@ function ClienteCardDetails({ cliente }) {
               </div>
             ))
           ) : (
-            <p className="p-3 text-center text-gray-400 font-roboto text-sm">Nenhum serviço realizado</p>
+            <p className="p-3 text-center text-gray-400 font-roboto text-sm">
+              Nenhum serviço realizado
+            </p>
           )}
         </div>
       </div>
+
     </>
   );
 }

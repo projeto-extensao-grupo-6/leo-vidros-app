@@ -92,7 +92,7 @@ export default function Funcionarios() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="h-[80px]" />
+        <div className="h-[80px] sm:h-[90px] md:h-[100px]" />
 
         <main className="flex-1 p-8">
           <div className="max-w-[1800px] mx-auto">
