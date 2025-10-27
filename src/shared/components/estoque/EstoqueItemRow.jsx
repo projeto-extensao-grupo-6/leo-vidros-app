@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronDown, Edit, Trash2 } from "lucide-react";
 
-const EstoqueItemRow = ({ item, isSelected, onToggle, onEdit, onDelete }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const EstoqueItemRow = ({ item, isSelected, onToggle, onEdit, onDelete, isInitiallyExpanded, onCollapse }) => {
+
+  const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded || false);
+
+  useEffect(() => {
+    setIsExpanded(isInitiallyExpanded || false);
+  }, [isInitiallyExpanded]);
 
   const columnClasses = {
     checkbox: "w-[5%] pl-4 pr-1",
@@ -27,8 +32,16 @@ const EstoqueItemRow = ({ item, isSelected, onToggle, onEdit, onDelete }) => {
     }
   };
 
+  const toggleExpansion = () => {
+      const newState = !isExpanded;
+      setIsExpanded(newState);
+      if (!newState && onCollapse) {
+           onCollapse();
+      }
+  };
+
   return (
-    <div className="mb-2">
+    <div className="mb-2" id={`item-${item.id}`}>
       <div
         className={`flex items-center border border-gray-200 bg-white hover:shadow-sm transition-shadow min-h-[64px] ${
           isExpanded ? "rounded-t-md" : "rounded-md"
@@ -80,9 +93,9 @@ const EstoqueItemRow = ({ item, isSelected, onToggle, onEdit, onDelete }) => {
           </button>
           <button
             title="Expandir detalhes"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggleExpansion}
             className="text-gray-400 hover:text-[#007EA7] p-1 rounded transition-colors"
-            disabled={!item.detalhes} // Desabilita se não houver detalhes
+            disabled={!item.detalhes}
           >
             <ChevronDown className={`w-5 h-5 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
           </button>

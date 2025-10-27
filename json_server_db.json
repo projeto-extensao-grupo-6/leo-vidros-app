@@ -317,7 +317,7 @@
       "nome": "Vidro",
       "descricao": "-",
       "preco": 85,
-      "quantidade": 30,
+      "quantidade": 4,
       "estoqueMinimo": 5,
       "tipo": "Vidros",
       "detalhes": {
@@ -362,6 +362,30 @@
             "data": "2025-10-27",
             "quantidade": 30,
             "observacao": "Teste entrada",
+            "funcionario": "João Silva"
+          },
+          {
+            "id": "mov-1761556262103-ecb94b501a50f",
+            "tipo": "Saída",
+            "data": "2025-10-27",
+            "quantidade": 35,
+            "observacao": "",
+            "funcionario": "João Silva"
+          },
+          {
+            "id": "mov-1761556275539-0ff3a2703988b",
+            "tipo": "Entrada",
+            "data": "2025-10-27",
+            "quantidade": 5,
+            "observacao": "",
+            "funcionario": "João Silva"
+          },
+          {
+            "id": "mov-1761556282801-45b1e14df6f39",
+            "tipo": "Saída",
+            "data": "2025-10-27",
+            "quantidade": 1,
+            "observacao": "",
             "funcionario": "João Silva"
           }
         ]

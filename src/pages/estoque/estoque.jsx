@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useLocation } from 'react-router-dom';
 import Header from "../../shared/components/header/header";
 import Sidebar from "../../shared/components/sidebar/sidebar";
 import {
@@ -11,8 +12,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Plus, 
-  ArrowRightLeft, 
+  Plus,
+  ArrowRightLeft,
 } from "lucide-react";
 
 import NovoProdutoModal from "../../shared/components/modalEstoque/NovoProdutoModal";
@@ -21,7 +22,7 @@ import ExportarModal from "../../shared/components/modalEstoque/ExportarModal";
 import EstoqueItemRow from "../../shared/components/estoque/EstoqueItemRow";
 import CalendarDropdown from "../../shared/components/estoque/CalendarDropdown";
 import FilterDropdown from "../../shared/components/estoque/FilterDropdown";
-import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSaidaEstoque"; 
+import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSaidaEstoque";
 
 const API_URL = "http://localhost:3000/estoque";
 const FUNCIONARIOS_API_URL = "http://localhost:3000/funcionarios";
@@ -36,7 +37,7 @@ export default function Estoque() {
   const [funcionarios, setFuncionarios] = useState([]);
 
   const [isNovoItemModalOpen, setIsNovoItemModalOpen] = useState(false);
-  const [isEntradaSaidaModalOpen, setIsEntradaSaidaModalOpen] = useState(false); 
+  const [isEntradaSaidaModalOpen, setIsEntradaSaidaModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -48,6 +49,10 @@ export default function Estoque() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({});
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const location = useLocation();
+  const focusItemId = location.state?.focusItemId;
+  const [expandedItemId, setExpandedItemId] = useState(focusItemId || null);
 
   const formatCurrency = (value) => {
     if (typeof value !== "number") {
@@ -92,6 +97,65 @@ export default function Estoque() {
     fetchFuncionarios();
   }, []);
 
+  const filteredEstoque = useMemo(() => {
+    let items = [...estoque];
+
+    if (busca) {
+      items = items.filter(
+        (item) =>
+          item.nome.toLowerCase().includes(busca.toLowerCase()) ||
+          (item.descricao && item.descricao.toLowerCase().includes(busca.toLowerCase()))
+      );
+    }
+
+    if (selectedFilterDate) {
+      const filterDateStr = toYYYYMMDD(selectedFilterDate);
+      items = items.filter(item => {
+        if (!item.detalhes || !item.detalhes.movimentos) return false;
+        return item.detalhes.movimentos.some(mov => mov.data === filterDateStr);
+      });
+    }
+
+    const situacaoFilters = activeFilters.situacao || [];
+    if (situacaoFilters.length > 0) {
+      items = items.filter(item => {
+        const situacao = item.quantidade === 0 ? "Fora de estoque"
+                       : item.quantidade < item.estoqueMinimo ? "Abaixo do normal"
+                       : "Disponível";
+        return situacaoFilters.includes(situacao);
+      });
+    }
+
+    const tipoFilters = activeFilters.tipo || [];
+    if (tipoFilters.length > 0) {
+      items = items.filter(item => tipoFilters.includes(item.tipo));
+    }
+
+    return items;
+  }, [estoque, busca, selectedFilterDate, activeFilters]);
+
+  useEffect(() => {
+    if (focusItemId && filteredEstoque.length > 0 && focusItemId !== expandedItemId) {
+      setExpandedItemId(focusItemId);
+
+      const itemIndex = filteredEstoque.findIndex(item => item.id === focusItemId);
+      if (itemIndex !== -1) {
+          const targetPage = Math.ceil((itemIndex + 1) / ITENS_POR_PAGINA);
+          if (pagina !== targetPage) {
+            setPagina(targetPage);
+          }
+
+          setTimeout(() => {
+            const element = document.getElementById(`item-${focusItemId}`);
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 300);
+      }
+    }
+  }, [focusItemId, filteredEstoque, expandedItemId, pagina]);
+
+
   const handleSaveItem = async (itemData) => {
     const itemPayload = {
       ...itemData,
@@ -102,7 +166,7 @@ export default function Estoque() {
         ...itemData.detalhes,
         valorCompra: parseCurrency(itemData.detalhes.valorCompra),
         valorVenda: parseCurrency(itemData.detalhes.valorVenda),
-        movimentos: itemData.detalhes.movimentos || [] 
+        movimentos: itemData.detalhes.movimentos || []
       } : null
     };
 
@@ -159,15 +223,15 @@ export default function Estoque() {
         });
       } catch (error) {
         console.error(`Erro ao atualizar item ${itemId}:`, error);
-        throw error; 
+        throw error;
       }
     });
 
     try {
       await Promise.all(updates);
-      await fetchEstoque(); 
-      setIsEntradaSaidaModalOpen(false); 
-      setSelectedItems([]); 
+      await fetchEstoque();
+      setIsEntradaSaidaModalOpen(false);
+      setSelectedItems([]);
     } catch (error) {
       console.error("Falha ao salvar um ou mais movimentos:", error);
     }
@@ -195,8 +259,8 @@ export default function Estoque() {
     setIsNovoItemModalOpen(true);
   };
 
-  const openEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(true); 
-  const closeEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(false); 
+  const openEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(true);
+  const closeEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(false);
 
   const openExportModal = () => setIsExportModalOpen(true);
   const closeExportModal = () => setIsExportModalOpen(false);
@@ -211,45 +275,9 @@ export default function Estoque() {
   const closeSuccessModal = () => setIsSuccessModalOpen(false);
 
   const toYYYYMMDD = (date) => {
+    if (!date) return null;
     return date.toISOString().split("T")[0];
   };
-
-  const filteredEstoque = useMemo(() => {
-    let items = [...estoque];
-
-    if (busca) {
-      items = items.filter(
-        (item) =>
-          item.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          (item.descricao && item.descricao.toLowerCase().includes(busca.toLowerCase()))
-      );
-    }
-
-    if (selectedFilterDate) {
-      const filterDateStr = toYYYYMMDD(selectedFilterDate);
-      items = items.filter(item => {
-        if (!item.detalhes || !item.detalhes.movimentos) return false;
-        return item.detalhes.movimentos.some(mov => mov.data === filterDateStr);
-      });
-    }
-
-    const situacaoFilters = activeFilters.situacao || [];
-    if (situacaoFilters.length > 0) {
-      items = items.filter(item => {
-        const situacao = item.quantidade === 0 ? "Fora de estoque"
-                       : item.quantidade < item.estoqueMinimo ? "Abaixo do normal"
-                       : "Disponível";
-        return situacaoFilters.includes(situacao);
-      });
-    }
-
-    const tipoFilters = activeFilters.tipo || [];
-    if (tipoFilters.length > 0) {
-      items = items.filter(item => tipoFilters.includes(item.tipo));
-    }
-
-    return items;
-  }, [estoque, busca, selectedFilterDate, activeFilters]);
 
   const kpiData = useMemo(() => {
     const totalItens = estoque.reduce((acc, item) => acc + item.quantidade, 0);
@@ -272,11 +300,6 @@ export default function Estoque() {
   const paginatedEstoque = useMemo(() => {
     const totalPaginas = Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA);
     const paginaAtual = Math.min(pagina, totalPaginas) || 1;
-    if (pagina !== paginaAtual && filteredEstoque.length > 0) {
-      setPagina(paginaAtual);
-    } else if (filteredEstoque.length === 0 && pagina !== 1) {
-      setPagina(1);
-    }
 
     const startIndex = (paginaAtual - 1) * ITENS_POR_PAGINA;
     const endIndex = startIndex + ITENS_POR_PAGINA;
@@ -316,7 +339,11 @@ export default function Estoque() {
   const startIndex = (pagina - 1) * ITENS_POR_PAGINA;
   const endIndex = Math.min(startIndex + ITENS_POR_PAGINA, filteredEstoque.length);
 
-  const isAllSelectedOnPage = paginatedEstoque.length > 0 && selectedItems.length === paginatedEstoque.length && paginatedEstoque.every(item => selectedItems.includes(item.id));
+  const isAllSelectedOnPage = paginatedEstoque.length > 0 && selectedItems.length >= paginatedEstoque.length && paginatedEstoque.every(item => selectedItems.includes(item.id));
+
+  const handleCollapseItem = () => {
+      setExpandedItemId(null);
+  }
 
 
   return (
@@ -361,7 +388,7 @@ export default function Estoque() {
                   </button>
                   <button
                     onClick={openEntradaSaidaModal}
-                    disabled={selectedItems.length === 0} 
+                    disabled={selectedItems.length === 0}
                     className="bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center whitespace-nowrap gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ArrowRightLeft className="w-4 h-4"/> Registrar Movimento
@@ -474,6 +501,8 @@ export default function Estoque() {
                           onToggle={() => handleCheckboxChange(item.id)}
                           onEdit={() => openEditItemModal(item)}
                           onDelete={() => handleDeleteItem(item.id)}
+                          isInitiallyExpanded={item.id === expandedItemId}
+                          onCollapse={handleCollapseItem}
                         />
                       );
                     })
@@ -519,8 +548,8 @@ export default function Estoque() {
         onClose={closeEntradaSaidaModal}
         onSave={handleSaveMovement}
         itemIds={selectedItems}
-        estoque={estoque} 
-        funcionarios={funcionarios} 
+        estoque={estoque}
+        funcionarios={funcionarios}
       />
 
       <SucessoModal
