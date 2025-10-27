@@ -540,7 +540,7 @@
       "formaPagamento": "Pix"
     }
   ],
-  "solicitacoesAcesso": [
+  "solicitacoes": [
     {
       "id": 1,
       "nome": "Ana Beatriz Silva",
