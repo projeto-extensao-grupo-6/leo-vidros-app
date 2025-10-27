@@ -214,7 +214,7 @@ const CalendarView = ({
           <div className="flex bg-muted rounded-modern p-1">
             <button
               onClick={() => handleViewChange("day")}
-              className={`px-3 py-1 text-sm rounded-modern transition-micro ${
+              className={`px-3 py-1 text-sm rounded-modern transition-micro cursor-pointer ${
                 viewType === "day"
                   ? "bg-blue-500 text-white"
                   : "text-text-secondary hover:text-text-primary"
@@ -224,7 +224,7 @@ const CalendarView = ({
             </button>
             <button
               onClick={() => handleViewChange("week")}
-              className={`px-3 py-1 text-sm rounded-modern transition-micro ${
+              className={`px-3 py-1 text-sm rounded-modern transition-micro cursor-pointer ${
                 viewType === "week"
                   ? "bg-blue-500 text-white"
                   : "text-text-secondary hover:text-text-primary"
@@ -234,7 +234,7 @@ const CalendarView = ({
             </button>
             <button
               onClick={() => handleViewChange("month")}
-              className={`px-3 py-1 text-sm rounded-modern transition-micro ${
+              className={`px-3 py-1 text-sm rounded-modern transition-micro cursor-pointer ${
                 viewType === "month"
                   ? "bg-blue-500 text-white"
                   : "text-text-secondary hover:text-text-primary"

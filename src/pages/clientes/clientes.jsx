@@ -253,8 +253,8 @@ export default function Clientes() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="h-20px" />
-        <main className="flex-1 p-8">
+
+        <main className="flex-1 p-23 gap-6 flex flex-col">
           <div className="mx-auto text-center">
             <h1 className="text-3xl font-bold text-gray-800">Clientes</h1>
             <p className="text-gray-500 text-lg">
@@ -262,11 +262,11 @@ export default function Clientes() {
             </p>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 flex flex-col flex-1">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex flex-col flex-1">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
               <Button
                 variant="contained"
-                className="bg-[#007EA7] hover:bg-[#00698A] text-white"
+                className="bg-[#007EA7] font-bold py-2 px-5 rounded-md hover:bg-[#006891] text-white"
                 onClick={abrirModalCriar}
               >
                 Novo Cliente
@@ -525,7 +525,7 @@ export default function Clientes() {
             </div>
 
             {clientesFiltrados.length > 0 && (
-              <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+              <div className="flex justify-between items-center mt-4 text-sm text-gray-600 p-4">
                 <span>
                   Mostrando {indexPrimeiro + 1} a{" "}
                   {Math.min(indexUltimo, clientesFiltrados.length)} de{" "}
@@ -537,6 +537,7 @@ export default function Clientes() {
                     size="small"
                     onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
                     disabled={pagina === 1}
+                    className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-[#bebebe] transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     Anterior
                   </Button>
@@ -547,6 +548,7 @@ export default function Clientes() {
                       setPagina((prev) => Math.min(prev + 1, totalPaginas))
                     }
                     disabled={pagina === totalPaginas}
+                    className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-[#bebebe] transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     Próximo
                   </Button>

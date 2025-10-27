@@ -29,7 +29,7 @@ const formatDate = (dateString) => {
 
 const formatPedidoId = (id) => {
     if (!id) return '';
-    const numericPart = id.replace(/\D/g, ''); 
+    const numericPart = id.replace(/\D/g, '');
     if (numericPart.length > 0) {
         return numericPart.padStart(3, '0');
     }
@@ -41,11 +41,11 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     const [pedidos, setPedidos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    
+
     const [modal, setModal] = useState({ confirm: false, view: false, form: false });
     const [mode, setMode] = useState("new");
-    const [current, setCurrent] = useState(null); 
-    const [targetId, setTargetId] = useState(null); 
+    const [current, setCurrent] = useState(null);
+    const [targetId, setTargetId] = useState(null);
     const [form, setForm] = useState(NOVO_FORM_PEDIDO());
     const [errors, setErrors] = useState({});
 
@@ -54,15 +54,15 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         try {
             const response = await fetch(API_PEDIDOS_URL);
             const data = await response.json();
-            
+
             const sortedData = data.sort((a, b) => {
                 const numA = parseInt(a.id.replace(/\D/g, '') || 0, 10);
                 const numB = parseInt(b.id.replace(/\D/g, '') || 0, 10);
-                
+
                 return numB - numA;
             });
 
-            setPedidos(sortedData); 
+            setPedidos(sortedData);
         } catch (error) {
             console.error("Erro ao buscar pedidos:", error);
         } finally {
@@ -71,7 +71,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     };
 
     useEffect(() => {
-        fetchPedidos(); 
+        fetchPedidos();
     }, []);
 
     useEffect(() => {
@@ -97,7 +97,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         const t = String(busca).toLowerCase().trim();
 
         if (t) {
-             lista = lista.filter((p) =>
+            lista = lista.filter((p) =>
                 [`#${formatPedidoId(p.id)}`, p.produtosDesc, p.descricao, p.formaPagamento].join(" ").toLowerCase().includes(t)
             );
         }
@@ -105,9 +105,9 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         if (paymentFilter && paymentFilter !== "Todos") {
             lista = lista.filter(p => p.formaPagamento === paymentFilter);
         }
-        
+
         return lista;
-    }, [busca, pedidos, paymentFilter]); 
+    }, [busca, pedidos, paymentFilter]);
 
     const totalPages = Math.max(1, Math.ceil(listaFiltrada.length / ITEMS_PER_PAGE));
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -143,12 +143,12 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         setErrors({});
         setModal((m) => ({ ...m, form: true }));
     };
-    
+
     const abrirConfirmarExclusao = (id) => {
         setTargetId(id);
         setModal((m) => ({ ...m, confirm: true }));
     };
-    
+
     const setField = (name, value) => {
         setForm((f) => ({ ...f, [name]: value }));
         if (errors[name]) {
@@ -210,7 +210,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             await fetchPedidos();
             setTargetId(null);
             setModal((m) => ({ ...m, confirm: false }));
-        } catch(error) {
+        } catch (error) {
             console.error("Erro na exclusão:", error);
         }
     };
@@ -218,34 +218,23 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
 
     return (
         <>
-            <div className="text-[13px] text-slate-500 mb-3">Pedidos cadastrados</div>
-            <div className="flex flex-col gap-4">
+            <div className="text-[13px] text-slate-500 mb-3 text-left font-semibold p-4">Pedidos cadastrados</div>
+            <div className="flex flex-col gap-3">
                 {loading && <p>Carregando pedidos...</p>}
                 {!loading && pagina.length === 0 && <p>Nenhum pedido encontrado, ajuste seus filtros.</p>}
-                
+
                 {!loading && pagina.map((item) => (
-                    <article key={item.id} className="rounded-[14px] border border-slate-200 card bg-white p-5 hover:shadow-sm transition-shadow">
-                        
+                    <article key={item.id} className="rounded-[14px] border border-slate-200 card bg-white p-5 hover:shadow-sm transition-shadow flex flex-col gap-4">
+
                         <header className="flex items-start justify-between">
                             <div className="flex items-center gap-2 text-slate-600">
-                                <FaBoxOpen /> 
+                                <FaBoxOpen />
                                 <span className="font-semibold">Pedido de produtos - #{formatPedidoId(item.id)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-slate-500">
-                                <button type="button" className="icon-btn hover:text-[#003d6b]" title="Editar" onClick={() => abrirEditar(item)}>
-                                    <FaEdit />
-                                </button>
-                                <button type="button" className="icon-btn hover:text-red-500" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
-                                    <FaTrash />
-                                </button>
-                                <button type="button" className="icon-btn hover:text-[#003d6b]" title="Exibir" onClick={() => abrirExibir(item)}>
-                                    <FaExternalLinkAlt /> 
-                                </button>
                             </div>
                         </header>
 
-                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mt-4 text-sm">
-                            
+                        <div className="grid grid-cols-1 md:grid-cols-7 gap-15 mt-2 text-sm">
+
                             <div className="md:col-span-2">
                                 <div className="text-slate-600 font-semibold">Itens e Valor</div>
                                 <div className="text-slate-900 font-normal">
@@ -253,7 +242,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                                     <span className="ml-3 font-bold text-[#003d6b]">{formatCurrency(item.valorTotal)}</span>
                                 </div>
                             </div>
-                            
+
                             <div className="md:col-span-1">
                                 <div className="text-slate-600 font-semibold">Produtos</div>
                                 <div className="text-slate-900 truncate" title={item.produtosDesc}>{item.produtosDesc}</div>
@@ -263,42 +252,51 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                                 <div className="text-slate-600 font-semibold">Descrição</div>
                                 <div className="text-slate-900 truncate" title={item.descricao}>{item.descricao}</div>
                             </div>
-                            
+
                             <div className="md:col-span-1">
                                 <div className="text-slate-600 font-semibold">Data da compra</div>
                                 <div className="text-slate-900">{formatDate(item.dataCompra)}</div>
                             </div>
-                            
+
                             <div className="md:col-span-1">
                                 <div className="text-slate-600 font-semibold">Forma de pagamento</div>
                                 <div className="text-slate-900 font-medium">{item.formaPagamento}</div>
                             </div>
+
+                            <div className="flex items-center gap-2 text-slate-500">
+                                <button type="button" className="icon-btn hover:text-[#003d6b] cursor-pointer" title="Editar" onClick={() => abrirEditar(item)}>
+                                    <FaEdit />
+                                </button>
+                                <button type="button" className="icon-btn hover:text-red-500 cursor-pointer" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
+                                    <FaTrash />
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="mt-4 border-t border-slate-100 pt-2 text-xs text-slate-500">
-                             Pedido registrado em {formatDate(item.dataCompra)}.
+                        <div className="mt-4 border-t border-slate-100 pt-2 text-xs text-center text-slate-500">
+                            Pedido registrado em {formatDate(item.dataCompra)}.
                         </div>
 
                     </article>
                 ))}
             </div>
 
-            <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center justify-between mt-2 p-5">
                 <div className="text-sm text-slate-600">
                     Mostrando {listaFiltrada.length ? start + 1 : 0}–{Math.min(end, listaFiltrada.length)} de {listaFiltrada.length} resultados
                 </div>
                 <div className="flex gap-2">
                     <button onClick={anterior} disabled={page === 1} className={`btn btn-ghost ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        ← Anterior
+                        Anterior
                     </button>
                     <button onClick={proxima} disabled={page === totalPages || totalPages === 0} className={`btn btn-ghost ${page === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        Próximo →
+                        Próximo
                     </button>
                 </div>
             </div>
 
             {modal.confirm && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
+                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
                     <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-6">
                         <div className="flex items-start gap-3">
                             <FaExclamationTriangle className="text-amber-500 mt-1 text-xl" />
@@ -313,8 +311,8 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             )}
 
             {modal.view && current && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
-                    <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6">
+                <div className=" bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
+                    <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-2">
                         <h2 className="text-xl font-bold mb-4">Detalhes do Pedido #{formatPedidoId(current.id)}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -348,9 +346,9 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                     </div>
                 </div>
             )}
-            
+
             {modal.form && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
+                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
                     <form onSubmit={salvar} className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 max-h-[90vh] flex flex-col">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-lg bg-slate-100 grid place-items-center text-slate-400">

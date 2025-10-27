@@ -11,21 +11,21 @@
       "id": "1",
       "historicoServicos": [
         {
-          "servico": "Reparo de Vazamento",
+          "servico": "Instalação de Box Frontal",
           "dataOrcamento": "20/02/2024",
           "dataServico": "22/02/2024",
-          "valor": "180.00",
+          "valor": "780.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "Pedro Costa",
+          "funcionario": "João Silva",
           "desconto": "0"
         },
         {
-          "servico": "Limpeza de Caixa d'Água",
+          "servico": "Manutenção de Janela de Vidro",
           "dataOrcamento": "15/03/2024",
           "dataServico": "16/03/2024",
           "valor": "120.00",
           "formaPagamento": "Cartão",
-          "funcionario": "Maria Lima",
+          "funcionario": "Maria Souza",
           "desconto": "5"
         }
       ]
@@ -33,7 +33,7 @@
     {
       "id": "2",
       "nome": "Lucas Pereira",
-      "contato": "11921098765",
+      "contato": "(11) 92109-8765",
       "email": "lucas.pereira@email.com",
       "status": "Ativo",
       "endereco": "Rua Oscar Freire, 300",
@@ -41,21 +41,21 @@
       "uf": "SP",
       "historicoServicos": [
         {
-          "servico": "Poda de Árvores",
+          "servico": "Instalação de Espelho Bisotado",
           "dataOrcamento": "18/06/2024",
           "dataServico": "20/06/2024",
           "valor": "320.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "João Almeida",
+          "funcionario": "João Silva",
           "desconto": "0"
         },
         {
-          "servico": "Jardinagem",
+          "servico": "Fechamento de Sacada",
           "dataOrcamento": "10/07/2024",
           "dataServico": "12/07/2024",
-          "valor": "150.00",
+          "valor": "3150.00",
           "formaPagamento": "Pix",
-          "funcionario": "Carlos Souza",
+          "funcionario": "Maria Souza",
           "desconto": "10"
         }
       ]
@@ -71,12 +71,12 @@
       "uf": "RJ",
       "historicoServicos": [
         {
-          "servico": "Instalação de Ar-Condicionado",
+          "servico": "Porta de Vidro Temperado (Giro)",
           "dataOrcamento": "05/05/2024",
           "dataServico": "07/05/2024",
-          "valor": "500.00",
+          "valor": "950.00",
           "formaPagamento": "Cartão",
-          "funcionario": "Felipe Rocha",
+          "funcionario": "João Silva",
           "desconto": "0"
         }
       ]
@@ -92,21 +92,21 @@
       "uf": "SP",
       "historicoServicos": [
         {
-          "servico": "Troca de Fiação",
+          "servico": "Substituição de Vidro Comum (Porta)",
           "dataOrcamento": "12/01/2024",
           "dataServico": "15/01/2024",
           "valor": "250.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "Rafael Lima",
+          "funcionario": "Maria Souza",
           "desconto": "0"
         },
         {
-          "servico": "Reparo de Tomada",
+          "servico": "Ajuste de Mola de Piso",
           "dataOrcamento": "20/02/2024",
           "dataServico": "22/02/2024",
-          "valor": "80.00",
+          "valor": "180.00",
           "formaPagamento": "Pix",
-          "funcionario": "Rafael Lima",
+          "funcionario": "Maria Souza",
           "desconto": "0"
         }
       ]
@@ -122,18 +122,18 @@
       "uf": "RJ",
       "historicoServicos": [
         {
-          "servico": "Pintura Residencial",
+          "servico": "Instalação de Guarda-Corpo (Vidro)",
           "dataOrcamento": "01/03/2024",
           "dataServico": "05/03/2024",
-          "valor": "800.00",
+          "valor": "1800.00",
           "formaPagamento": "Cartão",
-          "funcionario": "Marcos Vinicius",
+          "funcionario": "João Silva",
           "desconto": "5"
         }
       ]
     },
     {
-      "nome": "Ricardo Gome",
+      "nome": "Ricardo Gomes",
       "email": "ricardo.gomes@email.com",
       "endereco": "Av. Brasil, 500",
       "cidade": "São Paulo",
@@ -143,12 +143,12 @@
       "id": "6",
       "historicoServicos": [
         {
-          "servico": "Limpeza Pós-Obra",
+          "servico": "Manutenção de Vitrine Comercial",
           "dataOrcamento": "10/04/2024",
           "dataServico": "12/04/2024",
           "valor": "300.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "Paula Mendes",
+          "funcionario": "Maria Souza",
           "desconto": "0"
         }
       ]
@@ -164,12 +164,12 @@
       "uf": "SP",
       "historicoServicos": [
         {
-          "servico": "Poda de Árvores",
+          "servico": "Instalação de Espelho (Sala)",
           "dataOrcamento": "18/06/2024",
           "dataServico": "20/06/2024",
           "valor": "320.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "João Almeida",
+          "funcionario": "João Silva",
           "desconto": "0"
         }
       ]
@@ -185,12 +185,12 @@
       "uf": "RJ",
       "historicoServicos": [
         {
-          "servico": "Manutenção de Jardim",
+          "servico": "Instalação de Prateleiras de Vidro",
           "dataOrcamento": "25/07/2024",
           "dataServico": "27/07/2024",
           "valor": "200.00",
           "formaPagamento": "Pix",
-          "funcionario": "Carlos Souza",
+          "funcionario": "Maria Souza",
           "desconto": "5"
         }
       ]
@@ -206,20 +206,20 @@
       "uf": "SP",
       "historicoServicos": [
         {
-          "servico": "Instalação de Tomadas",
+          "servico": "Reparo em Janela Basculante",
           "dataOrcamento": "10/08/2024",
           "dataServico": "12/08/2024",
           "valor": "120.00",
           "formaPagamento": "Cartão",
-          "funcionario": "Rafael Lima",
+          "funcionario": "Maria Souza",
           "desconto": "0"
         }
       ]
     },
     {
       "id": "10",
-      "nome": "Patrícia Souzaa",
-      "contato": "21987658768",
+      "nome": "Patrícia Souza",
+      "contato": "(21) 98765-8768",
       "email": "patricia.souza@email.com",
       "status": "Ativo",
       "endereco": "Rua das Acácias, 88",
@@ -227,27 +227,27 @@
       "uf": "RJ",
       "historicoServicos": [
         {
-          "servico": "Reparo Hidráulico",
+          "servico": "Vedação de Box (Infiltração)",
           "dataOrcamento": "05/09/2024",
           "dataServico": "07/09/2024",
-          "valor": "400.00",
+          "valor": "150.00",
           "formaPagamento": "Dinheiro",
-          "funcionario": "Pedro Costa",
+          "funcionario": "João Silva",
           "desconto": "10"
         }
       ]
     },
     {
       "id": "11",
-      "nome": "Jão Gomes da Silva",
-      "contato": "11952028012",
-      "email": "Joao@gmail.com",
-      "endereco": "rua bnarbosa",
+      "nome": "João Gomes da Silva",
+      "contato": "(11) 95202-8012",
+      "email": "joao.gomes@gmail.com",
+      "endereco": "Rua Barbosa, 123",
       "status": "Inativo",
       "historicoServicos": [
         {
           "id": "temp-1761545974903",
-          "servico": "Carpinagem",
+          "servico": "Medição para Envidraçamento",
           "valor": 120,
           "dataOrcamento": "2025-10-27",
           "dataServico": "2025-10-30",
@@ -263,19 +263,19 @@
     {
       "id": "12",
       "nome": "Eros Nicolino da Rocha",
-      "contato": "21987658111",
-      "email": "patricia.souza@email.com",
-      "endereco": "Rua das Acácias, 88",
+      "contato": "(21) 98765-8111",
+      "email": "eros.nicolino@email.com",
+      "endereco": "Rua das Acácias, 90",
       "status": "Inativo",
       "historicoServicos": [
         {
           "id": "temp-1761546697475",
-          "servico": "Te Amar",
-          "valor": 0,
+          "servico": "Orçamento de Tampo de Mesa",
+          "valor": 50,
           "dataOrcamento": "2025-10-27",
-          "dataServico": "3000-01-01",
+          "dataServico": "2025-10-28",
           "formaPagamento": "Pix",
-          "desconto": 100,
+          "desconto": 0,
           "funcionario": "Eros Nicolino da Rocha"
         }
       ],
@@ -287,18 +287,18 @@
     {
       "id": "1",
       "nome": "João Silva",
-      "telefone": "(99) 99999-9999",
+      "telefone": "(11) 99999-9999",
       "funcao": "Gerente",
-      "escala": "6x1 - 7h00 às 14h00",
+      "escala": "6x1 - 07h00 às 14h00",
       "contrato": "CLT",
       "status": "Ativo"
     },
     {
       "id": "2",
       "nome": "Maria Souza",
-      "telefone": "(88) 88888-8888",
-      "funcao": "Auxiliar",
-      "escala": "5x2 - 8h00 às 17h00",
+      "telefone": "(11) 88888-8888",
+      "funcao": "Auxiliar de Instalação",
+      "escala": "5x2 - 08h00 às 17h00",
       "contrato": "PJ",
       "status": "Pausado"
     },
@@ -307,15 +307,15 @@
       "nome": "Eros Nicolino da Rocha",
       "telefone": "(11) 95202-7011",
       "funcao": "Atendente",
-      "escala": "5x2",
-      "contrato": "Fixo",
+      "escala": "5x2 - 09h00 às 18h00",
+      "contrato": "CLT",
       "status": "Ativo"
     }
   ],
   "estoque": [
     {
-      "nome": "Vidro",
-      "descricao": "-",
+      "nome": "Vidro Temperado 4mm Incolor",
+      "descricao": "Chapa de vidro temperado padrão para box e janelas.",
       "preco": 85,
       "quantidade": 4,
       "estoqueMinimo": 5,
@@ -327,7 +327,7 @@
         "cor": "Incolor",
         "aplicacao": "Janelas, portas, fachadas, box de banheiro, divisórias",
         "acabamento": "Corte reto",
-        "valorCompra": 2,
+        "valorCompra": 45,
         "valorVenda": 85,
         "movimentos": [
           {
@@ -337,7 +337,7 @@
             "unidade": "m²",
             "quantidade": 4,
             "observacao": "Porta de giro/Porta de vidro de correr/Manutenção de 2 vitrôs do quarto",
-            "funcionario": "Junior Silva"
+            "funcionario": "João Silva"
           },
           {
             "id": "m2",
@@ -345,15 +345,15 @@
             "data": "2025-02-05",
             "unidade": "m²",
             "quantidade": 6,
-            "observacao": "-",
-            "funcionario": "Junior Silva"
+            "observacao": "Recebimento de fornecedor.",
+            "funcionario": "João Silva"
           },
           {
             "id": "mov-1761551820951-16a78268f67398",
             "tipo": "Saída",
             "data": "2025-10-27",
             "quantidade": 10,
-            "observacao": "Teste Saida",
+            "observacao": "Saída para Ordem de Serviço #1054",
             "funcionario": "Maria Souza"
           },
           {
@@ -361,7 +361,7 @@
             "tipo": "Entrada",
             "data": "2025-10-27",
             "quantidade": 30,
-            "observacao": "Teste entrada",
+            "observacao": "Recebimento Fornecedor (NF 12345)",
             "funcionario": "João Silva"
           },
           {
@@ -369,7 +369,7 @@
             "tipo": "Saída",
             "data": "2025-10-27",
             "quantidade": 35,
-            "observacao": "",
+            "observacao": "Ajuste de inventário (Quebra)",
             "funcionario": "João Silva"
           },
           {
@@ -377,7 +377,7 @@
             "tipo": "Entrada",
             "data": "2025-10-27",
             "quantidade": 5,
-            "observacao": "",
+            "observacao": "Ajuste de inventário (Contagem)",
             "funcionario": "João Silva"
           },
           {
@@ -385,7 +385,7 @@
             "tipo": "Saída",
             "data": "2025-10-27",
             "quantidade": 1,
-            "observacao": "",
+            "observacao": "Uso interno",
             "funcionario": "João Silva"
           }
         ]
@@ -395,18 +395,18 @@
     {
       "id": "369a",
       "nome": "Óculos de Proteção",
-      "descricao": "Óculos para Proteção Ocular",
+      "descricao": "Óculos para Proteção Ocular (EPI)",
       "preco": 150,
       "quantidade": 20,
       "estoqueMinimo": 50,
       "tipo": "EPIS",
       "detalhes": {
-        "espessura": "20",
+        "espessura": "N/A",
         "unidadeMedida": "Unidade",
-        "tipoVidro": "",
-        "cor": "Cinza",
-        "aplicacao": "",
-        "acabamento": "",
+        "tipoVidro": "Policarbonato",
+        "cor": "Incolor/Cinza",
+        "aplicacao": "Proteção individual",
+        "acabamento": "N/A",
         "valorCompra": 70,
         "valorVenda": 150,
         "movimentos": [
@@ -415,7 +415,7 @@
             "tipo": "Entrada",
             "data": "2025-10-27",
             "quantidade": 20,
-            "observacao": "Teste de entrada",
+            "observacao": "Recebimento Fornecedor (NF 54321)",
             "funcionario": "Eros Nicolino da Rocha"
           }
         ]
@@ -491,7 +491,7 @@
     {
       "id": "5",
       "clienteId": "11",
-      "clienteNome": "Jão Gomes da Silva",
+      "clienteNome": "João Gomes da Silva",
       "data": "2025-10-07",
       "descricao": "Divisórias de vidro fosco",
       "status": "Ativo",
@@ -517,16 +517,16 @@
       "itensCount": 5,
       "valorTotal": 250,
       "produtosDesc": "Silicone neutro",
-      "descricao": "Silicone para vedação",
+      "descricao": "Silicone para vedação (Incolor)",
       "dataCompra": "2025-01-12",
-      "formaPagamento": "Cartão de crédito"
+      "formaPagamento": "Cartão de Crédito"
     },
     {
       "id": "3",
       "itensCount": 1,
       "valorTotal": 60,
-      "produtosDesc": "Espaçador 8mm",
-      "descricao": "Espaçador para box",
+      "produtosDesc": "Espaçador 8mm (Pacote)",
+      "descricao": "Espaçador plástico para box",
       "dataCompra": "2025-01-11",
       "formaPagamento": "Dinheiro"
     },
@@ -534,8 +534,8 @@
       "id": "4",
       "itensCount": 2,
       "valorTotal": 46,
-      "produtosDesc": "Tucano grande",
-      "descricao": "Suporte de prateleira",
+      "produtosDesc": "Suporte Tucano (Grande)",
+      "descricao": "Suporte de prateleira (Cromado)",
       "dataCompra": "2025-01-10",
       "formaPagamento": "Pix"
     }

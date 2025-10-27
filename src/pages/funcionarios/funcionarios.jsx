@@ -118,7 +118,7 @@ export default function Funcionarios() {
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <div className="h-80px" />
 
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-25">
           <div className="mx-auto">
             <div className="mb-10 text-center pb-7">
               <h1 className="text-3xl font-bold text-gray-800">Controle de funcionário</h1>
@@ -204,7 +204,7 @@ export default function Funcionarios() {
                 </Table>
               </TableContainer>
 
-              <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
+              <div className="flex justify-between items-center mt-4 text-sm text-gray-600 p-3">
                 <span>
                   Mostrando {indexPrimeiro + 1} a{" "}
                   {Math.min(indexUltimo, funcionariosFiltrados.length)} de{" "}

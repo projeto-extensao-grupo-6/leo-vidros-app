@@ -103,56 +103,64 @@ export default function Pedidos() {
         setIsFilterModalOpen(false);
     };
 
-
     return (
         <div className="flex bg-gray-50 min-h-screen">
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+            
             <div className="flex-1 flex flex-col min-h-screen">
                 <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-                <div className="h-[80px]" />
+                
+                {/* Espaçamento para o Header fixo */}
+                <div className="pt-20 lg:pt-20" />
 
-                <main className="flex-1 p-8">
-                    <section className="max-w-6xl mx-auto mb-8 text-center">
-                        <h1 className="text-[32px] leading-tight font-bold text-[#0F172A]">
+                <main className="flex-1 p-4 md:p-8">
+                    {/* Cabeçalho da página - centralizado */}
+                    <section className="text-center mb-8 px-2 w-full max-w-[1600px] mx-auto">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2">
                             Pedidos e Serviços
                         </h1>
-                        <p className="text-[15px] text-slate-500 mt-2">
+                        <p className="text-gray-500 text-sm sm:text-base">
                             Tenha uma visão completa dos pedidos e serviços atuais.
                         </p>
                     </section>
 
-                    <section className="max-w-6xl mx-auto">
+                    {/* Conteúdo principal - centralizado */}
+                    <section className="w-full max-w-[1800px] mx-auto pt-10">
                         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+                            {/* Barra de ações */}
                             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+                                {/* Botão Novo Registro */}
                                 <button
-                                    className="w-full md:w-auto inline-flex items-center gap-2 px-6 py-2 rounded text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity cursor-pointer"
+                                    className="w-full md:w-auto inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-white text-sm font-semibold shadow-sm hover:bg-[#006891] transition-colors cursor-pointer"
                                     style={{ backgroundColor: "#007EA7" }}
                                     onClick={handleNovoRegistroClick}
-                                    onMouseEnter={(e) => e.target.style.backgroundColor = "#002A4B"}
-                                    onMouseLeave={(e) => e.target.style.backgroundColor = "#007EA7"}
                                 >
-                                    <FaPlus className="w-3 h-3"/> Novo Registro
+                                    Novo Registro
                                 </button>
 
+                                {/* Controles de busca e filtros */}
                                 <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                    <div className="relative w-full md:min-w-[260px]">
+                                    {/* Campo de busca */}
+                                    <div className="relative w-full md:min-w-[300px]">
                                         <input
                                             placeholder="Busque Por..."
                                             value={busca}
                                             onChange={(e) => setBusca(e.target.value)}
-                                            className="w-full h-10 pl-10 pr-4 rounded-md border border-slate-300 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-[#007EA7]"
+                                            className="w-110 h-10 pl-10 pr-4 rounded-md border border-slate-300 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#007EA7]"
                                         />
                                         <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
                                     </div>
 
+                                    {/* Botão Filtrar */}
                                     <button
-                                        className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 rounded-md border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-sm cursor-pointer"
+                                        className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 rounded-md border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-sm cursor-pointer transition-colors"
                                         title="Filtrar"
                                         onClick={handleFilterClick}
                                     >
                                         <FaFilter /> Filtrar
                                     </button>
 
+                                    {/* Toggle Pedidos/Serviços */}
                                     <div className="flex items-center bg-slate-100 border border-slate-200 rounded-lg p-1">
                                         <Link
                                             to="/pedidos"
@@ -178,6 +186,7 @@ export default function Pedidos() {
                                 </div>
                             </div>
 
+                            {/* Lista de conteúdo (Pedidos ou Serviços) */}
                             <div className="mt-8">
                                 {activeTab === 'pedidos' && (
                                     <PedidosList
@@ -198,12 +207,12 @@ export default function Pedidos() {
                                     />
                                 )}
                             </div>
-
                         </div>
                     </section>
                 </main>
             </div>
 
+            {/* Modal de Filtros */}
             {isFilterModalOpen && (
                 <FilterModal
                     activeTab={activeTab}

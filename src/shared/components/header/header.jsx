@@ -11,8 +11,7 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
-  Typography,
-  Divider
+  Typography
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -55,12 +54,14 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
   return (
     <AppBar
       position="fixed"
-      className="!bg-[#003d6b] !shadow-lg z-[1100]"
+      elevation={4}
+      sx={{ bgcolor: "#002A4B" }}
+      className="shadow-lg z-1100"
     >
       <Toolbar
         className="
           flex justify-between items-center
-          !min-h-[65px] sm:!min-h-[75px] md:!min-h-[80px]
+          min-h-65px sm:min-h-75px md:min-h-80px
           px-3 sm:px-6 md:px-10
           transition-all duration-300
         "
@@ -90,11 +91,11 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
         >
           <div className="hidden sm:block text-right mr-1">
             <p className="text-xs sm:text-sm font-semibold text-white group-hover:text-gray-200 transition-colors">Julio Cesar</p>
-            <p className="text-[11px] sm:text-xs text-gray-300 group-hover:text-gray-400 transition-colors">Cargo</p>
+            <p className="text-[11px] sm:text-xs text-gray-300">Cargo</p>
           </div>
           <Avatar
             src={UserImg}
-            className="!w-10 !h-10 sm:!w-11 sm:!h-11 md:!w-12 md:!h-12 border-2 border-white group-hover:border-gray-300 transition-colors"
+            className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 border-2 border-white group-hover:border-gray-300 transition-colors"
           />
           <ExpandMore
             className={`text-white transition-transform duration-300 group-hover:text-gray-300 ${
@@ -128,7 +129,7 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
           <Box className="flex items-center px-4 py-5 gap-3">
              <Avatar
                src={UserImg}
-               className="!w-12 !h-12 border-2 border-white"
+               className="w-12 h-12 border-2 border-white"
              />
              <div>
                  <Typography variant="subtitle1" className="font-semibold leading-tight">

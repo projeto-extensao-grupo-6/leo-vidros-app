@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import "./servicos.css"; 
+import "./servicos.css";
 import { FaWrench, FaEdit, FaTrash, FaExternalLinkAlt, FaExclamationTriangle, FaUser } from "react-icons/fa";
 
 const API_SERVICOS_URL = "http://localhost:3000/servicos";
@@ -62,18 +62,18 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             ]);
             const servicosData = await servicosRes.json();
             const clientesData = await clientesRes.json();
-            
+
             const sortedServicos = servicosData.sort((a, b) => {
                 const idAisNum = /^\d+$/.test(a.id);
                 const idBisNum = /^\d+$/.test(b.id);
-            
+
                 if (idAisNum && idBisNum) {
                     return parseInt(b.id, 10) - parseInt(a.id, 10);
                 }
-                
+
                 if (a.id < b.id) return 1;
                 if (a.id > b.id) return -1;
-                return 0; 
+                return 0;
             });
 
             setServicos(sortedServicos);
@@ -112,22 +112,22 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         const t = String(busca).toLowerCase().trim();
 
         if (t) {
-             lista = lista.filter((s) =>
+            lista = lista.filter((s) =>
                 [formatServicoId(s.id), s.clienteNome, s.descricao, s.status, s.etapa].join(" ").toLowerCase().includes(t)
             );
         }
 
         if (statusFilter && statusFilter !== "Todos") {
-            const targetStatus = statusFilter === "Finalizado" ? "Finalizado" : "Ativo"; 
+            const targetStatus = statusFilter === "Finalizado" ? "Finalizado" : "Ativo";
             lista = lista.filter(s => s.status === targetStatus);
         }
 
         if (etapaFilter && etapaFilter !== "Todos") {
             lista = lista.filter(s => s.etapa === etapaFilter);
         }
-        
+
         return lista;
-    }, [busca, servicos, statusFilter, etapaFilter]); 
+    }, [busca, servicos, statusFilter, etapaFilter]);
 
     const totalPages = Math.max(1, Math.ceil(listaFiltrada.length / ITEMS_PER_PAGE));
     const start = (page - 1) * ITEMS_PER_PAGE;
@@ -249,20 +249,20 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             }
             await fetchData();
             fecharConfirmarExclusao();
-        } catch(error) {
+        } catch (error) {
             console.error("Erro na exclusão:", error);
         }
     };
 
     return (
         <>
-            <div className="text-[13px] text-slate-500 mb-3">Serviços cadastrados</div>
+            <div className="text-[13px] text-slate-500 mb-3 text-left font-semibold p-4">Serviços cadastrados</div>
             <div className="flex flex-col gap-4">
-                {loading && <p>Carregando serviços...</p> }
+                {loading && <p>Carregando serviços...</p>}
                 {!loading && pagina.length === 0 && <p>Nenhum serviço encontrado, ajuste seus filtros.</p>}
                 {!loading && pagina.map((item) => (
-                    <article key={item.id} className={`rounded-[14px] border border-slate-200 card bg-white p-5 ${item.status === 'Finalizado' ? "pedido-muted" : ""}`}>
-                        <header className="flex items-start justify-between">
+                    <article key={item.id} className={`rounded-[14px] border border-slate-200 card bg-white p-4 ${item.status === 'Finalizado' ? "pedido-muted" : ""}`}>
+                        <header className="flex items-center justify-between">
                             <div className="flex items-center gap-2 text-slate-600">
                                 <FaWrench />
                                 <span className="font-semibold">Pedido de serviço - #{formatServicoId(item.id)}</span>
@@ -280,7 +280,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                             </div>
                         </header>
 
-                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mt-4 border-slate-100 border-t pt-4">
                             <div className="md:col-span-2">
                                 <div className="text-slate-600 text-sm font-semibold">Nome Cliente</div>
                                 <div className="text-slate-900">{item.clienteNome || `ID: ${item.clienteId}` || 'N/A'}</div>
@@ -293,36 +293,35 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                                 <div className="text-slate-600 text-sm font-semibold">Descrição</div>
                                 <div className="text-slate-900">{item.descricao}</div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-center gap-2">
                                 <div className="text-slate-600 text-sm font-semibold mr-2">Status</div>
                                 <StatusPill status={item.status} />
                             </div>
-                        </div>
-
-                        <div className="flex items-center justify-between mt-5">
-                            <div className="text-slate-600 text-sm">{item.etapa}</div>
-                            <Progress value={item.progresso?.[0]} total={item.progresso?.[1]} dark={item.status === "Finalizado"} />
+                            <div className="flex flex-col items-center justify-between mt-5">
+                                <div className="text-slate-600 text-sm">{item.etapa}</div>
+                                <Progress value={item.progresso?.[0]} total={item.progresso?.[1]} dark={item.status === "Finalizado"} />
+                            </div>
                         </div>
                     </article>
                 ))}
             </div>
 
-            <div className="flex items-center justify-between mt-6">
+            <div className="flex items-center justify-between mt-6 p-5">
                 <div className="text-sm text-slate-600">
                     Mostrando {listaFiltrada.length ? start + 1 : 0}–{Math.min(end, listaFiltrada.length)} de {listaFiltrada.length} resultados
                 </div>
                 <div className="flex gap-2">
                     <button onClick={anterior} disabled={page === 1} className={`btn btn-ghost ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        ← Anterior
+                        Anterior
                     </button>
                     <button onClick={proxima} disabled={page === totalPages || totalPages === 0} className={`btn btn-ghost ${page === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        Próximo →
+                        Próximo
                     </button>
                 </div>
             </div>
 
             {modal.confirm && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharConfirmarExclusao(); }}>
+                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharConfirmarExclusao(); }}>
                     <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-6">
                         <div className="flex items-start gap-3">
                             <FaExclamationTriangle className="text-amber-500 mt-1 text-xl" />
@@ -337,7 +336,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             )}
 
             {modal.view && current && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharExibir(); }}>
+                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharExibir(); }}>
                     <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6">
                         <h2 className="text-xl font-bold mb-4">Pedido de serviço - #{formatServicoId(current.id)}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,7 +373,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             )}
 
             {modal.form && (
-                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) setModal((m) => ({ ...m, form: false })); }}>
+                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) setModal((m) => ({ ...m, form: false })); }}>
                     <form onSubmit={salvar} className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 max-h-[90vh] flex flex-col">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-10 h-10 rounded-lg bg-slate-100 grid place-items-center text-slate-400">

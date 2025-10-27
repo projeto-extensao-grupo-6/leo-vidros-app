@@ -125,10 +125,10 @@ export default function PaginaInicial() {
       : 0;
 
     return [
-      { title: "Itens c/ Estoque Baixo", value: countItensBaixo, icon: Info, caption: `${countItensBaixo} item(ns) requer atenção` },
+      { title: "Total de Itens em Baixo Estoque", value: countItensBaixo, icon: Info, caption: `${countItensBaixo} item(ns) requer atenção` },
       { title: "Agendamentos de Hoje", value: agendamentosHoje, icon: CalendarDays, caption: `${agendamentosHoje} serviço(s) hoje` },
-      { title: "Taxa Ocup. (Futuros/Total)", value: `${taxaOcupacao}%`, icon: TrendingUp, caption: `${agendamentosFuturos} agend. futuros` },
-      { title: "Total Agend. Futuros", value: agendamentosFuturos, icon: Clock, caption: `Próximos serviços` },
+      { title: "Taxa de Ocupação de Serviços", value: `${taxaOcupacao}%`, icon: TrendingUp, caption: `${agendamentosFuturos} agendamentos futuros` },
+      { title: "Total de Agendamentos Futuros", value: agendamentosFuturos, icon: Clock, caption: `Próximos serviços` },
     ];
   }, [estoqueData, clientesData]);
 
@@ -232,7 +232,7 @@ export default function PaginaInicial() {
               {/* Alertas de Estoque */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
                 <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
-                  Alertas de Estoque [ {alertasEstoque.length} ]
+                  Alertas de Estoque ( Total: {alertasEstoque.length} )
                 </div>
                 <div className="divide-y divide-gray-100 min-h-[200px]">
                   {loading ? <p className="p-6 text-center">Carregando...</p> :
@@ -252,10 +252,10 @@ export default function PaginaInicial() {
                       </div>
                       <div className="flex items-center gap-3 mt-3 md:mt-0">
                         <span
-                          className={`text-xs font-medium px-3 py-1 rounded-md ${
+                          className={`text-sm px-4 py-2 rounded-full font-bold ${
                             produto.status === "Crítico"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-yellow-100 text-yellow-700"
+                              ? "bg-red-200 text-black-800"
+                              : "bg-yellow-200 text-black-800"
                           }`}
                         >
                           {produto.status}
@@ -276,7 +276,7 @@ export default function PaginaInicial() {
               {/* Próximos Agendamentos */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
                 <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
-                  Próximos Agendamentos [ {proximosAgendamentos.length} ]
+                  Próximos Agendamentos ( Total: {proximosAgendamentos.length} )
                 </div>
                 <div className="divide-y divide-gray-100 min-h-[200px]">
                   {loading ? <p className="p-6 text-center">Carregando...</p> :
@@ -295,7 +295,7 @@ export default function PaginaInicial() {
                         </p>
                       </div>
                       <div className="flex items-center gap-3 mt-3 md:mt-0">
-                        <span className="bg-gray-100 text-gray-700 text-xs font-medium px-3 py-1 rounded-md">
+                        <span className="bg-gray-100 text-gray-700 text-base font-semibold px-5 py-2 rounded-full">
                           {ag.dia}
                         </span>
                         <button

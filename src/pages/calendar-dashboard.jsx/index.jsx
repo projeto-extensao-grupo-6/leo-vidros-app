@@ -79,7 +79,7 @@ const CalendarDashboard = () => {
               sidebarCollapsed ? "w-16" : "w-80"
             } transition-all duration-300 border-r border-hairline bg-surface flex flex-col`}
           >
-            <div className="p-4 border-b border-hairline">
+            <div className="p-6 border-b border-hairline">
               <div className="flex items-center justify-between">
                 {!sidebarCollapsed && (
                   <h2 className="font-semibold text-text-primary">
