@@ -57,7 +57,7 @@ const CalendarDashboard = () => {
       startTime: taskData.eventTime,
       endTime: addMinutesToTime(
         taskData.eventTime,
-        parseInt(taskData.duration || "60")
+        parseInt(taskData.duration || "240")
       ),
       createdAt: new Date().toISOString(),
       color: taskData.color,
@@ -71,8 +71,8 @@ const CalendarDashboard = () => {
     <>
       <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className="min-h-screen bg-background">
-        <div className="h-screen flex">
+      <div className="bg-background">
+        <div className="h-screen flex pt-auto">
           {/* Left Sidebar */}
           <div
             className={`${

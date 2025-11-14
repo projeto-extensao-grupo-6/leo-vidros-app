@@ -95,7 +95,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   return (
     <div className="fixed inset-0 bg-black/50 bg-opacity-10 flex items-center justify-center z-50" onClick={onClose}>
       <div 
-        className="bg-white border border-gray-200 rounded-xl p-9 m-4 min-h-[700px] w-[750px] shadow-2xl flex flex-col"
+        className="bg-white border border-gray-200 rounded-xl p-10 m-3 min-h-[700px] min-w-[750px] shadow-2xl flex flex-col"
         onClick={(e) => e?.stopPropagation()}
         onKeyDown={handleKeyDown}
         tabIndex={-1}
@@ -140,7 +140,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 onChange={(value) => handleInputChange('category', value)}
                 options={categoryOptions}
                 renderOption={(option) => (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start">
                     <span
                       className="inline-block w-3 h-3 rounded-full"
                       style={{ backgroundColor: option.color }}
@@ -153,8 +153,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           </div>
 
           {/* Row 2: Data & Horário */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
+          <div className="grid grid-cols-11 gap-4">
+            <div className="col-span-6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Data do evento *
               </label>
@@ -167,7 +167,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 maxLength={10}
               />
             </div>
-            <div>
+            <div className='col-span-2'>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
                 Horário *
               </label>
@@ -177,6 +177,21 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 onChange={(e) => handleInputChange('eventTime', e?.target?.value)}
                 placeholder="Horário do evento"
                 error={errors?.eventTime}
+                className="w-30"
+              />
+            </div>
+            <div className="col-span-1 flex justify-center items-center text-gray-700">até</div>
+            <div className='col-span-2'>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Horário fim*
+              </label>
+              <Input
+                type="time"
+                value={formData?.eventTime}
+                onChange={(e) => handleInputChange('eventTime', e?.target?.value)}
+                placeholder="Horário do evento"
+                error={errors?.eventTime}
+                className="w-30"
               />
             </div>
           </div>
