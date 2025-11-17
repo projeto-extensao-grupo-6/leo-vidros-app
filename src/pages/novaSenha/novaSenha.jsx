@@ -63,7 +63,7 @@ export default function NovaSenha() {
 
         try {
             // CHAMADA REAL PARA O BACK-END SPRING
-            const response = await fetch("http://localhost:3000/api/usuario/definirSenhaInicial", {
+            const response = await fetch("http://localhost:3000/api/usuarios/definir-senha", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
