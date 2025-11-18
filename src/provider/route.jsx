@@ -6,8 +6,8 @@ import Funcionarios from '../pages/funcionarios/funcionarios.jsx';
 import Clientes from '../pages/clientes/clientes.jsx';
 import Estoque from '../pages/estoque/estoque.jsx';
 import Pedidos from '../pages/pedidos/pedidos.jsx';
+import CalendarDashboard from '../pages/calendar-dashboard/index.jsx';
 import Acesso from '../pages/acesso/acesso.jsx';
-import CalendarDashboard from '../pages/calendar-dashboard.jsx/index.jsx';
 
 export const routes = createBrowserRouter([
   { path: '/', element: <Login /> },

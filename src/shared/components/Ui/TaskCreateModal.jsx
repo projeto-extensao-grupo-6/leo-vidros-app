@@ -3,47 +3,63 @@ import Icon from "../AppIcon";
 import Button from "../buttons/button.component";
 import Input from "./Input";
 import Select from "./Select";
+import MultipleSelectCheckmarks from "./MultipleSelectCheckmarks";
 
 const categoryOptions = [
   { value: "SERVICO", label: "Prestação de serviço", color: "#3B82F6" },
   { value: "ORCAMENTO", label: "Orçamento", color: "#FBBF24" },
 ];
 
+const serviceOptions = [
+  { value: "PEDIDO_001", label: "Pedido#001" },
+  { value: "PEDIDO_002", label: "Pedido#002" },
+  { value: "PEDIDO_003", label: "Pedido#003" },
+];
+
 const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   const [formData, setFormData] = useState({
-    clientName: "",
-    category: "SERVICO",
+    tipoAgendamento: "",
+    pedido: null,
+    funcionarios: [],
     eventDate: "",
     startTime: "",
     endTime: "",
-    local: "",
-    streetName: "",
+    rua: "",
     cep: "",
-    number: "",
-    complement: "",
-    neighborhood: "",
-    city: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    pais: "",
+    observacao: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [selectedFuncionarios, setSelectedFuncionarios] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setFormData({
-        clientName: initialData?.clientName || "",
-        category: initialData?.category || "service",
+        tipoAgendamento: initialData?.tipoAgendamento || "",
+        pedido: initialData?.pedido || null,
+        funcionarios: initialData?.funcionarios || [],
         eventDate: initialData?.eventDate || "",
         startTime: initialData?.startTime || "",
         endTime: initialData?.endTime || "",
-        local: initialData?.local || "",
-        streetName: initialData?.streetName || "",
+        rua: initialData?.rua || "",
         cep: initialData?.cep || "",
-        number: initialData?.number || "",
-        complement: initialData?.complement || "",
-        neighborhood: initialData?.neighborhood || "",
-        city: initialData?.city || "",
+        numero: initialData?.numero || "",
+        complemento: initialData?.complemento || "",
+        bairro: initialData?.bairro || "",
+        cidade: initialData?.cidade || "",
+        uf: initialData?.uf || "",
+        pais: initialData?.pais || "",
+        observacao: initialData?.observacao || "",
       });
       setErrors({});
+      setSelectedFuncionarios([]);
     }
   }, [isOpen, initialData]);
 
@@ -62,76 +78,98 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData?.clientName?.trim())
-      newErrors.clientName = (
-        <>
-          <span className="text-red-500 text-left">
-            * Nome do cliente é obrigatório
-          </span>
-        </>
-      );
-    if (!formData?.eventDate)
-      newErrors.eventDate = (
-        <>
-          <span className="text-red-500 text-left">
-            * Data do evento é obrigatória
-          </span>
-        </>
-      );
-    if (!formData?.local?.trim())
-      newErrors.local = (
-        <>
-          <span className="text-red-500 text-left">* Local é obrigatório</span>
-        </>
-      );
-    if (!formData?.streetName?.trim())
-      newErrors.streetName = (
-        <>
-          <span className="text-red-500 text-left">
-            * Nome da rua é obrigatório
-          </span>
-        </>
-      );
-    if (!formData?.cep?.trim())
-      newErrors.cep = (
-        <>
-          <span className="text-red-500 text-left">* CEP é obrigatório</span>
-        </>
-      );
-    if (!formData?.number?.trim())
-      newErrors.number = (
-        <>
-          <span className="text-red-500 text-left">* Número é obrigatório</span>
-        </>
-      );
-    if (!formData?.neighborhood?.trim())
-      newErrors.neighborhood = (
-        <>
-          <span className="text-red-500 text-left">* Bairro é obrigatório</span>
-        </>
-      );
-    if (!formData?.city?.trim())
-      newErrors.city = (
-        <>
-          <span className="text-red-500 text-left">* Cidade é obrigatória</span>
-        </>
-      );
+
+    if (!formData?.tipoAgendamento?.trim())
+      newErrors.tipoAgendamento = "* Tipo de agendamento é obrigatório";
+    if (!formData?.eventDate?.trim())
+      newErrors.eventDate = "* Data do evento é obrigatória";
+    if (!formData?.startTime?.trim())
+      newErrors.startTime = "* Horário de início é obrigatório";
+    if (!formData?.endTime?.trim())
+      newErrors.endTime = "* Horário de fim é obrigatório";
+    if (!formData?.rua?.trim())
+      newErrors.rua = "* Nome da rua é obrigatório";
+    if (!formData?.cep?.trim()) newErrors.cep = "* CEP é obrigatório";
+    if (!formData?.numero?.trim())
+      newErrors.numero = "* Número é obrigatório";
+    if (!formData?.bairro?.trim())
+      newErrors.bairro = "* Bairro é obrigatório";
+    if (!formData?.cidade?.trim())
+      newErrors.cidade = "* Cidade é obrigatória";
+    if (!formData?.uf?.trim()) newErrors.uf = "* UF é obrigatório";
+    if (!formData?.pais?.trim()) newErrors.pais = "* País é obrigatório";
+
     setErrors(newErrors);
     return Object.keys(newErrors)?.length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const formatTimeToHHmmss = (timeStr) => {
+    // timeStr esperado: "HH:mm"
+    if (!timeStr) return "00:00:00";
+    const [hour = 0, minute = 0] = timeStr.split(":").map((t) => Number(t));
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${pad(hour)}:${pad(minute)}:00`;
+  };
+
+  const handleSubmit = async (e) => {
     e?.preventDefault();
-    if (validateForm()) {
-      const selectedCategory = categoryOptions.find(
-        (cat) => cat.value === formData.category
-      );
-      const formDataWithColor = {
-        ...formData,
-        backgroundColor: selectedCategory?.color || "#3B82F6",
+
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      const payload = {
+        tipoAgendamento: formData.tipoAgendamento,
+        dataAgendamento: formData.eventDate, // DD/MM/YYYY ou YYYY-MM-DD conforme backend espera
+        inicioAgendamento: formatTimeToHHmmss(formData.startTime),
+        fimAgendamento: formatTimeToHHmmss(formData.endTime),
+        statusAgendamento: {
+          tipo: "AGENDAMENTO",
+          nome: "PENDENTE",
+        },
+        observacao: formData.observacao || "",
+        pedido: formData.pedido || null,
+        endereco: {
+          rua: formData.rua,
+          complemento: formData.complemento || "",
+          cep: formData.cep,
+          cidade: formData.cidade,
+          bairro: formData.bairro,
+          uf: formData.uf,
+          pais: formData.pais,
+        },
+        funcionarios: selectedFuncionarios || [],
+        produtos: [],
       };
-      onSave?.(formDataWithColor);
+
+      console.log("Enviando payload:", payload);
+
+      // Fazendo POST para o backend
+      const response = await fetch("http://localhost:3000/api/agendamentos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erro ao criar agendamento: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Agendamento criado com sucesso:", result);
+
+      onSave?.(result);
       onClose?.();
+    } catch (error) {
+      console.error("Erro ao salvar agendamento:", error);
+      setErrors({
+        submit: `Erro ao salvar agendamento: ${error.message}`,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -147,13 +185,13 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white border border-gray-200 rounded-xl p-10 m-3 min-h-[700px] min-w-[750px] shadow-2xl flex flex-col"
+        className="bg-white border border-gray-200 rounded-xl p-10 m-3 min-h-[650px] min-w-[750px] shadow-2xl flex flex-col"
         onClick={(e) => e?.stopPropagation()}
         onKeyDown={handleKeyDown}
         tabIndex={-1}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3">
+        <div className="flex items-center justify-between pb-5">
           <h2 className="text-2xl font-bold text-gray-900">Novo Agendamento</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <Icon name="X" size={22} />
@@ -163,47 +201,66 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
         {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="flex-1 flex flex-col gap-6 overflow-y-auto p-1.5"
+          className="flex-1 flex flex-col gap-6 overflow-y-auto "
         >
-          {/* Row 1: Nome do cliente & Tipo de serviço */}
+          {errors?.submit && (
+            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {errors.submit}
+            </div>
+          )}
+
+          {/* Row 1: Tipo de Agendamento & Pedido */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                Nome do cliente *
-              </label>
-              <Input
-                type="text"
-                value={formData?.clientName}
-                onChange={(e) =>
-                  handleInputChange("clientName", e?.target?.value)
-                }
-                placeholder="Digite o nome do cliente"
-                error={errors?.clientName}
-                autoFocus
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                Tipo de serviço *
+              <label className="block text-sm font-medium text-gray-700 pb-2 text-left">
+                Tipo de agendamento *
               </label>
               <Select
-                value={formData?.category}
-                onChange={(value) => handleInputChange("category", value)}
+                value={formData?.tipoAgendamento}
+                onChange={(value) =>
+                  handleInputChange("tipoAgendamento", value)
+                }
                 options={categoryOptions}
-                renderOption={(option) => (
-                  <div className="flex items-start">
-                    <span
-                      className="inline-block w-3 h-3 rounded-full"
-                      style={{ backgroundColor: option.color }}
-                    />
-                    <span>{option.label}</span>
-                  </div>
-                )}
+              />
+              {errors?.tipoAgendamento && (
+                <span className="text-red-500 text-sm">
+                  {errors.tipoAgendamento}
+                </span>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 pb-2 text-left">
+                Pedido
+              </label>
+              <Select
+                value={formData?.pedido}
+                onChange={(value) => handleInputChange("pedido", value)}
+                options={serviceOptions}
               />
             </div>
           </div>
 
-          {/* Row 2: Data & Horário */}
+          {/* Row 2: Funcionários */}
+          <div className="grid grid-cols-2 gap-4">
+            <label className="block text-sm font-medium text-gray-700 text-left col-span-2">
+              Selecione os funcionários responsáveis
+            </label>
+            <MultipleSelectCheckmarks
+              className="col-span-2"
+              placeholder="Escolha uma ou mais opções"
+              options={[
+                { value: "JOAO", label: "João" },
+                { value: "MARIA", label: "Maria" },
+                { value: "VINICIUS", label: "Vinicius" },
+              ]}
+              value={selectedFuncionarios}
+              onChange={setSelectedFuncionarios}
+              searchable
+              clearable
+            />
+          </div>
+
+          {/* Row 3: Data & Horário */}
           <div className="grid grid-cols-11 gap-4">
             <div className="col-span-6">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
@@ -222,7 +279,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                Horário *
+                Horário início *
               </label>
               <Input
                 type="time"
@@ -230,8 +287,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 onChange={(e) =>
                   handleInputChange("startTime", e?.target?.value)
                 }
-                placeholder="Horário do evento"
-                error={errors?.eventTime}
+                error={errors?.startTime}
                 className="w-30"
               />
             </div>
@@ -240,48 +296,30 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                Horário fim*
+                Horário fim *
               </label>
               <Input
                 type="time"
                 value={formData?.endTime}
-                onChange={(e) =>
-                  handleInputChange("endTime", e?.target?.value)
-                }
-                error={errors?.eventTime}
+                onChange={(e) => handleInputChange("endTime", e?.target?.value)}
+                error={errors?.endTime}
                 className="w-30"
               />
             </div>
           </div>
 
-          {/* Row 3: Local */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-              Local *
-            </label>
-            <Input
-              type="text"
-              value={formData?.local}
-              onChange={(e) => handleInputChange("local", e?.target?.value)}
-              placeholder="Ex: Salão, residência, empresa..."
-              error={errors?.local}
-            />
-          </div>
-
-          {/* Row 4: Nome da rua & CEP */}
+          {/* Row 4: Rua & CEP */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
-                Nome da rua *
+                Rua *
               </label>
               <Input
                 type="text"
-                value={formData?.streetName}
-                onChange={(e) =>
-                  handleInputChange("streetName", e?.target?.value)
-                }
+                value={formData?.rua}
+                onChange={(e) => handleInputChange("rua", e?.target?.value)}
                 placeholder="Digite o nome da rua"
-                error={errors?.streetName}
+                error={errors?.rua}
               />
             </div>
             <div>
@@ -307,10 +345,10 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               </label>
               <Input
                 type="text"
-                value={formData?.number}
-                onChange={(e) => handleInputChange("number", e?.target?.value)}
+                value={formData?.numero}
+                onChange={(e) => handleInputChange("numero", e?.target?.value)}
                 placeholder="Número"
-                error={errors?.number}
+                error={errors?.numero}
               />
             </div>
             <div>
@@ -319,12 +357,11 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               </label>
               <Input
                 type="text"
-                value={formData?.complement}
+                value={formData?.complemento}
                 onChange={(e) =>
-                  handleInputChange("complement", e?.target?.value)
+                  handleInputChange("complemento", e?.target?.value)
                 }
                 placeholder="Complemento (opcional)"
-                error={errors?.complement}
               />
             </div>
           </div>
@@ -337,12 +374,10 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               </label>
               <Input
                 type="text"
-                value={formData?.neighborhood}
-                onChange={(e) =>
-                  handleInputChange("neighborhood", e?.target?.value)
-                }
+                value={formData?.bairro}
+                onChange={(e) => handleInputChange("bairro", e?.target?.value)}
                 placeholder="Digite o bairro"
-                error={errors?.neighborhood}
+                error={errors?.bairro}
               />
             </div>
             <div>
@@ -351,16 +386,58 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               </label>
               <Input
                 type="text"
-                value={formData?.city}
-                onChange={(e) => handleInputChange("city", e?.target?.value)}
+                value={formData?.cidade}
+                onChange={(e) => handleInputChange("cidade", e?.target?.value)}
                 placeholder="Digite a cidade"
-                error={errors?.city}
+                error={errors?.cidade}
               />
             </div>
           </div>
 
+          {/* Row 7: UF & País */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                UF *
+              </label>
+              <Input
+                type="text"
+                value={formData?.uf}
+                onChange={(e) => handleInputChange("uf", e?.target?.value)}
+                placeholder="Digite a UF"
+                error={errors?.uf}
+                maxLength={2}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                País *
+              </label>
+              <Input
+                type="text"
+                value={formData?.pais}
+                onChange={(e) => handleInputChange("pais", e?.target?.value)}
+                placeholder="Digite o país"
+                error={errors?.pais}
+              />
+            </div>
+          </div>
+
+          {/* Row 8: Observação */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+              Observação
+            </label>
+            <Input
+              type="text"
+              value={formData?.observacao}
+              onChange={(e) => handleInputChange("observacao", e?.target?.value)}
+              placeholder="Adicione uma observação (opcional)"
+            />
+          </div>
+
           {/* Form Actions */}
-          <div className="flex justify-end align-items-center pt-6 border-t border-gray-200 gap-1">
+          <div className="flex justify-end align-items-center pt-4 border-gray-200 gap-1">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
@@ -370,8 +447,9 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               iconPosition="left"
               size="md"
               className="btn-primary"
+              disabled={loading}
             >
-              Criar Agendamento
+              {loading ? "Salvando..." : "Criar Agendamento"}
             </Button>
           </div>
         </form>

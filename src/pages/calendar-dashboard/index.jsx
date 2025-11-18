@@ -53,12 +53,15 @@ const CalendarDashboard = () => {
     const newTask = {
       id: Date.now(),
       ...taskData,
+      title: taskData?.category || "Agendamento", // adiciona título
       date: taskData.eventDate,
       startTime: taskData.startTime,
       endTime: taskData.endTime,
       createdAt: new Date().toISOString(),
-      color: taskData.color,
+      backgroundColor: taskData.backgroundColor || "#3B82F6", // corrige aqui
+      color: taskData.backgroundColor, // se precisar também em color
     };
+    console.log("Nova tarefa criada:", newTask); // debug
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
