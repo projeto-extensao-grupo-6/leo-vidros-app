@@ -29,13 +29,14 @@
         if (!response.ok) throw new Error("Email ou senha inválidos");
 
         const data = await response.json();
-        const { id, token, firstLogin, nome } = data;
+        const { id, token, firstLogin, nome, email: userEmail} = data;
         console.log("Login OK:", data);
 
         localStorage.setItem("userToken", token); 
         localStorage.setItem("userId", id);
         localStorage.setItem("userFirstLogin", String(firstLogin));
         localStorage.setItem("loggedUserName", nome);
+        localStorage.setItem("loggedUserEmail", userEmail);
 
         setModalOpen(true);
 

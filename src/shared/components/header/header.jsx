@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
@@ -28,7 +28,24 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const navigate = useNavigate();
+
+  const [userName, setUserName] = useState("Carregando...");
+  const [userEmail, setUserEmail] = useState("carregando@leovidros.com");
   
+  useEffect(() => {
+    const storedName = localStorage.getItem('loggedUserName');
+    const storedEmail = localStorage.getItem('loggedUserEmail');
+
+    if (storedName) {
+      setUserName(storedName);
+    } else {
+      setUserName("Usuário Léo Vidros"); 
+    }
+
+    if (storedEmail) {
+      setUserEmail(storedEmail);
+    }
+  }, []); 
 
   const handleProfileClick = (event) => setAnchorEl(event.currentTarget);
   const handleProfileClose = () => setAnchorEl(null);
@@ -93,8 +110,8 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
           onClick={handleProfileClick}
         >
           <div className="hidden sm:block text-right mr-1">
-            <p className="text-xs sm:text-sm font-semibold text-white group-hover:text-gray-200 transition-colors">Julio Cesar</p>
-            <p className="text-[11px] sm:text-xs text-gray-300">Cargo</p>
+            <p className="text-xs sm:text-sm font-semibold text-white group-hover:text-gray-200 transition-colors">{userName}</p>
+            <p className="text-[11px] sm:text-xs text-gray-300">Admin</p>
           </div>
           <Avatar
             src={UserImg}
@@ -136,10 +153,10 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
              />
              <div>
                  <Typography variant="subtitle1" className="font-semibold leading-tight">
-                   Julio Cesar
+                   {userName}
                  </Typography>
                  <Typography variant="body2" className="text-gray-300 leading-tight">
-                   julio.cesar@gmail.com
+                   {userEmail}
                  </Typography>
              </div>
           </Box>
