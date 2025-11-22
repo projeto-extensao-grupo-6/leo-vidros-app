@@ -24,15 +24,11 @@ import Logo from "../../../assets/logo/logo.png";
 import { useNavigate } from "react-router-dom";
 import UserImg from "../../../assets/User.png";
 
-import { useNavigate } from "react-router-dom";
-
 export default function Header({ toggleSidebar, sidebarOpen }) {
   const navigate = useNavigate();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-  const navigate = useNavigate();
-
   const [userName, setUserName] = useState("Carregando...");
   const [userEmail, setUserEmail] = useState("carregando@leovidros.com");
   
