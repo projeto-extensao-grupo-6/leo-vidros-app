@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Input from "../../shared/components/Ui/Input";
+import { useNavigate } from "react-router-dom";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
 import Button from "../../shared/components/buttons/button.component";
+import Api from "../../axios/Api";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
@@ -16,31 +19,38 @@ function Login() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+  
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
+      const response = await Api.post("/auth/login", {
+        email,
+        senha
       });
-
-      if (!response.ok) throw new Error("Email ou senha inválidos");
-
-      const data = await response.json();
+  
+      const data = response.data;
       console.log("Login OK:", data);
+  
+      localStorage.setItem("accessToken", data.token);
+      localStorage.setItem("nome", data.nome);
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("id", data.id);
+      localStorage.setItem("firstLogin", data.firstLogin);
 
+      console.log("TOKEN SALVO:", localStorage.getItem("accessToken"));
+  
       setModalOpen(true);
-
+  
       setTimeout(() => {
         setModalOpen(false);
+        navigate("/paginaInicial");
       }, 2000);
-      window.location.href = "./paginaInicial";
+  
     } catch (error) {
-      setError(error.message);
+      setError(error.response?.data?.message || "Email ou senha inválidos");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const variants = {
     initial: { opacity: 0, x: 20 },

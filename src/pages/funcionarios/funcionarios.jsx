@@ -19,8 +19,7 @@ import { Edit, Delete } from "@mui/icons-material";
 
 import FuncionarioForm from "../../shared/components/modalFuncionarios/FuncionarioForm";
 import DeleteFuncionario from "../../shared/components/modalFuncionarios/DeleteFuncionario";
-
-const API_URL = "http://localhost:3001/funcionarios";
+import Api from "../../axios/Api";
 
 export default function Funcionarios() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -40,9 +39,8 @@ export default function Funcionarios() {
 
   const fetchFuncionarios = async () => {
     try {
-      const response = await fetch(API_URL);
-      const data = await response.json();
-      setFuncionarios(data);
+      const response = await Api.get("/funcionarios");
+      setFuncionarios(response.data);
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);
     }
@@ -82,17 +80,9 @@ export default function Funcionarios() {
     try {
       if (modoEdicao && funcionarioSelecionado) {
         const funcAtualizado = { ...funcionarioSelecionado, ...novoFunc };
-        await fetch(`${API_URL}/${funcionarioSelecionado.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(funcAtualizado),
-        });
+        await Api.put(`/funcionarios/${funcionarioSelecionado.id}`, funcAtualizado);
       } else {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(novoFunc),
-        });
+        await Api.post("/funcionarios", novoFunc);
       }
       fetchFuncionarios();
     } catch (error) {
@@ -102,9 +92,7 @@ export default function Funcionarios() {
 
   const deletarFuncionario = async (id) => {
     try {
-      await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-      });
+      await Api.delete(`/funcionarios/${id}`);
       setFuncionarios((prev) => prev.filter((f) => f.id !== id));
     } catch (error) {
       console.error("Erro ao deletar funcionário:", error);

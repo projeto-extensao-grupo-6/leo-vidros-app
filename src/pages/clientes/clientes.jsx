@@ -28,8 +28,7 @@ import {
   VisibilityOutlined,
 } from "@mui/icons-material";
 import ClienteFormModal from "../../shared/components/clienteComponents/ClienteFormModal";
-
-const API_URL = "http://localhost:3001/clientes";
+import Api from "../../axios/Api";
 
 const formatCurrency = (value) => {
   if (value == null || isNaN(value)) return "R$ 0,00";
@@ -111,10 +110,8 @@ export default function Clientes() {
 
   const fetchClientes = async () => {
     try {
-      const response = await fetch(`${API_URL}?_sort=id&_order=desc`);
-      if (!response.ok) throw new Error("Erro ao buscar dados da API");
-      const data = await response.json();
-      setClientes(data);
+      const response = await Api.get("/clientes");
+      setClientes(response.data);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
     }
@@ -161,13 +158,7 @@ export default function Clientes() {
       try {
         const clienteAtualizado = { ...clienteSelecionado, ...dadosCliente };
 
-        const response = await fetch(`${API_URL}/${clienteSelecionado.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(clienteAtualizado),
-        });
-
-        if (!response.ok) throw new Error("Erro ao atualizar cliente");
+        await Api.put(`/clientes/${clienteSelecionado.id}`, clienteAtualizado);
 
         setClientes((prev) =>
           prev.map((c) =>
@@ -185,15 +176,9 @@ export default function Clientes() {
         );
         const novoClienteComId = { ...dadosCliente, id: maxIdExistente + 1 };
 
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(novoClienteComId),
-        });
+        const response = await Api.post("/clientes", novoClienteComId);
 
-        if (!response.ok) throw new Error("Erro ao criar cliente");
-
-        const novoCliente = await response.json();
+        const novoCliente = response.data;
         setClientes((prev) => [novoCliente, ...prev]);
       } catch (error) {
         console.error("Erro ao criar cliente (POST):", error);

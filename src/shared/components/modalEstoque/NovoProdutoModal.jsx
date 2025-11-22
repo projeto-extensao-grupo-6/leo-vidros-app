@@ -146,7 +146,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSave, item = null }) => {
                   onChange={handleChange}
                 />
               </div>
-
+              <br />
               {/* Unidade + Preço */}
               <div className="grid grid-cols-2 gap-[35px]">
                 <div>
@@ -183,7 +183,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSave, item = null }) => {
                   />
                 </div>
               </div>
-
+              <br />
               {/* Descrição */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">

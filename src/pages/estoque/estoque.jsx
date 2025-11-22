@@ -1,30 +1,25 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Api from "../../axios/Api";
+import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../shared/components/header/header";
 import Sidebar from "../../shared/components/sidebar/sidebar";
 import {
   Package,
-  ArrowUp,
   Search,
   CalendarDays,
   Filter,
   Download,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
   ArrowRightLeft,
 } from "lucide-react";
 import NovoProdutoModal from "../../shared/components/modalEstoque/NovoProdutoModal";
 import SucessoModal from "../../shared/components/modalEstoque/SucessoModal";
 import ExportarModal from "../../shared/components/modalEstoque/ExportarModal";
-import EstoqueItemRow from "../../shared/components/estoque/EstoqueItemRow";
+import EstoqueItemRow from "../../shared/components/modalEstoque/EstoqueItemRow";
 import CalendarDropdown from "../../shared/components/estoque/CalendarDropdown";
 import FilterDropdown from "../../shared/components/estoque/FilterDropdown";
 import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSaidaEstoque";
 
-const API_URL = "http://localhost:3001/estoque";
-const FUNCIONARIOS_API_URL = "http://localhost:3001/funcionarios";
 const ITENS_POR_PAGINA = 6;
 
 export default function Estoque() {
@@ -32,6 +27,7 @@ export default function Estoque() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [estoque, setEstoque] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [funcionarios, setFuncionarios] = useState([]);
   
   // Estados dos modais
@@ -55,117 +51,187 @@ export default function Estoque() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState(null);
   
-  // Location e foco
+  // Location e navegação
   const location = useLocation();
+  const navigate = useNavigate();
   const focusItemId = location.state?.focusItemId;
 
-  // Funções utilitárias
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  // ==================== FUNÇÕES UTILITÁRIAS ====================
+  
+  const toggleSidebar = useCallback(() => {
+    setSidebarOpen(prev => !prev);
+  }, []);
 
-  const formatCurrency = (value) => {
-    if (typeof value !== "number") {
-      value = 0;
-    }
+  const formatCurrency = useCallback((value) => {
+    if (typeof value !== "number") value = 0;
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
     }).format(value);
-  };
+  }, []);
 
-  const parseCurrency = (value) => {
+  const parseCurrency = useCallback((value) => {
     return parseFloat(String(value).replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
-  };
+  }, []);
 
-  const toYYYYMMDD = (date) => {
+  const toYYYYMMDD = useCallback((date) => {
     if (!date) return null;
     return date.toISOString().split("T")[0];
-  };
+  }, []);
 
-  // Funções de API
-  const fetchEstoque = async () => {
-    setLoading(true);
+  const mapEstoqueFromApi = useCallback((data) => {
+    return data.map((item) => ({
+      id: item.id,
+      quantidadeTotal: item.quantidadeTotal ?? 0,
+      quantidadeDisponivel: item.quantidadeDisponivel ?? 0,
+      reservado: item.reservado ?? 0,
+      localizacao: item.localizacao || "Não informado",
+      produto: {
+        id: item.produto.id,
+        nome: item.produto.nome,
+        descricao: item.produto.descricao || "",
+        unidademedida: item.produto.unidademedida || "unidade",
+        preco: item.produto.preco ?? 0,
+        ativo: item.produto.ativo ?? true,
+        // Campos de métrica
+        estoqueMinimo: item.produto.metrica?.nivelMinimo ?? 0,
+        estoqueMaximo: item.produto.metrica?.nivelMaximo ?? 0,
+        // Atributos do produto
+        atributos: item.produto.atributos || [],
+        // Campos calculados/compatibilidade
+        quantidade: item.quantidadeDisponivel ?? 0,
+        tipo: item.produto.atributos?.find(attr => attr.tipo === "categoria")?.valor || "Geral",
+      }
+    }));
+  }, []);
+
+  // ==================== FETCH DE DADOS ====================
+  
+  const fetchEstoque = useCallback(async () => {
     try {
-      const response = await fetch(API_URL);
-      const data = await response.json();
-      setEstoque(data);
+      setLoading(true);
+      setError(null);
+  
+      const response = await Api.get("/estoques");
+      const data = response.data;
+  
+      if (!data || data.length === 0) {
+        setEstoque([]);
+        return;
+      }
+  
+      const estoqueMapeado = mapEstoqueFromApi(data);
+      setEstoque(estoqueMapeado);
+  
     } catch (error) {
       console.error("Erro ao buscar estoque:", error);
+      setError("Não foi possível carregar o estoque. Tente novamente.");
+      setEstoque([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [mapEstoqueFromApi]);
+  
 
-  const fetchFuncionarios = async () => {
+  const fetchFuncionarios = useCallback(async () => {
     try {
-      const response = await fetch(FUNCIONARIOS_API_URL);
-      const data = await response.json();
-      setFuncionarios(data);
+      const response = await Api.get("/funcionarios");
+      const data = response.data;
+  
+      setFuncionarios(data || []);
+  
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);
+      setFuncionarios([]);
     }
-  };
-
-  // Effect para carregar dados iniciais
+  }, []);
+  
   useEffect(() => {
     fetchEstoque();
     fetchFuncionarios();
-  }, []);
+  }, [fetchEstoque, fetchFuncionarios]);
 
-  // Estoque filtrado
+  
   const filteredEstoque = useMemo(() => {
-    let items = [...estoque];
+    let items = estoque;
 
     // Filtro de busca
-    if (busca) {
+    if (busca.trim()) {
+      const buscaLower = busca.toLowerCase();
       items = items.filter(
         (item) =>
-          item.nome.toLowerCase().includes(busca.toLowerCase()) ||
-          (item.descricao && item.descricao.toLowerCase().includes(busca.toLowerCase()))
+          item.produto.nome.toLowerCase().includes(buscaLower) ||
+          item.produto.descricao.toLowerCase().includes(buscaLower) ||
+          item.localizacao.toLowerCase().includes(buscaLower)
       );
     }
 
-    // Filtro de data
+    // Filtro de data (se necessário implementar com movimentos futuros)
     if (selectedFilterDate) {
-      const filterDateStr = toYYYYMMDD(selectedFilterDate);
-      items = items.filter((item) => {
-        if (!item.detalhes || !item.detalhes.movimentos) return false;
-        return item.detalhes.movimentos.some((mov) => mov.data === filterDateStr);
-      });
+      // TODO: Implementar quando tiver endpoint de movimentos
+      console.log("Filtro de data selecionado:", selectedFilterDate);
     }
 
     // Filtro de situação
     const situacaoFilters = activeFilters.situacao || [];
     if (situacaoFilters.length > 0) {
       items = items.filter((item) => {
+        const quantidade = item.quantidadeDisponivel;
+        const estoqueMinimo = item.produto.estoqueMinimo;
+        
         const situacao =
-          item.quantidade === 0
+          quantidade === 0
             ? "Fora de estoque"
-            : item.quantidade < item.estoqueMinimo
+            : quantidade < estoqueMinimo
             ? "Abaixo do normal"
             : "Disponível";
+            
         return situacaoFilters.includes(situacao);
       });
     }
 
-    // Filtro de tipo
+    // Filtro de tipo (baseado em atributos)
     const tipoFilters = activeFilters.tipo || [];
     if (tipoFilters.length > 0) {
-      items = items.filter((item) => tipoFilters.includes(item.tipo));
+      items = items.filter((item) => tipoFilters.includes(item.produto.tipo));
     }
 
     return items;
   }, [estoque, busca, selectedFilterDate, activeFilters]);
 
-  // Effect para focar em item específico
+  // ==================== PAGINAÇÃO (OTIMIZADA) ====================
+  
+  const paginationData = useMemo(() => {
+    const totalPaginas = Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA);
+    const paginaAtual = Math.min(pagina, totalPaginas) || 1;
+    const startIndex = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    const endIndex = startIndex + ITENS_POR_PAGINA;
+    
+    return {
+      items: filteredEstoque.slice(startIndex, endIndex),
+      totalPaginas,
+      startIndex,
+      endIndex: Math.min(endIndex, filteredEstoque.length),
+      total: filteredEstoque.length
+    };
+  }, [filteredEstoque, pagina]);
+
+  // ==================== EFFECT PARA FOCUS EM ITEM ====================
+  
   useEffect(() => {
     if (focusItemId && filteredEstoque.length > 0 && focusItemId !== expandedItemId) {
       setExpandedItemId(focusItemId);
+      
       const itemIndex = filteredEstoque.findIndex((item) => item.id === focusItemId);
+      
       if (itemIndex !== -1) {
         const targetPage = Math.ceil((itemIndex + 1) / ITENS_POR_PAGINA);
+        
         if (pagina !== targetPage) {
           setPagina(targetPage);
         }
+        
+        // Scroll suave para o item
         setTimeout(() => {
           const element = document.getElementById(`item-${focusItemId}`);
           if (element) {
@@ -176,213 +242,201 @@ export default function Estoque() {
     }
   }, [focusItemId, filteredEstoque, expandedItemId, pagina]);
 
-  // Handlers de CRUD
-  const handleSaveItem = async (itemData) => {
-    const itemPayload = {
-      ...itemData,
-      preco: parseCurrency(itemData.preco),
-      quantidade: parseInt(itemData.quantidade, 10) || 0,
-      estoqueMinimo: parseInt(itemData.estoqueMinimo, 10) || 0,
-      detalhes: itemData.detalhes
-        ? {
-            ...itemData.detalhes,
-            valorCompra: parseCurrency(itemData.detalhes.valorCompra),
-            valorVenda: parseCurrency(itemData.detalhes.valorVenda),
-            movimentos: itemData.detalhes.movimentos || [],
-          }
-        : null,
-    };
-
-    const url = editingItem ? `${API_URL}/${editingItem.id}` : API_URL;
-    const method = editingItem ? "PUT" : "POST";
-
+  // ==================== HANDLERS DE CRUD ====================
+  
+  const handleSaveItem = useCallback(async (itemData) => {
     try {
-      const response = await fetch(url, {
-        method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(itemPayload),
-      });
+      const itemPayload = {
+        ...itemData,
+        preco: parseCurrency(itemData.preco),
+        quantidade: parseInt(itemData.quantidade, 10) || 0,
+        estoqueMinimo: parseInt(itemData.estoqueMinimo, 10) || 0,
+      };
 
-      if (!response.ok) throw new Error("Falha ao salvar o item.");
+      if (editingItem) {
+        await Api.put(`/estoques/${editingItem.id}`, itemPayload);
+      } else {
+        await Api.post("/estoques", itemPayload);
+      }
 
       await fetchEstoque();
-      handleSaveSuccess();
+      
+      setIsNovoItemModalOpen(false);
+      setIsSuccessModalOpen(true);
+      
+      setTimeout(() => {
+        setIsSuccessModalOpen(false);
+      }, 3000);
+      
     } catch (error) {
       console.error("Erro ao salvar item:", error);
+      alert("Erro ao salvar item. Tente novamente.");
     }
-  };
+  }, [editingItem, fetchEstoque, parseCurrency]);
 
-  const handleSaveMovement = async (itemIds, movementData) => {
-    const updates = itemIds.map(async (itemId) => {
-      const itemToUpdate = estoque.find((item) => item.id === itemId);
-      if (!itemToUpdate) return;
+  const handleViewDetails = useCallback((estoqueId) => {
+    console.log("🔍 Navegando para estoque ID:", estoqueId);
+    if (!estoqueId) {
+      console.error("❌ Erro: ID do estoque é undefined!");
+      return;
+    }
+    navigate(`/estoque/${estoqueId}`);
+  }, [navigate]);
 
-      const newQuantity =
-        movementData.tipo === "Entrada"
-          ? itemToUpdate.quantidade + movementData.quantidade
-          : itemToUpdate.quantidade - movementData.quantidade;
-
-      const newMovement = {
-        id: `mov-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        ...movementData,
-      };
-
-      const updatedItem = {
-        ...itemToUpdate,
-        quantidade: Math.max(0, newQuantity),
-        detalhes: {
-          ...(itemToUpdate.detalhes || {}),
-          movimentos: [...(itemToUpdate.detalhes?.movimentos || []), newMovement],
-        },
-      };
-
-      try {
-        await fetch(`${API_URL}/${itemId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedItem),
-        });
-      } catch (error) {
-        console.error(`Erro ao atualizar item ${itemId}:`, error);
-        throw error;
-      }
-    });
-
+  const handleSaveMovement = useCallback(async (itemIds, movementData) => {
     try {
+      const updates = itemIds.map(async (estoqueId) => {
+        const itemToUpdate = estoque.find((item) => item.id === estoqueId);
+        if (!itemToUpdate) return;
+
+        const newQuantity =
+          movementData.tipo === "Entrada"
+            ? itemToUpdate.quantidadeDisponivel + movementData.quantidade
+            : itemToUpdate.quantidadeDisponivel - movementData.quantidade;
+
+        const updatedItem = {
+          ...itemToUpdate,
+          quantidadeDisponivel: Math.max(0, newQuantity),
+          quantidadeTotal: Math.max(0, newQuantity),
+        };
+
+        return Api.put(`/estoques/${estoqueId}`, updatedItem);
+      });
+
       await Promise.all(updates);
       await fetchEstoque();
+      
       setIsEntradaSaidaModalOpen(false);
       setSelectedItems([]);
+      
     } catch (error) {
-      console.error("Falha ao salvar um ou mais movimentos:", error);
+      console.error("Falha ao salvar movimentos:", error);
+      alert("Erro ao registrar movimento. Tente novamente.");
     }
-  };
+  }, [estoque, fetchEstoque]);
 
-  const handleDeleteItem = async (id) => {
-    if (window.confirm("Tem certeza que deseja deletar este item?")) {
-      try {
-        await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        setEstoque((prev) => prev.filter((item) => item.id !== id));
-      } catch (error) {
-        console.error("Erro ao deletar item:", error);
-      }
+  const handleDeleteItem = useCallback(async (estoqueId) => {
+    if (!window.confirm("Tem certeza que deseja deletar este item?")) {
+      return;
     }
-  };
+    
+    try {
+      await Api.delete(`/estoques/${estoqueId}`);
+      
+      setEstoque((prev) => prev.filter((item) => item.id !== estoqueId));
+      
+    } catch (error) {
+      console.error("Erro ao deletar item:", error);
+      alert("Erro ao deletar item. Tente novamente.");
+    }
+  }, []);
 
-  // Handlers de modal
-  const openNewItemModal = () => {
+  // ==================== HANDLERS DE MODAL ====================
+  
+  const openNewItemModal = useCallback(() => {
     setEditingItem(null);
     setIsNovoItemModalOpen(true);
-  };
+  }, []);
 
-  const openEditItemModal = (item) => {
+  const openEditItemModal = useCallback((item) => {
     setEditingItem(item);
     setIsNovoItemModalOpen(true);
-  };
+  }, []);
 
-  const openEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(true);
-  const closeEntradaSaidaModal = () => setIsEntradaSaidaModalOpen(false);
-  const openExportModal = () => setIsExportModalOpen(true);
-  const closeExportModal = () => setIsExportModalOpen(false);
+  const openEntradaSaidaModal = useCallback(() => {
+    setIsEntradaSaidaModalOpen(true);
+  }, []);
+  
+  const closeEntradaSaidaModal = useCallback(() => {
+    setIsEntradaSaidaModalOpen(false);
+  }, []);
+  
+  const openExportModal = useCallback(() => {
+    setIsExportModalOpen(true);
+  }, []);
+  
+  const closeExportModal = useCallback(() => {
+    setIsExportModalOpen(false);
+  }, []);
 
-  const handleSaveSuccess = () => {
-    setIsNovoItemModalOpen(false);
-    setIsSuccessModalOpen(true);
-    setTimeout(() => {
-      setIsSuccessModalOpen(false);
-    }, 3000);
-  };
+  const closeSuccessModal = useCallback(() => {
+    setIsSuccessModalOpen(false);
+  }, []);
 
-  const closeSuccessModal = () => setIsSuccessModalOpen(false);
-
-  // KPIs calculados
-  const kpiData = useMemo(() => {
-    const totalItens = estoque.reduce((acc, item) => acc + item.quantidade, 0);
-    const baixoEstoque = estoque.filter(
-      (item) => item.quantidade < item.estoqueMinimo && item.quantidade > 0
-    ).length;
-    const foraDeEstoque = estoque.filter((item) => item.quantidade === 0).length;
-    const produtoEmAlta = estoque.length > 0 ? estoque[0].nome : "N/A";
-
-    return [
-      {
-        title: "Total de unidades em estoque",
-        value: totalItens,
-        caption: "+00% este mês",
-        captionColor: "green",
-      },
-      {
-        title: "Itens com baixo estoque",
-        value: baixoEstoque,
-        caption: `${baixoEstoque} atualmente`,
-      },
-      {
-        title: "Produto em alta",
-        value: produtoEmAlta,
-        caption: "Baseado em vendas",
-      },
-      {
-        title: "Itens fora de estoque",
-        value: foraDeEstoque,
-        caption: `${foraDeEstoque} atualmente`,
-      },
-    ];
-  }, [estoque]);
-
-  // Estoque paginado
-  const paginatedEstoque = useMemo(() => {
-    const totalPaginas = Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA);
-    const paginaAtual = Math.min(pagina, totalPaginas) || 1;
-    const startIndex = (paginaAtual - 1) * ITENS_POR_PAGINA;
-    const endIndex = startIndex + ITENS_POR_PAGINA;
-    return filteredEstoque.slice(startIndex, endIndex);
-  }, [filteredEstoque, pagina]);
-
-  // Handlers de seleção
-  const handleCheckboxChange = (id) => {
+  // ==================== HANDLERS DE SELEÇÃO ====================
+  
+  const handleCheckboxChange = useCallback((id) => {
     setSelectedItems((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  const handleSelectAllChange = (e) => {
+  const handleSelectAllChange = useCallback((e) => {
     if (e.target.checked) {
-      setSelectedItems(paginatedEstoque.map((item) => item.id));
+      setSelectedItems(paginationData.items.map((item) => item.id));
     } else {
       setSelectedItems([]);
     }
-  };
+  }, [paginationData.items]);
 
-  // Handlers de filtros
-  const handleDateFilterChange = (newDate) => {
-    console.log("Data recebida do calendário:", newDate);
+  // ==================== HANDLERS DE FILTROS ====================
+  
+  const handleDateFilterChange = useCallback((newDate) => {
     if (newDate) {
       setSelectedFilterDate(newDate);
       setIsCalendarOpen(false);
     }
-  };
+  }, []);
 
-  const handleFilterChange = (newFilters) => {
+  const handleFilterChange = useCallback((newFilters) => {
     setActiveFilters(newFilters);
-  };
+  }, []);
 
-  const handleCollapseItem = () => {
+  const handleCollapseItem = useCallback(() => {
     setExpandedItemId(null);
-  };
+  }, []);
 
-  // Cálculos auxiliares
-  const hasActiveFilters = Object.values(activeFilters).some(
-    (arr) => arr && arr.length > 0
+  // ==================== CÁLCULOS AUXILIARES ====================
+  
+  const hasActiveFilters = useMemo(
+    () => Object.values(activeFilters).some((arr) => arr && arr.length > 0),
+    [activeFilters]
   );
 
-  const totalPaginas = Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA);
-  const startIndex = (pagina - 1) * ITENS_POR_PAGINA;
-  const endIndex = Math.min(startIndex + ITENS_POR_PAGINA, filteredEstoque.length);
+  const isAllSelectedOnPage = useMemo(() => {
+    return (
+      paginationData.items.length > 0 &&
+      selectedItems.length >= paginationData.items.length &&
+      paginationData.items.every((item) => selectedItems.includes(item.id))
+    );
+  }, [paginationData.items, selectedItems]);
 
-  const isAllSelectedOnPage =
-    paginatedEstoque.length > 0 &&
-    selectedItems.length >= paginatedEstoque.length &&
-    paginatedEstoque.every((item) => selectedItems.includes(item.id));
+  // ==================== PREPARAÇÃO DE ITENS PARA RENDERIZAÇÃO ====================
+  
+  const renderedItems = useMemo(() => {
+    return paginationData.items.map((item) => {
+      const quantidade = item.quantidadeDisponivel;
+      const estoqueMinimo = item.produto.estoqueMinimo;
+      
+      const situacao =
+        quantidade === 0
+          ? "Fora de estoque"
+          : quantidade < estoqueMinimo
+          ? "Abaixo do normal"
+          : "Disponível";
+    
+      return {
+        ...item,
+        situacao,
+        produto: {
+          ...item.produto,
+          preco: formatCurrency(item.produto.preco),
+        }
+      };
+    });
+  }, [paginationData.items, formatCurrency]);
+
+  // ==================== RENDER ====================
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
@@ -395,7 +449,8 @@ export default function Estoque() {
         <main className="flex-1 item-center p-4 md:p-8">
           {/* Cabeçalho */}
           <div className="text-center mb-8 px-2 w-full max-w-[1600px]">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2 flex items-center justify-center gap-2">
+              <Package className="w-8 h-8 text-[#007EA7]" />
               Controle de Estoque
             </h1>
             <p className="text-gray-500 text-sm sm:text-base">
@@ -504,6 +559,13 @@ export default function Estoque() {
                 </div>
               </div>
 
+              {/* Mensagem de erro */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                  {error}
+                </div>
+              )}
+
               {/* Tabela */}
               <div className="overflow-x-auto">
                 {/* Cabeçalho da tabela */}
@@ -527,77 +589,70 @@ export default function Estoque() {
                 {/* Linhas da tabela */}
                 <div>
                   {loading ? (
-                    <p className="text-center p-4">Carregando...</p>
-                  ) : paginatedEstoque.length === 0 ? (
-                    <p className="text-center p-4 text-gray-500">
-                      Nenhum item encontrado.
-                    </p>
+                    <div className="text-center p-8">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#007EA7]"></div>
+                      <p className="mt-2 text-gray-600">Carregando...</p>
+                    </div>
+                  ) : renderedItems.length === 0 ? (
+                    <div className="text-center p-8 text-gray-500">
+                      <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+                      <p>Nenhum item encontrado.</p>
+                      {busca && (
+                        <button
+                          onClick={() => setBusca("")}
+                          className="mt-2 text-[#007EA7] hover:underline"
+                        >
+                          Limpar busca
+                        </button>
+                      )}
+                    </div>
                   ) : (
-                    paginatedEstoque.map((item) => {
-                      const situacao =
-                        item.quantidade === 0
-                          ? "Fora de estoque"
-                          : item.quantidade < item.estoqueMinimo
-                          ? "Abaixo do normal"
-                          : "Disponível";
-
-                      const itemFormatado = {
-                        ...item,
-                        situacao,
-                        preco: formatCurrency(item.preco),
-                        detalhes: item.detalhes
-                          ? {
-                              ...item.detalhes,
-                              valorCompra: formatCurrency(item.detalhes.valorCompra),
-                              valorVenda: formatCurrency(item.detalhes.valorVenda),
-                            }
-                          : null,
-                      };
-
-                      return (
-                        <EstoqueItemRow
-                          key={item.id}
-                          item={itemFormatado}
-                          isSelected={selectedItems.includes(item.id)}
-                          onToggle={() => handleCheckboxChange(item.id)}
-                          onEdit={() => openEditItemModal(item)}
-                          onDelete={() => handleDeleteItem(item.id)}
-                          isInitiallyExpanded={item.id === expandedItemId}
-                          onCollapse={handleCollapseItem}
-                        />
-                      );
-                    })
+                    renderedItems.map((item) => (
+                      <EstoqueItemRow
+                        key={item.id}
+                        item={item}
+                        isSelected={selectedItems.includes(item.id)}
+                        onToggle={() => handleCheckboxChange(item.id)}
+                        onEdit={() => openEditItemModal(item)}
+                        onDelete={() => handleDeleteItem(item.id)}
+                        onViewDetails={() => handleViewDetails(item.id)}
+                        isInitiallyExpanded={item.id === expandedItemId}
+                        onCollapse={handleCollapseItem}
+                      />
+                    ))
                   )}
                 </div>
               </div>
 
               {/* Paginação */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
-                <p className="text-sm text-gray-600">
-                  Mostrando{" "}
-                  <span className="font-medium">
-                    {filteredEstoque.length > 0 ? startIndex + 1 : 0}-{endIndex}
-                  </span>{" "}
-                  de <span className="font-medium">{filteredEstoque.length}</span>{" "}
-                  resultados
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPagina((p) => Math.max(p - 1, 1))}
-                    disabled={pagina === 1}
-                    className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-[#bebebe] transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    Anterior
-                  </button>
-                  <button
-                    onClick={() => setPagina((p) => Math.min(p + 1, totalPaginas))}
-                    disabled={pagina === totalPaginas || totalPaginas === 0}
-                    className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-[#bebebe] transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    Próximo
-                  </button>
+              {!loading && paginationData.total > 0 && (
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
+                  <p className="text-sm text-gray-600">
+                    Mostrando{" "}
+                    <span className="font-medium">
+                      {paginationData.total > 0 ? paginationData.startIndex + 1 : 0}-{paginationData.endIndex}
+                    </span>{" "}
+                    de <span className="font-medium">{paginationData.total}</span>{" "}
+                    resultados
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPagina((p) => Math.max(p - 1, 1))}
+                      disabled={pagina === 1}
+                      className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      onClick={() => setPagina((p) => Math.min(p + 1, paginationData.totalPaginas))}
+                      disabled={pagina === paginationData.totalPaginas || paginationData.totalPaginas === 0}
+                      className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Próximo
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </main>
