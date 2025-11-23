@@ -43,7 +43,7 @@ export default function ProductDetailPage() {
         const historicoResponse = await Api.get(`/historicos-estoques/${id}`);
         if (historicoResponse.status === 200) {
           const historicoData = historicoResponse.data;
-          // Ordenar por data mais recente primeiro
+          
           const historicoOrdenado = historicoData.sort((a, b) => 
             new Date(b.dataHora) - new Date(a.dataHora)
           );
@@ -94,7 +94,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -108,7 +107,6 @@ export default function ProductDetailPage() {
         [field]: value
       };
     } else {
-      // Se não é campo do produto, não atualizamos via API /produtos
       const updatedEstoque = { ...estoque, [field]: value };
       setEstoque(updatedEstoque);
       return;
@@ -127,7 +125,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao atualizar produto:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -154,7 +151,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao atualizar métrica:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -184,7 +180,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao atualizar atributo:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -214,7 +209,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao adicionar atributo:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -239,7 +233,6 @@ export default function ProductDetailPage() {
       });
     } catch (error) {
       console.error('Erro ao remover atributo:', error);
-      // Reverter mudança em caso de erro
       setEstoque(estoque);
     }
   };
@@ -604,6 +597,7 @@ export default function ProductDetailPage() {
                         <XAxis 
                           dataKey="date" 
                           stroke="#6b7280"
+                          reversed
                           style={{ fontSize: '12px' }}
                         />
                         <YAxis 

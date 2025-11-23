@@ -23,40 +23,34 @@ import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSai
 const ITENS_POR_PAGINA = 6;
 
 export default function Estoque() {
-  // Estados básicos
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [estoque, setEstoque] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [funcionarios, setFuncionarios] = useState([]);
   
-  // Estados dos modais
   const [isNovoItemModalOpen, setIsNovoItemModalOpen] = useState(false);
   const [isEntradaSaidaModalOpen, setIsEntradaSaidaModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   
-  // Estados de edição e seleção
   const [editingItem, setEditingItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   
-  // Estados de filtros e busca
   const [busca, setBusca] = useState("");
   const [selectedFilterDate, setSelectedFilterDate] = useState(null);
   const [activeFilters, setActiveFilters] = useState({});
-  
-  // Estados de UI
+ 
   const [pagina, setPagina] = useState(1);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState(null);
-  
-  // Location e navegação
+
   const location = useLocation();
   const navigate = useNavigate();
   const focusItemId = location.state?.focusItemId;
 
-  // ==================== FUNÇÕES UTILITÁRIAS ====================
   
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => !prev);
@@ -93,7 +87,7 @@ export default function Estoque() {
         unidademedida: item.produto.unidademedida || "unidade",
         preco: item.produto.preco ?? 0,
         ativo: item.produto.ativo ?? true,
-        // Campos de métrica
+       
         estoqueMinimo: item.produto.metrica?.nivelMinimo ?? 0,
         estoqueMaximo: item.produto.metrica?.nivelMaximo ?? 0,
         // Atributos do produto
@@ -104,8 +98,6 @@ export default function Estoque() {
       }
     }));
   }, []);
-
-  // ==================== FETCH DE DADOS ====================
   
   const fetchEstoque = useCallback(async () => {
     try {
@@ -244,40 +236,54 @@ export default function Estoque() {
 
   // ==================== HANDLERS DE CRUD ====================
   
-  const handleSaveItem = useCallback(async (itemData) => {
-    try {
-      const itemPayload = {
-        ...itemData,
-        preco: parseCurrency(itemData.preco),
-        quantidade: parseInt(itemData.quantidade, 10) || 0,
-        estoqueMinimo: parseInt(itemData.estoqueMinimo, 10) || 0,
-      };
+  // Substitua o handleSaveItem existente por este:
 
-      if (editingItem) {
-        await Api.put(`/estoques/${editingItem.id}`, itemPayload);
-      } else {
-        await Api.post("/estoques", itemPayload);
-      }
-
+const handleSaveItem = useCallback(async (itemData) => {
+  try {
+    // Se o itemData já é um objeto de resposta da API (tem estrutura de estoque)
+    // apenas recarrega a lista
+    if (itemData && itemData.id && itemData.produto) {
       await fetchEstoque();
-      
       setIsNovoItemModalOpen(false);
       setIsSuccessModalOpen(true);
       
       setTimeout(() => {
         setIsSuccessModalOpen(false);
       }, 3000);
-      
-    } catch (error) {
-      console.error("Erro ao salvar item:", error);
-      alert("Erro ao salvar item. Tente novamente.");
+      return;
     }
-  }, [editingItem, fetchEstoque, parseCurrency]);
+
+    // Caso contrário, trata como edição (legacy, se ainda necessário)
+    const itemPayload = {
+      ...itemData,
+      preco: parseCurrency(itemData.preco),
+      quantidade: parseInt(itemData.quantidade, 10) || 0,
+      estoqueMinimo: parseInt(itemData.estoqueMinimo, 10) || 0,
+    };
+
+    if (editingItem) {
+      await Api.put(`/estoques/${editingItem.id}`, itemPayload);
+    }
+
+    await fetchEstoque();
+    
+    setIsNovoItemModalOpen(false);
+    setIsSuccessModalOpen(true);
+    
+    setTimeout(() => {
+      setIsSuccessModalOpen(false);
+    }, 3000);
+    
+  } catch (error) {
+    console.error("Erro ao salvar item:", error);
+    alert("Erro ao salvar item. Tente novamente.");
+  }
+}, [editingItem, fetchEstoque, parseCurrency]);
 
   const handleViewDetails = useCallback((estoqueId) => {
     console.log("🔍 Navegando para estoque ID:", estoqueId);
     if (!estoqueId) {
-      console.error("❌ Erro: ID do estoque é undefined!");
+      console.error("Erro: ID do estoque é undefined!");
       return;
     }
     navigate(`/estoque/${estoqueId}`);
@@ -330,8 +336,6 @@ export default function Estoque() {
       alert("Erro ao deletar item. Tente novamente.");
     }
   }, []);
-
-  // ==================== HANDLERS DE MODAL ====================
   
   const openNewItemModal = useCallback(() => {
     setEditingItem(null);
@@ -362,8 +366,6 @@ export default function Estoque() {
   const closeSuccessModal = useCallback(() => {
     setIsSuccessModalOpen(false);
   }, []);
-
-  // ==================== HANDLERS DE SELEÇÃO ====================
   
   const handleCheckboxChange = useCallback((id) => {
     setSelectedItems((prev) =>
@@ -378,8 +380,6 @@ export default function Estoque() {
       setSelectedItems([]);
     }
   }, [paginationData.items]);
-
-  // ==================== HANDLERS DE FILTROS ====================
   
   const handleDateFilterChange = useCallback((newDate) => {
     if (newDate) {
@@ -395,8 +395,6 @@ export default function Estoque() {
   const handleCollapseItem = useCallback(() => {
     setExpandedItemId(null);
   }, []);
-
-  // ==================== CÁLCULOS AUXILIARES ====================
   
   const hasActiveFilters = useMemo(
     () => Object.values(activeFilters).some((arr) => arr && arr.length > 0),
@@ -410,8 +408,6 @@ export default function Estoque() {
       paginationData.items.every((item) => selectedItems.includes(item.id))
     );
   }, [paginationData.items, selectedItems]);
-
-  // ==================== PREPARAÇÃO DE ITENS PARA RENDERIZAÇÃO ====================
   
   const renderedItems = useMemo(() => {
     return paginationData.items.map((item) => {
@@ -435,9 +431,7 @@ export default function Estoque() {
       };
     });
   }, [paginationData.items, formatCurrency]);
-
-  // ==================== RENDER ====================
-
+  
   return (
     <div className="flex bg-gray-50 min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
