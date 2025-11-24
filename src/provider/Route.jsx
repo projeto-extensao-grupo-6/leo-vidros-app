@@ -10,6 +10,9 @@ import ProdutoDetalhe from '../pages/estoque/ProdutoDetalhe.jsx';
 import Pedidos from '../pages/pedidos/pedidos.jsx';
 import Solicitacoes from '../pages/solicitacoes/Solicitacoes.jsx';
 import CalendarDashboard from '../pages/calendar-dashboard.jsx/index.jsx';
+import Perfil from '../pages/perfil/perfil.jsx';
+import MapContainer from '../pages/geoLocalizacao/MapContainer.jsx';
+import NovaSenha from '../pages/novaSenha/novaSenha.jsx';
 
 export const routes = createBrowserRouter([
   { path: '/', element: <Login /> }, 
@@ -23,4 +26,7 @@ export const routes = createBrowserRouter([
   { path: '/acesso', element: <ProtectedRoute><Solicitacoes /></ProtectedRoute> },
   { path: '/agendamentos', element: <ProtectedRoute><CalendarDashboard /></ProtectedRoute> },
   { path: '/estoque/:id', element: <ProtectedRoute><ProdutoDetalhe /></ProtectedRoute> }, 
+  { path: '/primeiroAcesso/:idUsuario', element: <ProtectedRoute><NovaSenha/></ProtectedRoute>},
+  { path: '/perfil', element: <ProtectedRoute><Perfil /></ProtectedRoute> },
+  { path: '/geoLocalizacao', element: <ProtectedRoute><MapContainer /></ProtectedRoute> },
 ]);

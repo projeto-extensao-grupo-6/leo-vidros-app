@@ -303,21 +303,15 @@ const handleSaveItem = useCallback(async (itemData) => {
         status: false
       });
   
-      setEstoque((prev) =>
-        prev.map((item) =>
-          item.id === selectedEstoqueId ? { ...item, status: false } : item
-        )
-      );
+      await fetchEstoque();
   
       setModalOpen(false);
-  
-      navigate(0);
   
     } catch (error) {
       console.error("Erro ao inativar item:", error);
       alert("Erro ao inativar item. Tente novamente.");
     }
-  }, [selectedEstoqueId, navigate]);
+  }, [selectedEstoqueId, fetchEstoque]);
   
 
   const handleDeleteItem = useCallback((estoqueId) => {

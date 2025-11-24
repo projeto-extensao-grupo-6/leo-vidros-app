@@ -27,8 +27,7 @@ export default function NovaSenha() {
     const [userName, setUserName] = useState("Carregando...");
     
     useEffect(() => {
-        // Usar a mesma chave 'nome' do login
-        const loggedUserName = localStorage.getItem('nome'); 
+        const loggedUserName = sessionStorage.getItem('nome'); 
         
         if (loggedUserName) {
             setUserName(loggedUserName);

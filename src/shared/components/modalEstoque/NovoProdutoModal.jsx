@@ -269,7 +269,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                   onChange={handleChange}
                 />
               </div>
-
+              <br />
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">
@@ -307,7 +307,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                   />
                 </div>
               </div>
-
+              <br />
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">
                   Descrição do produto
