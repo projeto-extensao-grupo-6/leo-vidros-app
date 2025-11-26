@@ -75,7 +75,7 @@ export default function Perfil() {
     });
 
     useEffect(() => {
-        const userId = localStorage.getItem('userId');
+        const userId = sessionStorage.getItem('userId');
 
         if (!userId) {
             console.error("ID do usuário não encontrado no localStorage. Faça o login.");
@@ -151,7 +151,7 @@ export default function Perfil() {
     };
 
     const handleSave = () => {
-        const userId = localStorage.getItem('userId');
+        const userId = sessionStorage.getItem('userId');
 
         if (!userId) {
             setMessage({ type: 'error', text: 'Não é possível salvar: usuário não autenticado.' });
