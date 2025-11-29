@@ -387,7 +387,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                                         {index + 1}
                                     </div>
                                     <span
-                                        className={`text-xs mt-3 text-center ${index <= currentStep
+                                        className={`text-sm mt-3 text-center ${index <= currentStep
                                                 ? "text-gray-900 font-semibold"
                                                 : "text-gray-500"
                                             }`}

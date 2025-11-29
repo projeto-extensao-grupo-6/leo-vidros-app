@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { FaBox, FaBoxOpen, FaTrash, FaExternalLinkAlt, FaExclamationTriangle } from 'react-icons/fa';
 import { BiSolidPencil } from "react-icons/bi";
 import SkeletonLoader from '../../shared/components/skeleton/SkeletonLoader';
+import NovoPedidoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoModal';
+import EditarPedidoModal from '../../shared/components/pedidosServicosComponents/EditarPedidoModal';
 
 // import Api from "../../axios/Api";
 
@@ -11,73 +13,119 @@ import SkeletonLoader from '../../shared/components/skeleton/SkeletonLoader';
 const MOCK_PEDIDOS = [
     {
         id: "1",
+        clienteNome: "João Silva",
         produtosDesc: "Vidros temperados",
         descricao: "Vidro temperado 8mm para janela — 1,20m x 1,00m",
         dataCompra: "2025-11-20",
+        data: "2025-11-20",
         formaPagamento: "Pix",
         itensCount: 2,
         valorTotal: 480.00,
-        status: "Ativo"
+        status: "Ativo",
+        produtos: [
+            { nome: "Vidro Temperado 8mm", quantidade: 1, preco: 400.00 },
+            { nome: "Kit de Fixação", quantidade: 1, preco: 80.00 }
+        ],
+        observacoes: "Entrega urgente"
     },
     {
         id: "2",
+        clienteNome: "Maria Santos",
         produtosDesc: "Ferragens para vidro",
         descricao: "Kit de roldanas para porta de correr + puxadores",
         dataCompra: "2025-11-18",
+        data: "2025-11-18",
         formaPagamento: "Cartão de crédito",
         itensCount: 6,
         valorTotal: 265.90,
-        status: "Finalizado"
+        status: "Finalizado",
+        produtos: [
+            { nome: "Roldanas", quantidade: 4, preco: 45.00 },
+            { nome: "Puxadores", quantidade: 2, preco: 42.95 }
+        ],
+        observacoes: ""
     },
     {
         id: "3",
+        clienteNome: "Cliente não informado",
         produtosDesc: "Espelhos",
         descricao: "Espelho 4mm lapidado — 1,50m x 0,60m",
         dataCompra: "2025-11-25",
+        data: "2025-11-25",
         formaPagamento: "Dinheiro",
         itensCount: 1,
         valorTotal: 350.00,
-        status: "Ativo"
+        status: "Ativo",
+        produtos: [
+            { nome: "Espelho 4mm Lapidado", quantidade: 1, preco: 350.00 }
+        ],
+        observacoes: "Cliente preferiu não se identificar"
     },
     {
         id: "4",
+        clienteNome: "Ana Costa",
         produtosDesc: "Box para banheiro",
         descricao: "Box de vidro temperado 8mm — modelo de correr, cor incolor",
         dataCompra: "2025-11-15",
+        data: "2025-11-15",
         formaPagamento: "Boleto",
         itensCount: 1,
         valorTotal: 780.00,
-        status: "Ativo"
+        status: "Ativo",
+        produtos: [
+            { nome: "Box Vidro Temperado 8mm", quantidade: 1, preco: 780.00 }
+        ],
+        observacoes: "Instalação agendada para próxima semana"
     },
     {
         id: "5",
+        clienteNome: "Pedro Almeida",
         produtosDesc: "Vidros laminados",
         descricao: "Vidro laminado 3+3mm — 2 chapas 2,00m x 1,00m",
         dataCompra: "2025-11-22",
+        data: "2025-11-22",
         formaPagamento: "Pix",
         itensCount: 2,
         valorTotal: 560.75,
-        status: "Ativo"
+        status: "Ativo",
+        produtos: [
+            { nome: "Vidro Laminado 3+3mm", quantidade: 2, preco: 280.375 }
+        ],
+        observacoes: "Medidas exatas - sem margem de erro"
     },
     {
         id: "6",
+        clienteNome: "Carlos Oliveira",
         produtosDesc: "Acessórios",
         descricao: "Fechos, dobradiças e suportes para prateleiras de vidro",
         dataCompra: "2025-11-12",
+        data: "2025-11-12",
         formaPagamento: "Cartão de crédito",
         itensCount: 10,
         valorTotal: 312.00,
-        status: "Finalizado"
+        status: "Finalizado",
+        produtos: [
+            { nome: "Fechos", quantidade: 4, preco: 25.00 },
+            { nome: "Dobradiças", quantidade: 4, preco: 35.00 },
+            { nome: "Suportes", quantidade: 2, preco: 56.00 }
+        ],
+        observacoes: ""
     },
     {
         id: "7",
+        clienteNome: "Cliente não informado",
         produtosDesc: "Prateleiras de vidro",
         descricao: "Prateleiras em vidro 10mm — kit com 3 unidades",
         dataCompra: "2025-11-26",
+        data: "2025-11-26",
         formaPagamento: "Pix",
         itensCount: 3,
         valorTotal: 450.00,
-        status: "Ativo"
+        status: "Ativo",
+        produtos: [
+            { nome: "Prateleira Vidro 10mm", quantidade: 3, preco: 150.00 }
+        ],
+        observacoes: "Retirada no local"
     },
 ];
 // ===== FIM DADOS MOCADOS =====
@@ -128,7 +176,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     const [pedidos, setPedidos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [modal, setModal] = useState({ confirm: false, view: false, form: false });
+    const [modal, setModal] = useState({ confirm: false, view: false, form: false, novo: false, editar: false });
     const [mode, setMode] = useState("new");
     const [current, setCurrent] = useState(null);
     const [targetId, setTargetId] = useState(null);
@@ -178,17 +226,14 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
 
     useEffect(() => {
         if (triggerNovoRegistro) {
-            setMode('new');
-            setForm(NOVO_FORM_PEDIDO());
-            setErrors({});
-            setModal((m) => ({ ...m, form: true }));
+            setModal((m) => ({ ...m, novo: true }));
             onNovoRegistroHandled();
         }
     }, [triggerNovoRegistro, onNovoRegistroHandled]);
 
     useEffect(() => {
         const onKey = (e) => {
-            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false });
+            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
@@ -243,7 +288,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         if (errors[name]) setErrors(e => ({ ...e, [name]: undefined }));
     };
 
-    const fecharTodos = () => setModal({ confirm: false, view: false, form: false });
+    const fecharTodos = () => setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
 
     const abrirExibir = (item) => {
         setCurrent(item);
@@ -251,19 +296,8 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     };
 
     const abrirEditar = (item) => {
-        setMode("edit");
         setCurrent(item);
-        setForm({
-            produtosDesc: item.produtosDesc || "",
-            descricao: item.descricao || "",
-            dataCompra: item.dataCompra,
-            formaPagamento: item.formaPagamento,
-            itensCount: item.itensCount || 1,
-            valorTotal: item.valorTotal || 0,
-            status: item.status || "Ativo",
-        });
-        setErrors({});
-        setModal((m) => ({ ...m, form: true }));
+        setModal((m) => ({ ...m, editar: true }));
     };
 
     const abrirConfirmarExclusao = (id) => {
@@ -347,6 +381,40 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         // }
     };
 
+    const handleNovoPedidoSuccess = (novoPedido) => {
+        // ===== VERSÃO MOCADA =====
+        const newId = String(Math.max(...pedidos.map(p => parseInt(p.id) || 0)) + 1);
+        const pedidoCompleto = {
+            id: newId,
+            clienteNome: novoPedido.clienteNome,
+            produtosDesc: novoPedido.produtos?.map(p => p.nome).join(", ") || "Produtos",
+            descricao: novoPedido.descricao || "",
+            dataCompra: novoPedido.data,
+            formaPagamento: novoPedido.formaPagamento,
+            itensCount: novoPedido.itensCount || 0,
+            valorTotal: novoPedido.valorTotal || 0,
+            produtos: novoPedido.produtos || [],
+            observacoes: novoPedido.observacoes || "",
+            status: "Ativo"
+        };
+        setPedidos([pedidoCompleto, ...pedidos]);
+        setPage(1);
+
+        // ===== VERSÃO COM API (COMENTADA) =====
+        // fetchData(); // Recarregar dados da API
+    };
+
+    const handleEditarPedidoSuccess = (pedidoAtualizado) => {
+        // ===== VERSÃO MOCADA =====
+        const updatedPedidos = pedidos.map(p =>
+            p.id === pedidoAtualizado.id ? pedidoAtualizado : p
+        );
+        setPedidos(updatedPedidos);
+
+        // ===== VERSÃO COM API (COMENTADA) =====
+        // fetchData(); // Recarregar dados da API
+    };
+
     return (
          <>
             <div className="flex flex-col gap-4 w-full py-4">
@@ -375,13 +443,10 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                             <div className="flex items-center gap-2 self-end md:self-auto">
                                 <StatusBadge status={item.status} />
                                 <div className="h-4 w-px bg-slate-300 mx-1"></div>
-                                <button type="button" className="p-1.5 rounded-full text-[#64748b] transition-colors hover:bg-[#f1f5f9] cursor-pointer hover:text-[#0f172a]" title="Exibir Detalhes" onClick={() => abrirExibir(item)}>
-                                    <FaExternalLinkAlt />
-                                </button>
-                                <button type="button" className="p-1 rounded-full text-[#64748b] transition-colors hover:bg-[#f1f5f9] cursor-pointer hover:text-[#0f172a]" title="Editar" onClick={() => abrirEditar(item)}>
+                                <button type="button" className="p-2 rounded-full text-[#64748b] transition-colors hover:bg-[#f1f5f9] cursor-pointer hover:text-[#0f172a]" title="Editar" onClick={() => abrirEditar(item)}>
                                     <BiSolidPencil />
                                 </button>
-                                <button type="button" className="p-1.5 rounded-full text-rose-700 transition-colors hover:bg-rose-50 cursor-pointer hover:text-rose-500" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
+                                <button type="button" className="p-2 rounded-full text-rose-700 transition-colors hover:bg-rose-50 cursor-pointer hover:text-rose-500" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
                                     <FaTrash />
                                 </button>
                             </div>
@@ -465,185 +530,18 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                 </div>
             )}
 
-            {/* MODAL VIEW */}
-            {modal.view && current && (
-                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
-                    <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
-                        <div className="flex justify-between items-start mb-6 border-b pb-4">
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <FaBoxOpen className="text-[#007EA7]" /> Detalhes do Pedido
-                                </h2>
-                                <p className="text-sm text-slate-500">ID: #{formatPedidoId(current.id)}</p>
-                            </div>
-                            <StatusBadge status={current.status} />
-                        </div>
+            <NovoPedidoModal 
+                isOpen={modal.novo}
+                onClose={fecharTodos}
+                onSuccess={handleNovoPedidoSuccess}
+            />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Produtos</label>
-                                    <p className="font-medium text-slate-800">{current.produtosDesc}</p>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Data da Compra</label>
-                                    <p className="font-medium text-slate-800">{formatDate(current.dataCompra)}</p>
-                                </div>
-                                <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Forma de Pagamento</label>
-                                    <p className="font-medium text-slate-800 bg-slate-50 p-2 rounded border border-slate-100 mt-1">{current.formaPagamento}</p>
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Descrição</label>
-                                    <p className="text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100 mt-1 min-h-20 text-sm leading-relaxed">{current.descricao || 'Sem descrição'}</p>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-400 uppercase">Quantidade</label>
-                                        <p className="font-medium text-slate-800 text-2xl">{current.itensCount}</p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-bold text-slate-400 uppercase">Valor Total</label>
-                                        <p className="font-bold text-[#007EA7] text-2xl">{formatCurrency(current.valorTotal)}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-8 pt-4 border-t flex justify-end">
-                            <button onClick={fecharTodos} className="px-6 py-2 rounded-md bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 transition-colors">Fechar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* MODAL FORM (Novo/Editar) */}
-            {modal.form && (
-                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
-                    <form onSubmit={salvar} className="w-full max-w-3xl bg-white rounded-xl shadow-2xl p-0 overflow-hidden flex flex-col max-h-[90vh] animate-scaleIn">
-
-                        {/* Header Modal */}
-                        <div className="px-6 py-4 bg-slate-50 border-b flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-white border shadow-sm grid place-items-center text-[#007EA7]">
-                                    {mode === "new" ? <FaBoxOpen /> : <FaEdit />}
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-800">{mode === "new" ? "Novo Pedido" : `Editar Pedido #${formatPedidoId(current?.id)}`}</h2>
-                                    <p className="text-xs text-slate-500">Preencha os dados abaixo</p>
-                                </div>
-                            </div>
-
-                            <label className="flex items-center gap-2 cursor-pointer group">
-                                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-800">Status Ativo</span>
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={form.status === "Ativo"}
-                                        onChange={(e) => setField("status", e.target.checked ? "Ativo" : "Finalizado")}
-                                    />
-                                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-[#007EA7] transition-colors"></div>
-                                    <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></div>
-                                </div>
-                            </label>
-                        </div>
-
-                        {/* Body Scrollable */}
-                        <div className="p-6 overflow-y-auto space-y-5">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Produtos <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="text"
-                                        value={form.produtosDesc}
-                                        onChange={(e) => setField("produtosDesc", e.target.value)}
-                                        placeholder="Ex: Peças automotivas"
-                                        className={`w-full h-10 rounded-md border px-3 text-sm outline-none focus:ring-2 transition-all ${errors.produtosDesc ? "border-rose-300 focus:ring-rose-100" : "border-slate-300 focus:border-[#007EA7] focus:ring-[#007EA7]/20"}`}
-                                    />
-                                    {errors.produtosDesc && <p className="text-rose-500 text-xs mt-1">{errors.produtosDesc}</p>}
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">Data da Compra <span className="text-red-500">*</span></label>
-                                    <input
-                                        type="date"
-                                        value={form.dataCompra}
-                                        onChange={(e) => setField("dataCompra", e.target.value)}
-                                        className={`w-full h-10 rounded-md border px-3 text-sm outline-none focus:ring-2 transition-all ${errors.dataCompra ? "border-rose-300 focus:ring-rose-100" : "border-slate-300 focus:border-[#007EA7] focus:ring-[#007EA7]/20"}`}
-                                    />
-                                    {errors.dataCompra && <p className="text-rose-500 text-xs mt-1">{errors.dataCompra}</p>}
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Descrição Detalhada</label>
-                                <textarea
-                                    value={form.descricao}
-                                    onChange={(e) => setField("descricao", e.target.value)}
-                                    placeholder="Descreva os itens do pedido..."
-                                    rows={3}
-                                    className="w-full rounded-md border border-slate-300 p-3 text-sm outline-none focus:ring-2 focus:border-[#007EA7] focus:ring-[#007EA7]/20 transition-all resize-none"
-                                />
-                            </div>
-
-                            <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                                <h3 className="text-sm font-bold text-slate-700 mb-3">Informações Financeiras</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Forma de Pagamento <span className="text-red-500">*</span></label>
-                                        <select
-                                            value={form.formaPagamento}
-                                            onChange={(e) => setField("formaPagamento", e.target.value)}
-                                            className={`w-full h-9 rounded border px-3 text-sm focus:border-[#007EA7] focus:outline-none ${errors.formaPagamento ? "border-rose-300" : "border-slate-300"}`}
-                                        >
-                                            <option value="">Selecione...</option>
-                                            <option value="Pix">Pix</option>
-                                            <option value="Cartão de crédito">Cartão de crédito</option>
-                                            <option value="Dinheiro">Dinheiro</option>
-                                            <option value="Boleto">Boleto</option>
-                                        </select>
-                                        {errors.formaPagamento && <p className="text-rose-500 text-xs mt-1">{errors.formaPagamento}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Quantidade de Itens</label>
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            value={form.itensCount}
-                                            onChange={(e) => setField("itensCount", Number(e.target.value))}
-                                            className="w-full h-9 rounded border border-slate-300 px-3 text-sm focus:border-[#007EA7] focus:outline-none"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Valor Total (R$)</label>
-                                        <input
-                                            type="number"
-                                            step="0.01"
-                                            min={0}
-                                            value={form.valorTotal}
-                                            onChange={(e) => setField("valorTotal", Number(e.target.value))}
-                                            className="w-full h-9 rounded border border-slate-300 px-3 text-sm focus:border-[#007EA7] focus:outline-none"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Footer Modal */}
-                        <div className="px-6 py-4 border-t bg-slate-50 flex justify-end gap-3">
-                            <button type="button" onClick={fecharTodos} className="px-5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 font-semibold hover:bg-slate-100 transition-colors">
-                                Cancelar
-                            </button>
-                            <button type="submit" className="px-5 py-2 rounded-md text-white font-semibold shadow-sm hover:opacity-90 transition-opacity" style={{ backgroundColor: "#007EA7" }}>
-                                {mode === "new" ? "Salvar Pedido" : "Salvar Alterações"}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            <EditarPedidoModal 
+                isOpen={modal.editar}
+                onClose={fecharTodos}
+                pedido={current}
+                onSuccess={handleEditarPedidoSuccess}
+            />
         </>
     );
 }
