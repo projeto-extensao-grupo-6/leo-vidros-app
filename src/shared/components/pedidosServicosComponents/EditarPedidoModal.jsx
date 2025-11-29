@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, X, Edit, Save, Plus, Trash2 } from "lucide-react";
 import Api from "../../../axios/Api";
+import { onlyLetters } from "../../../utils/masks";
 
 const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
     const [modoEdicao, setModoEdicao] = useState(false);
@@ -30,9 +31,16 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let maskedValue = value;
+
+        // Aplicar máscara de apenas letras para nome do cliente
+        if (name === "clienteNome") {
+            maskedValue = onlyLetters(value);
+        }
+
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: maskedValue,
         }));
     };
 
@@ -84,6 +92,7 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
 
             const pedidoAtualizado = {
                 ...pedido,
+                clienteNome: formData.clienteNome,
                 formaPagamento: formData.formaPagamento,
                 observacoes: formData.observacoes,
                 produtos: formData.produtos,
@@ -155,9 +164,13 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                             </label>
                             <input
                                 type="text"
-                                className="w-lg px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+                                name="clienteNome"
+                                className={`w-lg px-4 py-2 border border-gray-300 rounded-md ${
+                                    modoEdicao ? "bg-white" : "bg-gray-100"
+                                }`}
                                 value={formData.clienteNome}
-                                readOnly
+                                onChange={handleChange}
+                                readOnly={!modoEdicao}
                             />
                         </div>
                         <div className="flex flex-col gap-1 items-start rounded-md">
@@ -297,10 +310,14 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                         >
                             <option value="">Selecione...</option>
                             <option value="Dinheiro">Dinheiro</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão de crédito">Cartão de crédito</option>
+                            <option value="Cartão de débito">Cartão de débito</option>
                             <option value="Cartão de Crédito">Cartão de Crédito</option>
                             <option value="Cartão de Débito">Cartão de Débito</option>
                             <option value="PIX">PIX</option>
                             <option value="Boleto">Boleto</option>
+                            <option value="Transferência">Transferência bancária</option>
                         </select>
                     </div>
 

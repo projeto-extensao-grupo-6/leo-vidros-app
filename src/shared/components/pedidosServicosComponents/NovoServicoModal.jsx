@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Wrench, ChevronDown, Plus, X, AlertCircle, MapPin, User, FileText } from "lucide-react";
 import Api from "../../../axios/Api";
+import { cpfMask, phoneMask, cepMask, onlyLetters, removeMask } from "../../../utils/masks";
 
 const useServicoAPI = () => {
     const cadastrarCliente = async (clienteData) => {
@@ -137,9 +138,22 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let maskedValue = value;
+
+        // Aplicar máscaras específicas
+        if (name === "clienteCpf") {
+            maskedValue = cpfMask(value);
+        } else if (name === "clienteTelefone") {
+            maskedValue = phoneMask(value);
+        } else if (name === "cep") {
+            maskedValue = cepMask(value);
+        } else if (name === "clienteNome") {
+            maskedValue = onlyLetters(value);
+        }
+
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: maskedValue,
         }));
         setError(null);
     };
@@ -203,7 +217,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
     };
 
     const handleBuscarCep = async () => {
-        const cepLimpo = formData.cep.replace(/\D/g, "");
+        const cepLimpo = removeMask(formData.cep);
         if (cepLimpo.length !== 8) {
             setError("CEP inválido");
             return;
@@ -519,6 +533,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 name="clienteCpf"
                                                 placeholder="000.000.000-00"
+                                                maxLength={14}
                                                 className="w-full border border-gray-300 rounded-md px-4 py-3 text-left"
                                                 value={formData.clienteCpf}
                                                 onChange={handleChange}
@@ -533,6 +548,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 name="clienteTelefone"
                                                 placeholder="(00) 00000-0000"
+                                                maxLength={15}
                                                 className="w-full border border-gray-300 rounded-md px-4 py-3 text-left"
                                                 value={formData.clienteTelefone}
                                                 onChange={handleChange}

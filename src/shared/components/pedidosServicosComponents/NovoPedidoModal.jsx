@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ShoppingCart, ChevronDown, Plus, X, AlertCircle, User, Package, Trash2 } from "lucide-react";
 import Api from "../../../axios/Api";
+import { cpfMask, phoneMask, onlyLetters, removeMask } from "../../../utils/masks";
 
 const usePedidoAPI = () => {
     const cadastrarCliente = async (clienteData) => {
@@ -112,9 +113,20 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        let maskedValue = value;
+
+        // Aplicar máscaras específicas
+        if (name === "clienteCpf") {
+            maskedValue = cpfMask(value);
+        } else if (name === "clienteTelefone") {
+            maskedValue = phoneMask(value);
+        } else if (name === "clienteNome") {
+            maskedValue = onlyLetters(value);
+        }
+
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: maskedValue,
         }));
         setError(null);
     };
@@ -200,6 +212,13 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                     quantidade,
                     subtotal: quantidade * novosProdutos[index].preco
                 };
+            } else if (field === "preco") {
+                const preco = parseFloat(value) || 0;
+                novosProdutos[index] = {
+                    ...novosProdutos[index],
+                    preco,
+                    subtotal: preco * novosProdutos[index].quantidade
+                };
             } else {
                 novosProdutos[index] = {
                     ...novosProdutos[index],
@@ -233,12 +252,8 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                     setError("Telefone do cliente é obrigatório");
                     return false;
                 }
-            } else if (formData.tipoCliente === "nenhum") {
-                if (!formData.clienteNome.trim()) {
-                    setError("Digite um nome para identificação");
-                    return false;
-                }
             }
+            // Quando tipoCliente === "nenhum", não há validação necessária
         }
 
         if (currentStep === 1) {
@@ -531,7 +546,8 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 name="clienteCpf"
                                                 placeholder="000.000.000-00"
-                                                className="w-full border border-gray-300 rounded-md px-4 py-3"
+                                                maxLength={14}
+                                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-left"
                                                 value={formData.clienteCpf}
                                                 onChange={handleChange}
                                             />
@@ -545,7 +561,8 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                                                 type="text"
                                                 name="clienteTelefone"
                                                 placeholder="(00) 00000-0000"
-                                                className="w-full border border-gray-300 rounded-md px-4 py-3"
+                                                maxLength={15}
+                                                className="w-full border border-gray-300 rounded-md px-4 py-3 text-left"
                                                 value={formData.clienteTelefone}
                                                 onChange={handleChange}
                                             />
@@ -647,10 +664,15 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                                                     Preço Unitário
                                                 </label>
                                                 <input
-                                                    type="text"
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2 bg-gray-100"
-                                                    value={`R$ ${produto.subtotal.toFixed(2)}`}
-                                                    readOnly
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
+                                                    value={produto.preco}
+                                                    onChange={(e) =>
+                                                        handleProdutoChange(index, "preco", e.target.value)
+                                                    }
+                                                    placeholder="0.00"
                                                 />
                                             </div>
 
