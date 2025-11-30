@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   format,
   addDays,
@@ -19,7 +19,6 @@ import {
   ChevronRight,
   Plus,
   Clock,
-  X,
   MapPin,
   FileText,
   Users,
@@ -459,111 +458,139 @@ const MonthView = ({ currentMonth, events, onDateClick, onEventClick }) => {
 // ------------------------------------------------------------------
 // Week View (simplificado)
 // ------------------------------------------------------------------
-const WeekView = ({
-  currentDate,
-  timeSlots,
-  events,
-  onEventClick,
-  onDateClick,
-  onTimeSlotClick,
-}) => {
+const WeekView = ({ currentDate, events, timeSlots, onTimeSlotClick, onDayNavigate }) => {
+  const containerRef = useRef(null);
   const start = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
 
-  const getEventsForDay = useCallback(
-    (day) => {
-      const key = format(day, "yyyy-MM-dd");
-      return events?.filter((e) => {
-        const d =
-          e.eventDate ||
-          e.dataAgendamento ||
-          e.date ||
-          (e.start && format(parseISO(e.start), "yyyy-MM-dd"));
-        return d === key;
-      });
-    },
-    [events]
-  );
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const minutesFromStart = (h - 6) * 60 + m;
+    const slotIndex = Math.max(0, Math.floor(minutesFromStart / 30) - 2);
+    el.scrollTop = slotIndex * 28;
+  }, [currentDate]);
+
+  const eventsByDate = useMemo(() => {
+    const m = {};
+    events.forEach((e) => {
+      const k = getEventDateKey(e);
+      if (!k) return;
+      m[k] = m[k] || [];
+      m[k].push(e);
+    });
+    return m;
+  }, [events]);
+
+  const dayLayouts = useMemo(() => {
+    const map = {};
+    weekDays.forEach((day) => {
+      const key = normalizeDate(day);
+      const list = eventsByDate[key] || [];
+      map[key] = layoutOverlappingEvents(list);
+    });
+    return map;
+  }, [weekDays, eventsByDate]);
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="grid grid-cols-8 border-b border-gray-200 bg-white">
-        <div className="w-20 border-r border-gray-100"></div>
-        {weekDays.map((day) => (
+    <div className="flex flex-col h-full overflow-hidden border border-hairline rounded-modern">
+      <div className="grid grid-cols-8 bg-muted border-b border-hairline rounded-t-modern">
+        <div className="p-2 text-center text-xs font-semibold text-text-secondary">Horário</div>
+        {weekDays.map((d) => (
           <div
-            key={day.toISOString()}
-            className={`py-3 text-center border-r border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition ${
-              isToday(day) ? "bg-blue-50/30" : ""
+            key={d.toISOString()}
+            className={`p-2 text-center border-l border-hairline ${
+              isToday(d) ? "bg-primary/10" : ""
             }`}
-            onClick={() => onDateClick?.(day)}
           >
-            <div
-              className={`text-xs font-bold uppercase tracking-wider mb-1 ${
-                isToday(day) ? "text-blue-600" : "text-gray-400"
-              }`}
-            >
-              {format(day, "EEE", { locale: ptBR })}
+            <div className="text-[11px] font-medium text-text-secondary">
+              {format(d, "EEE", { locale: ptBR })}
             </div>
             <div
-              className={`text-2xl font-bold w-10 h-10 flex items-center justify-center rounded-full ${
-                isToday(day) ? "bg-blue-600 text-white" : "text-gray-900"
+              className={`text-sm font-semibold mt-1 ${
+                isToday(d) ? "text-primary" : "text-text-primary"
               }`}
             >
-              {format(day, "d")}
+              {format(d, "d")}
             </div>
           </div>
         ))}
       </div>
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-8 relative min-h-[1000px]">
-          <div className="w-20 flex flex-col border-r border-gray-100 bg-white sticky left-0 z-10">
-            {timeSlots.map((t) => (
-              <div
-                key={t}
-                className="h-[70px] border-b border-gray-50 text-xs text-gray-400 font-medium text-right pr-3 pt-2"
-              >
-                {t}
-              </div>
-            ))}
+
+      <div ref={containerRef} className="flex-1 overflow-y-auto border-t border-hairline relative">
+        <NowLine startHour={6} endHour={20} slotHeight={28} />
+        <div className="grid grid-cols-8 min-h-full">
+          <div className="flex flex-col">
+            {timeSlots.map((t, idx) => {
+              const isHour = t.endsWith(":00");
+              return (
+                <div
+                  key={t}
+                  className={`border-r border-b border-hairline h-[28px] ${
+                    isHour ? "bg-white" : "bg-muted/40"
+                  }`}
+                >
+                  <div className="text-[10px] text-right pr-2 text-text-secondary leading-[28px]">
+                    {isHour ? t : ""}
+                  </div>
+                </div>
+              );
+            })}
           </div>
+
           {weekDays.map((day) => {
-            const dayEvents = getEventsForDay(day);
+            const dayKey = normalizeDate(day);
+            const dayEvents = dayLayouts[dayKey] || [];
             return (
-              <div
-                key={day.toISOString()}
-                className="flex flex-col relative border-r border-gray-100 bg-white"
-              >
+              <div key={dayKey} className="relative border-r border-hairline">
                 {timeSlots.map((t) => (
                   <div
-                    key={t}
-                    className="h-[70px] border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer"
-                    onClick={() =>
-                      onTimeSlotClick?.(day, t) // abre criação com data + hora
-                    }
+                    key={dayKey + t}
+                    className="border-b border-hairline h-[28px] hover:bg-muted/20 cursor-pointer transition-micro"
+                    onClick={() => onTimeSlotClick(day, t)}
                   />
                 ))}
+
                 <div className="absolute inset-0 p-1">
-                  {dayEvents.map((evt) => (
-                    <div
-                      key={evt.id}
-                      className="absolute left-1 right-1 rounded-md px-2 py-1 shadow-sm border-l-4 bg-blue-50 cursor-pointer text-[11px] leading-tight"
-                      style={{
-                        top: "4px",
-                        borderLeftColor: evt.backgroundColor || "#3b82f6",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEventClick?.(evt);
-                      }}
-                    >
-                      <div className="font-semibold truncate">
-                        {evt.title || "Evento"}
+                  {dayEvents.map((evt) => {
+                    const start = evt._start;
+                    const end = evt._end;
+                    const top = ((start - 6 * 60) / 30) * 28;
+                    const height = Math.max(28, ((end - start) / 30) * 28 - 2);
+                    const colCount = evt._colCount || 1;
+                    const col = evt._col || 0;
+                    const widthPct = 100 / colCount;
+                    const leftPct = (100 / colCount) * col;
+
+                    return (
+                      <div
+                        key={evt.id || `${evt._start}-${evt._idx}`}
+                        className="absolute rounded-[6px] px-2 py-1 shadow-sm border-l-4 bg-blue-50 text-[11px] leading-tight overflow-hidden hover:shadow-md cursor-pointer"
+                        style={{
+                          top,
+                          height,
+                          left: `${leftPct}%`,
+                          width: `calc(${widthPct}% - 4px)`,
+                          borderLeftColor: evt.backgroundColor || "#3b82f6",
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Se precisar abrir detalhes do evento, use onEventClick
+                        }}
+                        title={`${evt.startTime} - ${evt.endTime} ${evt.title || ""}`}
+                      >
+                        <div className="font-semibold truncate">
+                          {evt.title || "Evento"}
+                        </div>
+                        <div className="opacity-70 text-[10px]">
+                          {evt.startTime} - {evt.endTime || ""}
+                        </div>
                       </div>
-                      <div className="opacity-70">
-                        {evt.startTime} - {evt.endTime}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -713,11 +740,14 @@ const CalendarView = ({
   };
 
   const handleTimeSlotClick = (day, time) => {
-    setCurrentDate(day);
+    // garante que o Dashboard saiba a data selecionada
+    onDateSelect?.(day);
+
+    // abre o modal CreateTask com data e início preenchidos
     onEventCreate?.({
       eventDate: format(day, "yyyy-MM-dd"),
-      startTime: time,
-      endTime: "",
+      startTime: time, // vem do slot clicado (ex: "08:00")
+      endTime: "",     // usuário define no modal
     });
   };
 
@@ -783,17 +813,16 @@ const CalendarView = ({
             timeSlots={timeSlots}
             events={events}
             onEventClick={handleEventClick}
-            onTimeSlotClick={handleTimeSlotClick}
+            onTimeSlotClick={handleTimeSlotClick} // ✅ abre modal com dia+hora
           />
         )}
         {viewType === "week" && (
           <WeekView
             currentDate={currentDate}
-            timeSlots={timeSlots}
             events={events}
-            onEventClick={handleEventClick}
-            onDateClick={handleDayClick}
-            onTimeSlotClick={handleTimeSlotClick}
+            timeSlots={timeSlots}
+            onTimeSlotClick={handleTimeSlotClick} // ✅ idem na semana
+            onDayNavigate={handleDayClick}
           />
         )}
         {viewType === "month" && (
