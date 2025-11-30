@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   format,
+  addDays,
   startOfWeek,
   endOfWeek,
-  addDays,
   isSameDay,
   isToday,
   startOfMonth,
@@ -13,7 +13,7 @@ import {
   eachDayOfInterval,
   parseISO,
 } from "date-fns";
-import { de, ptBR } from "date-fns/locale";
+import { ptBR } from "date-fns/locale";
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,25 +21,26 @@ import {
   Clock,
   X,
   MapPin,
-  Calendar as CalendarIcon,
-  Calendar,
-  User,
-  Briefcase,
   FileText,
   Users,
   Loader2,
-  AlertTriangle, // Adicionado para o modal de exclusão
+  AlertTriangle,
+  Calendar as CalendarIcon,
 } from "lucide-react";
 import agendamentosService from "../../../services/agendamentosService";
 
-// --- COMPONENTE DE CONFIRMAÇÃO DE EXCLUSÃO (NOVO) ---
+// ------------------------------------------------------------------
+// Delete Confirmation Modal
+// ------------------------------------------------------------------
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, isDeleting }) => {
   if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-      <div 
-        className="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden transform transition-all scale-100 border border-gray-100"
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
@@ -49,30 +50,27 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, isDeleting }) => 
             </div>
             <h3 className="text-xl font-bold text-gray-900">Excluir Agendamento?</h3>
           </div>
-          
           <p className="text-gray-600 mb-6 leading-relaxed">
-            Você tem certeza que deseja remover este item? <br/>
-            <span className="text-red-500 font-medium text-sm">Esta ação é irreversível e os dados serão perdidos permanentemente.</span>
+            Esta ação é irreversível e removerá o agendamento permanentemente.
           </p>
-
           <div className="flex justify-end gap-3">
             <button
               onClick={onClose}
               disabled={isDeleting}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               onClick={onConfirm}
               disabled={isDeleting}
-              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 flex items-center gap-2 disabled:opacity-70"
             >
               {isDeleting ? (
-                 <>
-                   <Loader2 className="w-4 h-4 animate-spin" />
-                   Excluindo...
-                 </>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Excluindo...
+                </>
               ) : (
                 "Sim, excluir"
               )}
@@ -84,217 +82,9 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, isDeleting }) => 
   );
 };
 
-// --- COMPONENTE PRINCIPAL ---
-const CalendarView = ({
-  selectedDate,
-  onDateSelect,
-  onEventCreate,
-  events = [],
-  onEventDeleted,
-}) => {
-  const [viewType, setViewType] = useState("month");
-  const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
-
-  // Estado para controlar o modal de detalhes do evento
-  const [selectedEvent, setSelectedEvent] = useState(null);
-
-  useEffect(() => {
-    if (selectedDate) setCurrentDate(selectedDate);
-  }, [selectedDate]);
-
-  // Navegação
-  const handlePrev = () => {
-    if (viewType === "day") setCurrentDate(addDays(currentDate, -1));
-    else if (viewType === "week") setCurrentDate(addDays(currentDate, -7));
-    else if (viewType === "month") setCurrentDate(addMonths(currentDate, -1));
-  };
-
-  const handleNext = () => {
-    if (viewType === "day") setCurrentDate(addDays(currentDate, 1));
-    else if (viewType === "week") setCurrentDate(addDays(currentDate, 7));
-    else if (viewType === "month") setCurrentDate(addMonths(currentDate, 1));
-  };
-
-  const handleTodayClick = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    onDateSelect?.(today);
-  };
-
-  const handleViewChange = (newViewType) => {
-    setViewType(newViewType);
-  };
-
-  // Filtros de eventos
-  const getEventsForDay = (day) => {
-    const dayString = format(day, "yyyy-MM-dd");
-    return events.filter((event) => event.date === dayString);
-  };
-
-  // Handlers de interação
-  const handleTimeSlotClick = (day, time) => {
-    onEventCreate?.({
-      eventDate: format(day, "yyyy-MM-dd"),
-      startTime: time,
-    });
-  };
-
-  const handleDayClick = (day) => {
-    setCurrentDate(day);
-    onDateSelect?.(day);
-    setViewType("day");
-
-    // ✅ Abrir modal já com a data do dia clicado
-    onEventCreate?.({
-      eventDate: format(day, "yyyy-MM-dd"),
-      startTime: "",
-      endTime: "",
-    });
-  };
-
-  // Abre o modal com as informações do agendamento
-  const handleEventClick = (event) => {
-    setSelectedEvent(event);
-  };
-
-  // Fecha o modal
-  const handleCloseModal = () => {
-    setSelectedEvent(null);
-  };
-
-  // Ação do botão de Geolocalização
-  const handleGeoLocationClick = (addressData) => {
-    const { rua, numero, cidade, uf, cep } = addressData || {};
-    const fullAddress = `${rua}, ${numero} - ${cidade}, ${uf}`;
-    // Aqui você poderia abrir o Google Maps em nova aba
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`, '_blank');
-  };
-
-  const renderHeaderTitle = () => {
-    if (viewType === "day") return format(currentDate, "PPP", { locale: ptBR });
-    if (viewType === "week") {
-      const start = startOfWeek(currentDate, { weekStartsOn: 0 });
-      const end = addDays(start, 6);
-      if (format(start, "MMMM") === format(end, "MMMM")) {
-        return `${format(start, "d")} - ${format(end, "d MMMM yyyy", {
-          locale: ptBR,
-        })}`;
-      }
-      return `${format(start, "d MMM", { locale: ptBR })} - ${format(
-        end,
-        "d MMM yyyy",
-        { locale: ptBR }
-      )}`;
-    }
-    if (viewType === "month")
-      return format(currentDate, "MMMM yyyy", { locale: ptBR });
-    return "";
-  };
-
-  const timeSlots = useMemo(() => {
-    const slots = [];
-    for (let hour = 6; hour <= 22; hour++) {
-      slots.push(`${hour.toString().padStart(2, "0")}:00`);
-    }
-    return slots;
-  }, []);
-
-  return (
-    <div className="h-full flex flex-col bg-white shadow-sm border border-gray-200 font-sans relative overflow-hidden">
-      {/* Header da Toolbar */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">
-            <button
-              onClick={handlePrev}
-              className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition-all duration-200"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={handleNext}
-              className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition-all duration-200"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <h2 className="text-2xl font-bold text-gray-900 capitalize tracking-tight">
-              {renderHeaderTitle()}
-            </h2>
-            <button
-              onClick={handleTodayClick}
-              className="px-4 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-full transition-colors"
-            >
-              Hoje
-            </button>
-          </div>
-        </div>
-
-        <div className="flex bg-gray-50 p-1.5 rounded-xl border border-gray-100">
-          {["day", "week", "month"].map((type) => (
-            <button
-              key={type}
-              onClick={() => handleViewChange(type)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                viewType === type
-                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-black/5"
-                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
-              }`}
-            >
-              {{ day: "Dia", week: "Semana", month: "Mês" }[type]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Área de Conteúdo */}
-      <div className="flex-1 overflow-hidden relative bg-white">
-        {viewType === "day" && (
-          <DayView
-            currentDay={currentDate}
-            timeSlots={timeSlots}
-            getEventsForDay={getEventsForDay}
-            handleTimeSlotClick={handleTimeSlotClick}
-            onEventClick={handleEventClick}
-          />
-        )}
-        {viewType === "week" && (
-          <WeekView
-            currentDate={currentDate}
-            timeSlots={timeSlots}
-            getEventsForDay={getEventsForDay}
-            handleTimeSlotClick={handleTimeSlotClick}
-            handleDateClick={handleDayClick}
-            onEventClick={handleEventClick}
-          />
-        )}
-        {viewType === "month" && (
-          <MonthView
-            currentMonth={currentDate}
-            events={events}
-            onDateClick={handleDayClick}
-            onEventCreate={onEventCreate}
-            onEventClick={handleEventClick}
-          />
-        )}
-      </div>
-
-      {/* MODAL DE DETALHES DO EVENTO */}
-      {selectedEvent && (
-        <EventDetailsModal
-          initialEvent={selectedEvent}
-          onClose={handleCloseModal}
-          onGeoLocationClick={handleGeoLocationClick}
-          onEventDeleted={onEventDeleted}
-        />
-      )}
-    </div>
-  );
-};
-
-// COMPONENTE MODAL DE DETALHES (ATUALIZADO - PROFISSIONAL)
+// ------------------------------------------------------------------
+// Event Details Modal
+// ------------------------------------------------------------------
 const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventDeleted }) => {
   const [details, setDetails] = useState(initialEvent);
   const [loading, setLoading] = useState(false);
@@ -304,61 +94,44 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
 
   useEffect(() => {
     const fetchDetails = async () => {
-      if (initialEvent.endereco && initialEvent.funcionarios) {
-        setDetails(initialEvent);
-        return;
-      }
-
+      if (!initialEvent?.id) return;
       setLoading(true);
       try {
-        const eventId = initialEvent.id;
-        if (!eventId) throw new Error("ID do evento não fornecido");
-
-        const response = await fetch(
-          `http://localhost:3000/api/agendamentos/${eventId}`
-        );
-
-        if (!response.ok) {
-          console.warn("API não respondeu, usando dados locais.");
-          setDetails(initialEvent);
+        const res = await fetch(`http://localhost:3000/api/agendamentos/${initialEvent.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Preserve funcionários caso a API não retorne
+            const merged = {
+            ...initialEvent,
+            ...data,
+            funcionarios: data.funcionarios?.length
+              ? data.funcionarios
+              : initialEvent.funcionarios || [],
+          };
+          setDetails(merged);
         } else {
-          const data = await response.json();
-          setDetails(data);
+          setDetails(initialEvent);
         }
-      } catch (err) {
-        console.error("Erro ao buscar detalhes:", err);
+      } catch {
         setDetails(initialEvent);
       } finally {
         setLoading(false);
       }
     };
-
     fetchDetails();
   }, [initialEvent]);
 
-  const handleDeleteClick = () => {
-    setIsDeleteModalOpen(true);
-  };
+  const handleDeleteClick = () => setIsDeleteModalOpen(true);
 
   const handleConfirmDelete = async () => {
     setDeleting(true);
     try {
-      console.log("🗑️ Deletando agendamento ID:", details.id);
       await agendamentosService.delete(details.id);
-      console.log("✅ Agendamento deletado com sucesso!");
-
-      if (onEventDeleted) {
-        console.log("📢 Chamando callback onEventDeleted com ID:", details.id);
-        onEventDeleted(details.id);
-      }
-
-      setTimeout(() => {
-        setIsDeleteModalOpen(false);
-        onClose();
-      }, 300);
-    } catch (err) {
-      console.error("❌ Erro ao deletar agendamento:", err);
-      setError("Erro ao deletar agendamento. Tente novamente mais tarde.");
+      onEventDeleted?.(details.id);
+      setIsDeleteModalOpen(false);
+      onClose?.();
+    } catch (e) {
+      setError("Erro ao deletar. Tente novamente.");
     } finally {
       setDeleting(false);
     }
@@ -367,46 +140,46 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
   if (!details) return null;
 
   const getBadgeColor = (type) => {
-    if (type === "SERVICO" || type?.value === "SERVICO")
-      return "bg-blue-50 text-blue-700 border-blue-200";
-    if (type === "ORCAMENTO" || type?.value === "ORCAMENTO")
-      return "bg-amber-50 text-amber-700 border-amber-200";
+    const v = type?.value || type;
+    if (v === "SERVICO") return "bg-blue-50 text-blue-700 border-blue-200";
+    if (v === "ORCAMENTO") return "bg-amber-50 text-amber-700 border-amber-200";
     return "bg-gray-50 text-gray-700 border-gray-200";
   };
 
   const formatAddress = (end) => {
     if (!end) return "Endereço não informado";
-    return `${end.rua || ""}, ${end.numero || ""} ${
-      end.complemento ? `- ${end.complemento}` : ""
+    return `${end.rua || ""}${end.numero ? ", " + end.numero : ""}${
+      end.complemento ? " - " + end.complemento : ""
     } - ${end.bairro || ""}, ${end.cidade || ""}/${end.uf || ""}`;
   };
 
   const getPedidoLabel = (pedido) => {
     if (!pedido) return "Nenhum pedido vinculado";
-    if (typeof pedido === "string") return pedido;
     if (pedido.label) return pedido.label;
     if (pedido.descricao) return pedido.descricao;
     if (pedido.nome) return pedido.nome;
     if (pedido.id) return `Pedido #${pedido.id}`;
-    return "Pedido desconhecido";
+    return String(pedido);
   };
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        onClick={onClose}
+      >
         <div
-          className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-200/50"
+          className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-gray-200"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Cabeçalho Limpo */}
-          <div className="relative bg-white px-8 py-6 border-b border-gray-100">
+          {/* Header */}
+            <div className="relative bg-white px-8 py-6 border-b border-gray-100">
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition"
             >
               <X size={20} />
             </button>
-
             <div className="pr-10">
               <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">
                 Agendamento
@@ -414,7 +187,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
               <h2 className="text-2xl font-bold text-gray-900">
                 {details.title || "Sem título"}
               </h2>
-
               <div className="flex flex-wrap gap-2 mt-4">
                 <span
                   className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${getBadgeColor(
@@ -434,26 +206,23 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
             </div>
           </div>
 
-          {/* Corpo com Scroll */}
-          <div className="p-8 space-y-6 overflow-y-auto custom-scrollbar bg-white">
+          {/* Body */}
+          <div className="p-8 space-y-6 overflow-y-auto">
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16">
                 <Loader2 size={40} className="animate-spin mb-3 text-gray-400" />
-                <span className="text-gray-500 text-sm font-medium">
-                  Carregando...
-                </span>
+                <span className="text-gray-500 text-sm font-medium">Carregando...</span>
               </div>
             ) : (
               <>
                 {error && (
-                  <div className="p-4 bg-red-50 text-red-700 border border-red-100 rounded-lg text-sm font-medium">
-                    ⚠️ {error}
+                  <div className="p-4 bg-red-50 text-red-700 border border-red-100 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <AlertTriangle size={16} />
+                    {error}
                   </div>
                 )}
 
-                {/* Informações em 2 Colunas */}
                 <div className="grid grid-cols-2 gap-8 w-full">
-                  {/* Data */}
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Data
@@ -472,8 +241,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
                         : "-"}
                     </p>
                   </div>
-
-                  {/* Horário */}
                   <div className="space-y-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Horário
@@ -484,10 +251,8 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
                   </div>
                 </div>
 
-                {/* Divider */}
                 <div className="border-t border-gray-100"></div>
 
-                {/* Pedido */}
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                     <FileText size={14} />
@@ -498,7 +263,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
                   </p>
                 </div>
 
-                {/* Localização */}
                 <div className="space-y-1">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                     <MapPin size={14} />
@@ -516,7 +280,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
                   )}
                 </div>
 
-                {/* Funcionários */}
                 <div className="space-y-2.5">
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
                     <Users size={14} />
@@ -524,26 +287,26 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
                   </p>
                   {details.funcionarios && details.funcionarios.length > 0 ? (
                     <div className="flex flex-wrap gap-2.5">
-                      {details.funcionarios.map((func, idx) => (
-                        <div
-                          key={idx}
-                          className="inline-flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-gray-700"
-                        >
-                          <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
-                            {(func.label || func.nome || func || "?").charAt(0).toUpperCase()}
+                      {details.funcionarios.map((func, idx) => {
+                        const nome = func.label || func.nome || func;
+                        return (
+                          <div
+                            key={idx}
+                            className="inline-flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-full px-3.5 py-1.5 text-sm font-medium text-gray-700"
+                          >
+                            <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">
+                              {String(nome).charAt(0).toUpperCase()}
+                            </div>
+                            <span className="truncate">{nome}</span>
                           </div>
-                          <span className="truncate">{func.label || func.nome || func}</span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500">
-                      Nenhum funcionário atribuído
-                    </p>
+                    <p className="text-sm text-gray-500">Nenhum funcionário atribuído</p>
                   )}
                 </div>
 
-                {/* Observações */}
                 {details.observacao && (
                   <div className="space-y-2">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -558,20 +321,18 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
             )}
           </div>
 
-          {/* Rodapé com Ações */}
           <div className="p-6 bg-gray-50 border-t border-gray-100 flex gap-3">
             <button
               onClick={handleDeleteClick}
               disabled={loading || deleting}
-              className="px-5 py-2.5 rounded-lg font-medium text-red-600 hover:bg-red-50 border border-red-200 hover:border-red-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="px-5 py-2.5 rounded-lg font-medium text-red-600 hover:bg-red-50 border border-red-200 hover:border-red-300 text-sm disabled:opacity-50"
             >
               Excluir
             </button>
-
             <button
-              onClick={() => onGeoLocationClick(details.endereco)}
+              onClick={() => onGeoLocationClick?.(details.endereco)}
               disabled={!details.endereco || loading}
-              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg font-medium transition-all text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg font-medium text-sm disabled:bg-gray-300"
             >
               <MapPin size={16} />
               Ver no Mapa
@@ -580,7 +341,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
         </div>
       </div>
 
-      {/* Modal de Confirmação */}
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -591,92 +351,82 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
   );
 };
 
-// --- 1. MONTH VIEW (Mantido igual) ---
+// ------------------------------------------------------------------
+// Month View
+// ------------------------------------------------------------------
+const MonthView = ({ currentMonth, events, onDateClick, onEventClick }) => {
+  const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 });
+  const end = startOfWeek(addDays(endOfMonth(currentMonth), 6), { weekStartsOn: 0 });
+  const days = eachDayOfInterval({ start, end });
 
-const MonthView = ({
-  currentMonth,
-  events,
-  onDateClick,
-  onEventCreate,
-  onEventClick,
-}) => {
   const eventsByDate = useMemo(() => {
     const map = {};
-    events.forEach((evt) => {
-      const dateKey = evt.date;
-      if (!map[dateKey]) map[dateKey] = [];
-      map[dateKey].push(evt);
+    events?.forEach((e) => {
+      const d =
+        e.eventDate ||
+        e.dataAgendamento ||
+        e.date ||
+        (e.start && format(parseISO(e.start), "yyyy-MM-dd"));
+      if (!d) return;
+      map[d] = map[d] || [];
+      map[d].push(e);
     });
     return map;
   }, [events]);
 
-  const calendarDays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(monthStart);
-    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-    return eachDayOfInterval({ start: startDate, end: endDate });
-  }, [currentMonth]);
-
-  const weekDaysHeader = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const weekDaysNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
-      <div className="grid grid-cols-7 border-b border-gray-200 bg-white">
-        {weekDaysHeader.map((day) => (
+    <div className="flex-1 flex flex-col">
+      <div className="grid grid-cols-7 bg-white border-b border-gray-200">
+        {weekDaysNames.map((w) => (
           <div
-            key={day}
+            key={w}
             className="py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-widest"
           >
-            {day}
+            {w}
           </div>
         ))}
       </div>
-
-      <div className="grid grid-cols-7 flex-1 auto-rows-fr gap-px border-b border-gray-200 overflow-y-auto bg-gray-200">
-        {calendarDays.map((day) => {
+      <div className="grid grid-cols-7 flex-1 auto-rows-fr gap-px bg-gray-200 overflow-y-auto">
+        {days.map((day) => {
           const dateKey = format(day, "yyyy-MM-dd");
           const dayEvents = eventsByDate[dateKey] || [];
-          const isCurrentMonth = isSameMonth(day, currentMonth);
-          const isTodayDate = isToday(day);
-
+          const isCurrent = isSameMonth(day, currentMonth);
+          const isCurrentToday = isToday(day);
           return (
             <div
               key={dateKey}
-              className={`bg-white relative flex flex-col p-2 min-h-[120px] group transition-colors hover:bg-gray-50 border border-gray-200${
-                !isCurrentMonth ? "bg-gray-50/30" : ""
+              className={`bg-white relative flex flex-col p-2 min-h-[120px] group transition-colors hover:bg-gray-50 border border-gray-200 ${
+                !isCurrent ? "opacity-60" : ""
               }`}
-              onClick={() => onDateClick(day)}
+              onClick={() => onDateClick?.(day)}
             >
               <div className="flex justify-between items-start mb-2">
                 <span
-                  className={`text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-lg transition-all ${
-                    isTodayDate
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-200"
-                      : !isCurrentMonth
-                      ? "text-gray-300"
-                      : "text-gray-700 hover:bg-gray-100"
+                  className={`text-sm font-semibold w-8 h-8 flex items-center justify-center rounded-lg ${
+                    isCurrentToday
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "text-gray-700"
                   }`}
                 >
                   {format(day, "d")}
                 </span>
-
                 <button
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full p-1.5 transition"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onEventCreate?.({ eventDate: dateKey, startTime: "09:00" });
+                    onDateClick?.(day);
                   }}
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full p-1.5 transition-all"
                 >
                   <Plus size={16} />
                 </button>
               </div>
-
               <div className="flex-1 space-y-1.5 overflow-hidden">
                 {dayEvents.slice(0, 3).map((evt) => (
                   <div
                     key={evt.id}
-                    className="text-xs px-2 py-1 rounded-md truncate cursor-pointer hover:opacity-90 transition-all border-l-4 shadow-sm hover:shadow-md hover:-translate-y-px"
+                    className="text-xs px-2 py-1 rounded-md truncate cursor-pointer hover:opacity-90 transition border-l-4 shadow-sm hover:shadow-md"
                     style={{
                       backgroundColor: `${evt.backgroundColor || "#3b82f6"}15`,
                       borderLeftColor: evt.backgroundColor || "#3b82f6",
@@ -688,15 +438,12 @@ const MonthView = ({
                       onEventClick?.(evt);
                     }}
                   >
-                    <span className="font-bold mr-1.5 opacity-75">
-                      {evt.startTime}
-                    </span>
+                    <span className="font-bold mr-1.5 opacity-75">{evt.startTime}</span>
                     <span className="font-medium">{evt.title}</span>
                   </div>
                 ))}
-
                 {dayEvents.length > 3 && (
-                  <div className="text-[10px] text-gray-500 font-semibold pl-2 pt-0.5">
+                  <div className="text-[10px] text-gray-500 font-semibold pl-2">
                     + {dayEvents.length - 3} mais
                   </div>
                 )}
@@ -709,71 +456,57 @@ const MonthView = ({
   );
 };
 
-// --- 2. WEEK VIEW (Mantido igual) ---
-
+// ------------------------------------------------------------------
+// Week View (simplificado)
+// ------------------------------------------------------------------
 const WeekView = ({
   currentDate,
   timeSlots,
-  getEventsForDay,
-  handleTimeSlotClick,
-  handleDateClick,
+  events,
   onEventClick,
+  onDateClick,
+  onTimeSlotClick,
 }) => {
-  const currentWeekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const start = startOfWeek(currentDate, { weekStartsOn: 0 });
+  const weekDays = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
 
-  const weekDays = useMemo(() => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      days.push(addDays(currentWeekStart, i));
-    }
-    return days;
-  }, [currentWeekStart]);
-
-  const SLOT_HEIGHT = 70;
-
-  const getEventStyle = (event) => {
-    const startMin =
-      parseInt(event.startTime.split(":")[0]) * 60 +
-      parseInt(event.startTime.split(":")[1]);
-    const endMin =
-      parseInt(event.endTime.split(":")[0]) * 60 +
-      parseInt(event.endTime.split(":")[1]);
-    const duration = endMin - startMin;
-    const startOffset = startMin - 6 * 60;
-
-    return {
-      top: `${(startOffset / 60) * SLOT_HEIGHT}px`,
-      height: `${Math.max((duration / 60) * SLOT_HEIGHT, 40)}px`,
-      backgroundColor: event.backgroundColor,
-    };
-  };
+  const getEventsForDay = useCallback(
+    (day) => {
+      const key = format(day, "yyyy-MM-dd");
+      return events?.filter((e) => {
+        const d =
+          e.eventDate ||
+          e.dataAgendamento ||
+          e.date ||
+          (e.start && format(parseISO(e.start), "yyyy-MM-dd"));
+        return d === key;
+      });
+    },
+    [events]
+  );
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="grid grid-cols-8 border-b border-gray-200 bg-white shadow-sm z-10">
+      <div className="grid grid-cols-8 border-b border-gray-200 bg-white">
         <div className="w-20 border-r border-gray-100"></div>
         {weekDays.map((day) => (
           <div
             key={day.toISOString()}
-            className={`py-3 text-center border-r border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors group ${
+            className={`py-3 text-center border-r border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition ${
               isToday(day) ? "bg-blue-50/30" : ""
             }`}
-            onClick={() => handleDateClick(day)}
+            onClick={() => onDateClick?.(day)}
           >
             <div
               className={`text-xs font-bold uppercase tracking-wider mb-1 ${
-                isToday(day)
-                  ? "text-blue-600"
-                  : "text-gray-400 group-hover:text-gray-600"
+                isToday(day) ? "text-blue-600" : "text-gray-400"
               }`}
             >
               {format(day, "EEE", { locale: ptBR })}
             </div>
             <div
-              className={`text-2xl font-bold w-10 h-10 mx-auto flex items-center justify-center rounded-full transition-all ${
-                isToday(day)
-                  ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
-                  : "text-gray-900 group-hover:bg-gray-100"
+              className={`text-2xl font-bold w-10 h-10 flex items-center justify-center rounded-full ${
+                isToday(day) ? "bg-blue-600 text-white" : "text-gray-900"
               }`}
             >
               {format(day, "d")}
@@ -781,55 +514,57 @@ const WeekView = ({
           </div>
         ))}
       </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <div className="grid grid-cols-8 relative min-h-[1120px]">
-          <div className="w-20 flex flex-col border-r border-gray-100 bg-white sticky left-0 z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]">
-            {timeSlots.map((time) => (
+      <div className="flex-1 overflow-y-auto">
+        <div className="grid grid-cols-8 relative min-h-[1000px]">
+          <div className="w-20 flex flex-col border-r border-gray-100 bg-white sticky left-0 z-10">
+            {timeSlots.map((t) => (
               <div
-                key={time}
-                className={`h-[70px] border-b border-gray-50 text-xs text-gray-400 font-medium text-right pr-4 pt-2 relative`}
+                key={t}
+                className="h-[70px] border-b border-gray-50 text-xs text-gray-400 font-medium text-right pr-3 pt-2"
               >
-                <span className="top-3 relative bg-white pl-1">{time}</span>
+                {t}
               </div>
             ))}
           </div>
-
           {weekDays.map((day) => {
             const dayEvents = getEventsForDay(day);
             return (
               <div
                 key={day.toISOString()}
-                className="relative border-r border-gray-100 bg-white"
+                className="flex flex-col relative border-r border-gray-100 bg-white"
               >
-                {timeSlots.map((time) => (
+                {timeSlots.map((t) => (
                   <div
-                    key={time}
-                    className="h-[70px] border-b border-gray-50 hover:bg-gray-50/50 transition-colors cursor-pointer relative"
-                    onClick={() => handleTimeSlotClick(day, time)}
-                  >
-                    <div className="absolute top-1/2 w-full border-t border-dotted border-gray-100/50 pointer-events-none"></div>
-                  </div>
+                    key={t}
+                    className="h-[70px] border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer"
+                    onClick={() =>
+                      onTimeSlotClick?.(day, t) // abre criação com data + hora
+                    }
+                  />
                 ))}
-
-                {dayEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="absolute left-1 right-1 rounded-lg px-3 py-2 text-xs shadow-sm overflow-hidden hover:z-20 hover:shadow-lg transition-all cursor-pointer border-l-[3px] border-black/10 group"
-                    style={getEventStyle(event)}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEventClick?.(event);
-                    }}
-                  >
-                    <div className="font-bold text-gray-900 truncate text-sm mb-0.5">
-                      {event.title}
+                <div className="absolute inset-0 p-1">
+                  {dayEvents.map((evt) => (
+                    <div
+                      key={evt.id}
+                      className="absolute left-1 right-1 rounded-md px-2 py-1 shadow-sm border-l-4 bg-blue-50 cursor-pointer text-[11px] leading-tight"
+                      style={{
+                        top: "4px",
+                        borderLeftColor: evt.backgroundColor || "#3b82f6",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEventClick?.(evt);
+                      }}
+                    >
+                      <div className="font-semibold truncate">
+                        {evt.title || "Evento"}
+                      </div>
+                      <div className="opacity-70">
+                        {evt.startTime} - {evt.endTime}
+                      </div>
                     </div>
-                    <div className="text-gray-700 truncate opacity-80 group-hover:opacity-100">
-                      {event.startTime} - {event.endTime}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             );
           })}
@@ -839,38 +574,23 @@ const WeekView = ({
   );
 };
 
-// --- 3. DAY VIEW (Mantido igual) ---
-
-const DayView = ({
-  currentDay,
-  timeSlots,
-  getEventsForDay,
-  handleTimeSlotClick,
-  onEventClick,
-}) => {
-  const dayEvents = getEventsForDay(currentDay);
-  const SLOT_HEIGHT = 80;
-
-  const getEventStyle = (event) => {
-    const startMin =
-      parseInt(event.startTime.split(":")[0]) * 60 +
-      parseInt(event.startTime.split(":")[1]);
-    const endMin =
-      parseInt(event.endTime.split(":")[0]) * 60 +
-      parseInt(event.endTime.split(":")[1]);
-    const duration = endMin - startMin;
-    const startOffset = startMin - 6 * 60;
-
-    return {
-      top: `${(startOffset / 60) * SLOT_HEIGHT}px`,
-      height: `${Math.max((duration / 60) * SLOT_HEIGHT, 50)}px`,
-      backgroundColor: event.backgroundColor,
-    };
-  };
+// ------------------------------------------------------------------
+// Day View (simplificado)
+// ------------------------------------------------------------------
+const DayView = ({ currentDay, timeSlots, events, onEventClick, onTimeSlotClick }) => {
+  const dayKey = format(currentDay, "yyyy-MM-dd");
+  const dayEvents = events?.filter((e) => {
+    const d =
+      e.eventDate ||
+      e.dataAgendamento ||
+      e.date ||
+      (e.start && format(parseISO(e.start), "yyyy-MM-dd"));
+    return d === dayKey;
+  });
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="grid grid-cols-[100px_1fr] border-b border-gray-200 bg-white shadow-sm z-10 py-4">
+      <div className="grid grid-cols-[100px_1fr] border-b border-gray-200 bg-white py-4">
         <div className="text-center text-gray-400 text-xs font-bold uppercase tracking-widest pt-2">
           Horário
         </div>
@@ -883,53 +603,225 @@ const DayView = ({
           </div>
         </div>
       </div>
-
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-[100px_1fr] relative">
           <div className="border-r border-gray-100 bg-white">
-            {timeSlots.map((time) => (
+            {timeSlots.map((t) => (
               <div
-                key={time}
+                key={t}
                 className="h-[80px] border-b border-gray-50 text-sm text-gray-500 font-medium text-center pt-3"
               >
-                {time}
+                {t}
               </div>
             ))}
           </div>
-
           <div className="relative bg-white">
-            {timeSlots.map((time) => (
+            {timeSlots.map((t) => (
               <div
-                key={time}
+                key={t}
                 className="h-[80px] border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer relative"
-                onClick={() => handleTimeSlotClick(currentDay, time)}
+                onClick={() => onTimeSlotClick?.(currentDay, t)}
               >
-                <div className="absolute top-1/2 w-full border-t border-dotted border-gray-100 pointer-events-none"></div>
+                <div className="absolute top-1/2 w-full border-t border-dotted border-gray-100 pointer-events-none" />
               </div>
             ))}
-
-            {dayEvents.map((event) => (
+            {dayEvents?.map((evt, i) => (
               <div
-                key={event.id}
-                className="absolute left-4 right-4 rounded-xl px-4 py-1 shadow-sm border-l-4 border-black/10 hover:shadow-lg cursor-pointer transition-all hover:-translate-y-0.5"
-                style={getEventStyle(event)}
+                key={evt.id || i}
+                className="absolute left-4 right-4 rounded-md px-3 py-1 shadow-sm border-l-4 bg-blue-50 hover:shadow-md cursor-pointer"
+                style={{ top: 6 + i * 66, borderLeftColor: evt.backgroundColor || "#3b82f6" }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEventClick?.(event);
+                  onEventClick?.(evt);
                 }}
               >
-                <div className="font-bold text-gray-900 text-lg mb-1">
-                  {event.title}
+                <div className="font-semibold text-gray-900 text-sm truncate">
+                  {evt.title}
                 </div>
-                <div className="text-gray-800font-medium flex items-center justify-center gap-2 opacity-80">
-                  <Clock size={16} />
-                  {event.startTime} - {event.endTime}
+                <div className="text-gray-600 text-xs flex items-center gap-1">
+                  <Clock size={12} />
+                  {evt.startTime} - {evt.endTime}
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+// ------------------------------------------------------------------
+// Calendar View Main
+// ------------------------------------------------------------------
+const CalendarView = ({
+  selectedDate,
+  onDateSelect,
+  onEventCreate,
+  events = [],
+  onEventDeleted,
+}) => {
+  const [currentDate, setCurrentDate] = useState(selectedDate || new Date());
+  const [viewType, setViewType] = useState("month");
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const timeSlots = useMemo(() => {
+    const slots = [];
+    for (let h = 6; h < 20; h++) {
+      slots.push(`${String(h).padStart(2, "0")}:00`);
+    }
+    return slots;
+  }, []);
+
+  const handlePrev = () => {
+    setCurrentDate((d) =>
+      viewType === "month" ? addMonths(d, -1) : addDays(d, viewType === "week" ? -7 : -1)
+    );
+  };
+
+  const handleNext = () => {
+    setCurrentDate((d) =>
+      viewType === "month" ? addMonths(d, 1) : addDays(d, viewType === "week" ? 7 : 1)
+    );
+  };
+
+  const handleTodayClick = () => setCurrentDate(new Date());
+
+  const handleViewChange = (type) => setViewType(type);
+
+  const renderHeaderTitle = () => {
+    if (viewType === "month") return format(currentDate, "MMMM yyyy", { locale: ptBR });
+    if (viewType === "week") {
+      const start = startOfWeek(currentDate, { weekStartsOn: 0 });
+      const end = endOfWeek(currentDate, { weekStartsOn: 0 });
+      return `${format(start, "d MMM", { locale: ptBR })} - ${format(end, "d MMM", {
+        locale: ptBR,
+      })}`;
+    }
+    if (viewType === "day") return format(currentDate, "d 'de' MMMM yyyy", { locale: ptBR });
+    return "";
+  };
+
+  const handleDayClick = (day) => {
+    setCurrentDate(day);
+    onDateSelect?.(day);
+    onEventCreate?.({
+      eventDate: format(day, "yyyy-MM-dd"),
+      startTime: "",
+      endTime: "",
+    });
+  };
+
+  const handleTimeSlotClick = (day, time) => {
+    setCurrentDate(day);
+    onEventCreate?.({
+      eventDate: format(day, "yyyy-MM-dd"),
+      startTime: time,
+      endTime: "",
+    });
+  };
+
+  const handleEventClick = (evt) => {
+    setSelectedEvent(evt);
+  };
+
+  const handleCloseModal = () => setSelectedEvent(null);
+
+  return (
+    <div className="h-full flex flex-col bg-white border border-gray-200 relative">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2 bg-gray-50 rounded-lg p-1 border border-gray-100">
+            <button
+              onClick={handlePrev}
+              className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={handleNext}
+              className="p-1.5 hover:bg-white hover:shadow-sm rounded-md text-gray-600 transition"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-gray-900 capitalize tracking-tight">
+              {renderHeaderTitle()}
+            </h2>
+            <button
+              onClick={handleTodayClick}
+              className="px-4 py-1.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-full transition-colors"
+            >
+              Hoje
+            </button>
+          </div>
+        </div>
+        <div className="flex bg-gray-50 p-1.5 rounded-xl border border-gray-100">
+          {["day", "week", "month"].map((type) => (
+            <button
+              key={type}
+              onClick={() => handleViewChange(type)}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+                viewType === type
+                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-black/5"
+                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-200/50"
+              }`}
+            >
+              {{ day: "Dia", week: "Semana", month: "Mês" }[type]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-hidden">
+        {viewType === "day" && (
+          <DayView
+            currentDay={currentDate}
+            timeSlots={timeSlots}
+            events={events}
+            onEventClick={handleEventClick}
+            onTimeSlotClick={handleTimeSlotClick}
+          />
+        )}
+        {viewType === "week" && (
+          <WeekView
+            currentDate={currentDate}
+            timeSlots={timeSlots}
+            events={events}
+            onEventClick={handleEventClick}
+            onDateClick={handleDayClick}
+            onTimeSlotClick={handleTimeSlotClick}
+          />
+        )}
+        {viewType === "month" && (
+          <MonthView
+            currentMonth={currentDate}
+            events={events}
+            onDateClick={handleDayClick}
+            onEventClick={handleEventClick}
+          />
+        )}
+      </div>
+
+      {selectedEvent && (
+        <EventDetailsModal
+          initialEvent={selectedEvent}
+          onClose={handleCloseModal}
+          onGeoLocationClick={(endereco) => {
+            if (!endereco) return;
+            const q = encodeURIComponent(
+              `${endereco.rua || ""} ${endereco.numero || ""} ${endereco.cidade || ""} ${
+                endereco.uf || ""
+              }`
+            );
+            window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, "_blank");
+          }}
+          onEventDeleted={onEventDeleted}
+        />
+      )}
     </div>
   );
 };

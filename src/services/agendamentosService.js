@@ -32,7 +32,7 @@ export const agendamentosService = {
 
       return await response.json();
     } catch (error) {
-      console.error("essa porra deu errada:", error);
+      console.error("Erro na requisição:", error);
       throw error;
     }
   },

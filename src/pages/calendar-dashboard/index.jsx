@@ -20,7 +20,6 @@ const CalendarDashboard = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [modalInitialData, setModalInitialData] = useState({});
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   const getToken = () => {
     return (
@@ -31,13 +30,7 @@ const CalendarDashboard = () => {
     );
   };
 
-  useEffect(() => {
-    console.log("🔄 Iniciando carregamento de agendamentos...");
-    fetchAgendamentos();
-  }, []);
-
   const fetchAgendamentos = async () => {
-    setLoading(true);
     try {
       const token = getToken();
       
@@ -92,24 +85,28 @@ const CalendarDashboard = () => {
       localStorage.setItem("tasks", JSON.stringify(transformedTasks));
     } catch (error) {
       console.error("❌ Erro ao carregar agendamentos:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
+  useEffect(() => {
+    fetchAgendamentos();
+  }, []);
+
+  const handleEventDeleted = (eventId) => {
+    setTasks((prev) => {
+      const next = prev.filter((t) => t.id !== eventId);
+      localStorage.setItem("tasks", JSON.stringify(next));
+      return next;
+    });
+    // opcional: sincronizar novamente
+    setTimeout(fetchAgendamentos, 400);
   };
 
-  const handleCalendarToggle = (calendarId) => {
-    console.log("Calendar toggled:", calendarId);
-  };
-
-  const handleEventCreate = (eventData = {}) => {
+  const handleEventCreate = (data = {}) => {
     // eventData.eventDate vem do CalendarView quando você clica num dia/slot
     let formattedDate =
-      eventData?.eventDate ||
-      eventData?.date ||
+      data?.eventDate ||
+      data?.date ||
       selectedDate?.toISOString()?.split("T")?.[0];
 
     // Garantir formato yyyy-MM-dd
@@ -120,9 +117,9 @@ const CalendarDashboard = () => {
 
     setModalInitialData({
       eventDate: formattedDate,           // ✅ pré-preenche a data
-      startTime: eventData?.startTime || "",
-      endTime: eventData?.endTime || "",
-      tipoAgendamento: eventData?.tipoAgendamento || "",
+      startTime: data?.startTime || "",
+      endTime: data?.endTime || "",
+      tipoAgendamento: data?.tipoAgendamento || "",
       pedido: null,
       funcionarios: [],
     });
@@ -130,24 +127,32 @@ const CalendarDashboard = () => {
     setShowTaskModal(true);
   };
 
-  const handleTaskSave = async (taskData) => {
-    await fetchAgendamentos();
+  const handleTaskSave = (taskData) => {
+    const newTask = {
+      id: Date.now(),
+      ...taskData,
+      title: taskData?.category || "Agendamento", // adiciona título
+      date: taskData.eventDate,
+      startTime: taskData.startTime,
+      endTime: taskData.endTime,
+      createdAt: new Date().toISOString(),
+      backgroundColor: taskData.backgroundColor || "#3B82F6", // corrige aqui
+      color: taskData.backgroundColor, // se precisar também em color
+    };
+    console.log("Nova tarefa criada:", newTask); // debug
+    const updatedTasks = [...tasks, newTask];
+    setTasks(updatedTasks);
+    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
   };
 
-  const handleEventDeleted = async (eventId) => {
-    console.log("🗑️ [Dashboard] Deletando evento ID:", eventId);
+  // ✅ Adicionado: handler da seleção de data
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
 
-    setTasks((prevTasks) => {
-      const filtered = prevTasks.filter((task) => task.id !== eventId);
-      console.log("📋 Tasks após exclusão:", filtered.length, "eventos");
-      localStorage.setItem("tasks", JSON.stringify(filtered));
-      return filtered;
-    });
-
-    setTimeout(async () => {
-      console.log("🔄 [Dashboard] Recarregando agendamentos do backend...");
-      await fetchAgendamentos();
-    }, 500);
+  // ✅ Adicionado: evita erro em SharedCalendarList
+  const handleCalendarToggle = (calendarId) => {
+    console.log("Toggle calendário:", calendarId);
   };
 
   return (
@@ -259,10 +264,10 @@ const CalendarDashboard = () => {
             <div className="flex-1 overflow-hidden">
               <CalendarView
                 selectedDate={selectedDate}
-                onDateSelect={handleDateSelect}
+                onDateSelect={setSelectedDate}
                 onEventCreate={handleEventCreate}
                 events={tasks}
-                onEventDeleted={handleEventDeleted}
+                onEventDeleted={handleEventDeleted}  // ✅ agora definido
               />
             </div>
           </div>
