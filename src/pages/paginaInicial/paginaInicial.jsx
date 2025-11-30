@@ -12,9 +12,7 @@ import {
 } from "lucide-react";
 import Kpis from "../../shared/components/kpis/kpis";
 import Api from "../../axios/Api";
-
-const API_ESTOQUE_URL = "http://localhost:3001/estoques";
-const API_CLIENTES_URL = "http://localhost:3001/clientes";
+import { getQtdAgendamentosFuturos, getQtdAgendamentosHoje, getQtdItensCriticos, getTaxaOcupacaoServicos, getEstoqueCritico, getAgendamentosFuturos } from "../../service/dashboardService";
 
 const isToday = (date) => {
     if (!date) return false;
@@ -52,16 +50,20 @@ const parseDate = (dateString) => {
 };
 
 export default function PaginaInicial() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [headerHeight, setHeaderHeight] = useState(80);
-  const headerRef = useRef(null);
-  const navigate = useNavigate();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [headerHeight, setHeaderHeight] = useState(80);
+    const headerRef = useRef(null);
+    const navigate = useNavigate();
 
-  const [estoqueData, setEstoqueData] = useState([]);
-  const [clientesData, setClientesData] = useState([]);
-  const [loading, setLoading] = useState(true);
+    const [itensCriticos, setItensCriticos] = useState([]);
+    const [qtdAgendamentosHoje, setQtdAgendamentosHoje] = useState(0);
+    const [qtdAgendamentosFuturos, setQtdAgendamentosFuturos] = useState(0);
+    const [taxaOcupacaoServicos, setTaxaOcupacaoServicos] = useState(0.0);
+    const [qtdItensCriticos, setQtdItensCriticos] = useState(0);
+    const [agendamentosFuturos, setAgendamentosFuturos] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -71,140 +73,56 @@ export default function PaginaInicial() {
           Api.get("/estoques"),
           Api.get("/clientes")
         ]);
-
-        const estoqueData = estoqueRes.data;
-        const clientesData = clientesRes.data;
-
-        setEstoqueData(estoqueData);
-        setClientesData(clientesData);
+        setEstoqueData(estoqueRes.data);
+        setClientesData(clientesRes.data);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
       } finally {
         setLoading(false);
       }
     };
-
     carregarDados();
   }, []);
 
   useEffect(() => {
-    const updateHeight = () => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
+    const carregarKpis = async () => {
+      try {
+        const [
+          qtdAgendamentosHojeRes,
+          qtdAgendamentosFuturosRes,
+          agendamentosFuturosRes,
+          itensCriticosRes,
+          taxaOcupacaoRes,
+          qtdItensCriticosRes
+        ] = await Promise.all([
+          getQtdAgendamentosHoje(),
+          getQtdAgendamentosFuturos(),
+          getAgendamentosFuturos(),
+          getEstoqueCritico(),
+          getTaxaOcupacaoServicos(),
+          getQtdItensCriticos()
+        ]);
+
+      console.log(taxaOcupacaoRes.data);
+      setQtdAgendamentosHoje(qtdAgendamentosHojeRes.data.qtdAgendamentosHoje);
+      setQtdAgendamentosFuturos(qtdAgendamentosFuturosRes.data.qtdAgendamentosFuturos);
+      setQtdItensCriticos(qtdItensCriticosRes.data.quantidade);
+      setTaxaOcupacaoServicos(taxaOcupacaoRes.data.taxaOcupacaoServicos);
+      setAgendamentosFuturos(agendamentosFuturosRes.data);
+      setItensCriticos(itensCriticosRes.data);
+    } catch (error) {
+        console.error("Erro ao carregar KPIs:", error);
       }
     };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
+    carregarKpis();
   }, []);
 
-  const calculatedKpiData = useMemo(() => {
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    // Garantir que estoqueData é um array
-    const estoqueArray = Array.isArray(estoqueData) ? estoqueData : [];
-    const clientesArray = Array.isArray(clientesData) ? clientesData : [];
-
-    const itensBaixoEstoque = estoqueArray.filter(
-      (item) => item.quantidade < item.estoqueMinimo && item.quantidade > 0
-    );
-    const countItensBaixo = itensBaixoEstoque.length;
-
-    const todosAgendamentos = clientesArray.flatMap(cliente =>
-        (cliente.historicoServicos || []).map(servico => ({
-            ...servico,
-            clienteNome: cliente.nome,
-            dataServicoObj: parseDate(servico.dataServico)
-        }))
-    ).filter(servico => servico.dataServicoObj);
-
-    const agendamentosHoje = todosAgendamentos.filter(
-        servico => isToday(servico.dataServicoObj)
-    ).length;
-
-    const agendamentosFuturos = todosAgendamentos.filter(
-        servico => isFuture(servico.dataServicoObj)
-    ).length;
-
-    const totalServicosHistorico = todosAgendamentos.length;
-    const taxaOcupacao = totalServicosHistorico > 0
-      ? ((agendamentosFuturos / totalServicosHistorico) * 100).toFixed(0)
-      : 0;
-
-    return [
-      { title: "Total de Itens em Baixo Estoque", value: countItensBaixo, icon: Info, caption: `${countItensBaixo} item(ns) requer atenção` },
-      { title: "Agendamentos de Hoje", value: agendamentosHoje, icon: CalendarDays, caption: `${agendamentosHoje} serviço(s) hoje` },
-      { title: "Taxa de Ocupação de Serviços", value: `${taxaOcupacao}%`, icon: TrendingUp, caption: `${agendamentosFuturos} agendamentos futuros` },
-      { title: "Total de Agendamentos Futuros", value: agendamentosFuturos, icon: Clock, caption: `Próximos serviços` },
-    ];
-  }, [estoqueData, clientesData]);
-
-  const alertasEstoque = useMemo(() => {
-    // Garantir que estoqueData é um array
-    const estoqueArray = Array.isArray(estoqueData) ? estoqueData : [];
-    
-    return estoqueArray
-      .filter((item) => item.quantidade < item.estoqueMinimo)
-      .sort((a, b) => a.quantidade - b.quantidade)
-      .slice(0, 3)
-      .map(item => ({
-          id: item.id,
-          nome: item.nome,
-          estoque: item.quantidade,
-          status: item.quantidade === 0 ? "Crítico" : "Atenção"
-      }));
-  }, [estoqueData]);
-
-  const proximosAgendamentos = useMemo(() => {
-    // Garantir que clientesData é um array
-    const clientesArray = Array.isArray(clientesData) ? clientesData : [];
-    
-    return clientesArray
-      .flatMap(cliente =>
-        (cliente.historicoServicos || []).map(servico => ({
-            idServico: servico.id || `temp-${servico.dataServico}-${Math.random()}`,
-            idCliente: cliente.id,
-            clienteNome: cliente.nome,
-            tipo: servico.servico,
-            dataServicoObj: parseDate(servico.dataServico),
-            dataOriginal: servico.dataServico
-        }))
-      )
-      .filter(servico => servico.dataServicoObj && isFuture(servico.dataServicoObj))
-      .sort((a, b) => a.dataServicoObj - b.dataServicoObj)
-      .slice(0, 3)
-      .map(ag => {
-          let diaTexto = ag.dataOriginal;
-          if (ag.dataServicoObj) {
-              const hoje = new Date(); hoje.setHours(0,0,0,0);
-              const amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1);
-              if (ag.dataServicoObj.getTime() === hoje.getTime()) {
-                  diaTexto = "Hoje";
-              } else if (ag.dataServicoObj.getTime() === amanha.getTime()) {
-                  diaTexto = "Amanhã";
-              }
-              else {
-                  diaTexto = ag.dataServicoObj.toLocaleDateString('pt-BR');
-              }
-          }
-          return {
-              ...ag,
-              dia: diaTexto
-          }
-      });
-  }, [clientesData]);
-
-  const handleEstoqueItemClick = (itemId) => {
-    console.log(`Navegando para /estoque com foco no item ID: ${itemId}`);
-    navigate('/estoque', { state: { focusItemId: itemId } });
-  };
-
-  const handleAgendamentoItemClick = (idCliente, idServico) => {
-    console.log(`Navegando para /clientes com foco no cliente ${idCliente}, serviço ${idServico}`);
-    navigate('/clientes', { state: { focusClienteId: idCliente, focusServicoId: idServico } });
-  };
-
+  const calculatedKpiData = useMemo(() => [
+    { title: "Total de Itens em Baixo Estoque", value: qtdItensCriticos, icon: Info, caption: `${qtdItensCriticos} item(ns) requer atenção` },
+    { title: "Agendamentos de Hoje", value: qtdAgendamentosHoje, icon: CalendarDays, caption: `${qtdAgendamentosHoje} serviço(s) hoje` },
+    { title: "Taxa de Ocupação de Serviços", value: `${taxaOcupacaoServicos}%`, icon: TrendingUp, caption: `${qtdAgendamentosFuturos} agendamentos futuros` },
+    { title: "Total de Agendamentos Futuros", value: qtdAgendamentosFuturos, icon: Clock, caption: `Próximos serviços` },
+  ], [itensCriticos, qtdAgendamentosHoje, taxaOcupacaoServicos, qtdAgendamentosFuturos]);
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-[Inter]">
@@ -238,87 +156,95 @@ export default function PaginaInicial() {
 
             {/* Seções lado a lado */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-[1600px] mx-auto px-2">
-              {/* Alertas de Estoque */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
-                <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
-                  Alertas de Estoque ( Total: {alertasEstoque.length} )
-                </div>
-                <div className="divide-y divide-gray-100 min-h-[200px]">
-                  {loading ? <p className="p-6 text-center">Carregando...</p> :
-                   alertasEstoque.length === 0 ? <p className="p-6 text-center text-gray-500">Nenhum item com estoque baixo.</p> :
-                   alertasEstoque.map((produto) => (
-                    <div
-                      key={produto.id}
-                      className="flex flex-col md:flex-row items-center justify-between px-6 py-4"
-                    >
-                      <div className="text-center md:text-left">
-                        <p className="font-semibold text-gray-800 text-base">
-                          {produto.nome}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Estoque: {produto.estoque} unidades
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 mt-3 md:mt-0">
-                        <span
-                          className={`text-sm px-4 py-2 rounded-full font-bold ${
-                            produto.status === "Crítico"
-                              ? "bg-red-200 text-black-800"
-                              : "bg-yellow-200 text-black-800"
-                          }`}
-                        >
-                          {produto.status}
-                        </span>
-                        <button
-                            title="Ver detalhes no estoque"
-                            onClick={() => handleEstoqueItemClick(produto.id)}
-                            className="border border-gray-300 p-1.5 rounded-md hover:bg-gray-100 transition text-gray-600 hover:text-[#003d6b]"
-                        >
-                          <SlidersHorizontal className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+  <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
+    Itens em Estoque Crítico ( Total: {itensCriticos.length} )
+  </div>
+  <div className="divide-y divide-gray-100 min-h-[200px]">
+    {loading ? (
+      <p className="p-6 text-center">Carregando...</p>
+    ) : itensCriticos.length === 0 ? (
+      <p className="p-6 text-center text-gray-500">Nenhum item crítico encontrado.</p>
+    ) : (
+      itensCriticos.map((item) => (
+        <div
+          key={item.id}
+          className="flex flex-col md:flex-row items-center justify-between px-6 py-4"
+        >
+          <div className="text-center md:text-left">
+            <p className="font-semibold text-gray-800 text-base">
+              {item.nomeProduto || "Sem nome"}
+            </p>
+            <p className="text-sm text-gray-600">
+              Quantidade: {item.quantidadeTotal} | Mínimo: {item.nivelMinimo}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 mt-3 md:mt-0">
+            <span
+              className={`text-sm px-4 py-2 rounded-full font-bold ${
+                item.status === "Crítico"
+                  ? "bg-red-200 text-black-800"
+                  : "bg-yellow-200 text-black-800"
+              }`}
+            >
+              {item.status}
+            </span>
+            <button
+              title="Ver detalhes do estoque"
+              onClick={() => handleEstoqueItemClick(item.id)}
+              className="border border-gray-300 p-1.5 rounded-md hover:bg-gray-100 transition text-gray-600 hover:text-[#003d6b]"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
 
-              {/* Próximos Agendamentos */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
-                <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
-                  Próximos Agendamentos ( Total: {proximosAgendamentos.length} )
-                </div>
-                <div className="divide-y divide-gray-100 min-h-[200px]">
-                  {loading ? <p className="p-6 text-center">Carregando...</p> :
-                   proximosAgendamentos.length === 0 ? <p className="p-6 text-center text-gray-500">Nenhum agendamento futuro encontrado.</p> :
-                   proximosAgendamentos.map((ag) => (
-                    <div
-                      key={ag.idCliente + '-' + ag.idServico}
-                      className="flex flex-col md:flex-row items-center justify-between px-6 py-4"
-                    >
-                      <div className="text-center md:text-left">
-                        <p className="font-semibold text-gray-800 text-base">
-                          {ag.clienteNome}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {ag.tipo}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 mt-3 md:mt-0">
-                        <span className="bg-gray-100 text-gray-700 text-base font-semibold px-5 py-2 rounded-full">
-                          {ag.dia}
-                        </span>
-                        <button
-                          title="Ver detalhes do agendamento"
-                          onClick={() => handleAgendamentoItemClick(ag.idCliente, ag.idServico)}
-                          className="border border-gray-300 p-1.5 rounded-md hover:bg-gray-100 transition text-gray-600 hover:text-[#003d6b]"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
+           <div className="bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+  <div className="bg-[#003d6b] text-white py-4 px-6 text-center font-semibold text-lg tracking-wide">
+    Próximos Agendamentos ( Total: {agendamentosFuturos.length} )
+  </div>
+  <div className="divide-y divide-gray-100 min-h-[200px]">
+    {loading ? (
+      <p className="p-6 text-center">Carregando...</p>
+    ) : agendamentosFuturos.length === 0 ? (
+      <p className="p-6 text-center text-gray-500">Nenhum agendamento futuro encontrado.</p>
+    ) : (
+      agendamentosFuturos.map((ag) => (
+        <div
+          key={ag.idAgendamento}
+          className="flex flex-col md:flex-row items-center justify-between px-6 py-4"
+        >
+          <div className="text-center md:text-left">
+            <p className="font-semibold text-gray-800 text-base">
+              {ag.agendamentoObservacao || "Sem descrição"}
+            </p>
+            <p className="text-sm text-gray-600">
+              Status: {ag.status} | Valor: R$ {ag.valorTotal.toFixed(2)}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 mt-3 md:mt-0">
+            <span className="bg-gray-100 text-gray-700 text-base font-semibold px-5 py-2 rounded-full">
+              {ag.dataAgendamento}
+            </span>
+            <button
+              title="Ver detalhes do agendamento"
+              onClick={() => handleAgendamentoItemClick(ag.idAgendamento)}
+              className="border border-gray-300 p-1.5 rounded-md hover:bg-gray-100 transition text-gray-600 hover:text-[#003d6b]"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
             </div>
           </main>
       </div>
