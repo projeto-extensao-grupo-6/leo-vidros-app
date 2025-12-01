@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-  import { motion, AnimatePresence } from "framer-motion";
-  import AccountCircle from "@mui/icons-material/AccountCircle";
-  import LockIcon from "@mui/icons-material/Lock";
-  import Button from "../../shared/components/buttons/button.component";
-  import { useNavigate } from "react-router-dom"
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import AccountCircle from "@mui/icons-material/AccountCircle";
+import LockIcon from "@mui/icons-material/Lock";
+import Button from "../../shared/components/buttons/button.component";
+import { useNavigate } from "react-router-dom"
+import Input from "../../shared/components/Ui/Input";
 
   function Login() {
     const [email, setEmail] = useState("");
@@ -43,27 +45,23 @@ import React, { useState } from "react";
 
         setModalOpen(true);
 
-        const redirectPath = firstLogin 
-          ? `/primeiroAcesso/${id}` 
-          : "/paginaInicial";
-
-      setTimeout(() => {
-        setModalOpen(false);
-        
-        // Verificar se é primeiro login para redirecionar para nova senha
-        if (data.firstLogin === true || data.firstLogin === "true") {
-          navigate(`/primeiroAcesso/${data.id}`);
-        } else {
-          navigate("/paginaInicial");
-        }
-      }, 2000);
-  
-    } catch (error) {
-      setError(error.response?.data?.message || "Email ou senha inválidos");
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTimeout(() => {
+          setModalOpen(false);
+          
+          // Verificar se é primeiro login para redirecionar para nova senha
+          if (data.firstLogin === true || data.firstLogin === "true") {
+            navigate(`/primeiroAcesso/${data.id}`);
+          } else {
+            navigate("/paginaInicial");
+          }
+        }, 2000);
+    
+      } catch (error) {
+        setError(error.response?.data?.message || "Email ou senha inválidos");
+      } finally {
+        setLoading(false);
+      }
+    };
   
 
     const variants = {
