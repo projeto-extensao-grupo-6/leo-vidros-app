@@ -33,13 +33,8 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
   const [userEmail, setUserEmail] = useState("carregando@leovidros.com");
   
   useEffect(() => {
-<<<<<<< HEAD
     const storedName = sessionStorage.getItem('loggedUserName');
     const storedEmail = sessionStorage.getItem('loggedUserEmail');
-=======
-    const storedName = localStorage.getItem('loggedUserName');
-    const storedEmail = localStorage.getItem('loggedUserEmail');
->>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
 
     if (storedName) {
       setUserName(storedName);

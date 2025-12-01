@@ -3,13 +3,8 @@ import Header from "../../shared/components/header/header";
 import Sidebar from "../../shared/components/sidebar/sidebar";
 import { Search, Check, X, CheckCheck, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import ModalConfirmacao from "../../shared/components/modalAceiteOrRecusa/ModalAceiteOrRecusa";
-<<<<<<< HEAD
 import Api from "../../axios/Api";
 
-=======
-
-const API_URL = "http://localhost:3000/api/solicitacoes"; 
->>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
 const ITENS_POR_PAGINA = 10;
 
 export default function Acesso() {
@@ -44,7 +39,6 @@ export default function Acesso() {
       let url;
   
       if (busca.trim()) {
-<<<<<<< HEAD
         url = `/solicitacoes/findAllBy?nome=${encodeURIComponent(busca.trim())}`;
       } else {
         url = `/solicitacoes?status=${statusAtual}`;
@@ -53,17 +47,6 @@ export default function Acesso() {
       const response = await Api.get(url);
       // Garantindo que sempre seja um array
       const data = Array.isArray(response.data) ? response.data : [];
-=======
-        url = `${API_URL}/findAllBy?nome=${encodeURIComponent(busca.trim())}`;
-      } else {
-        url = `${API_URL}?status=${statusAtual}`;
-      }
-  
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-  
-      const data = await response.json();
->>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
       setSolicitacoes(data);
     } catch (error) {
       console.error("Erro ao buscar solicitações:", error);
@@ -73,20 +56,11 @@ export default function Acesso() {
     }
   }
   
-<<<<<<< HEAD
   const updateSolicitacaoStatus = (ids, novoStatus) => {
     const promises = ids.map(id => {
       const endpoint = novoStatus === 'Aprovado' 
         ? `/solicitacoes/aceitar/${id}` 
         : `/solicitacoes/recusar/${id}`;
-=======
-  
-  const updateSolicitacaoStatus = async (ids, novoStatus) => {
-    const promises = ids.map(id => {
-      const endpoint = novoStatus === 'Aprovado' 
-        ? `${API_URL}/aceitar/${id}` 
-        : `${API_URL}/recusar/${id}`;
->>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
   
       const statusBackend = novoStatus === 'Aprovado' ? 'ACEITO' : 'RECUSADO';
   
@@ -99,7 +73,6 @@ export default function Acesso() {
         options.body = JSON.stringify({ status: statusBackend });
       }
   
-<<<<<<< HEAD
       return Api.request({
         url: endpoint,
         method: options.method,
@@ -108,11 +81,6 @@ export default function Acesso() {
       }).then(res => {
         if (res.status < 200 || res.status >= 300) throw new Error(`Falha ao atualizar ${id}`);
         return res.data;
-=======
-      return fetch(endpoint, options).then(res => {
-        if (!res.ok) throw new Error(`Falha ao atualizar ${id}`);
-        return res.json();
->>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
       });
     });
   
