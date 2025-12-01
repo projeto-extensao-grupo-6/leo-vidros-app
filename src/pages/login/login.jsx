@@ -45,27 +45,23 @@ import Input from "../../shared/components/Ui/Input";
 
         setModalOpen(true);
 
-        const redirectPath = firstLogin 
-          ? `/primeiroAcesso/${id}` 
-          : "/paginaInicial";
-
-      setTimeout(() => {
-        setModalOpen(false);
-        
-        // Verificar se é primeiro login para redirecionar para nova senha
-        if (data.firstLogin === true || data.firstLogin === "true") {
-          navigate(`/primeiroAcesso/${data.id}`);
-        } else {
-          navigate("/paginaInicial");
-        }
-      }, 2000);
-  
-    } catch (error) {
-      setError(error.response?.data?.message || "Email ou senha inválidos");
-    } finally {
-      setLoading(false);
-    }
-  };
+        setTimeout(() => {
+          setModalOpen(false);
+          
+          // Verificar se é primeiro login para redirecionar para nova senha
+          if (data.firstLogin === true || data.firstLogin === "true") {
+            navigate(`/primeiroAcesso/${data.id}`);
+          } else {
+            navigate("/paginaInicial");
+          }
+        }, 2000);
+    
+      } catch (error) {
+        setError(error.response?.data?.message || "Email ou senha inválidos");
+      } finally {
+        setLoading(false);
+      }
+    };
   
 
     const variants = {
