@@ -104,6 +104,8 @@ export default function PaginaInicial() {
 
       } catch (error) {
         console.error("Erro ao carregar KPIs:", error);
+      } finally {
+        setLoading(false);
       }
     };
     carregarKpis();
@@ -235,7 +237,7 @@ export default function PaginaInicial() {
                           {ag.agendamentoObservacao || "Sem descrição"}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Status: {ag.status} | Valor: R$ {ag.valorTotal.toFixed(2)}
+                          Etapa: {ag.status} | Valor: R$ {ag.valorTotal.toFixed(2)}
                         </p>
                       </div>
                       <div className="flex items-center gap-3 mt-3 md:mt-0">
