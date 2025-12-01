@@ -78,46 +78,55 @@ export default function Perfil() {
         const userId = sessionStorage.getItem('userId');
 
         if (!userId) {
-            console.error("ID do usuário não encontrado no localStorage. Faça o login.");
-            setMessage({ type: 'error', text: 'Usuário não autenticado. Faça o login novamente.' });
+            console.error("ID do usuário não encontrado no sessionStorage.");
+            // window.location.href = '/login';
             return;
         }
 
         setLoading(true);
         Api.get(`/usuarios/${userId}`)
             .then(response => {
-                const data = response.data;
+                // Tenta acessar os dados em diferentes estruturas possíveis
+                const userData = response.data.usuario || response.data.data || response.data;
+
+                console.log('userData extraído:', userData);
+                console.log('userData.endereco:', userData.endereco);
+
+                // Extrai o endereço com segurança
+                const endereco = userData.endereco || {};
+
+                console.log('Endereço processado:', endereco);
 
                 setFormData({
-                    nome: data.nome || "",
-                    cpf: data.cpf || "",
-                    email: data.email || "",
-                    telefone: data.telefone || "",
-                    cargo: data.cargo || "Cargo não informado",
+                    nome: userData.nome || "",
+                    cpf: userData.cpf || "",
+                    email: userData.email || "",
+                    telefone: userData.telefone || "",
+                    cargo: "Gerente Administrativo",
 
-                    rua: data.endereco?.rua || "",
-                    cep: data.endereco?.cep || "",
-                    bairro: data.endereco?.bairro || "",
-                    cidade: data.endereco?.cidade || "",
-                    numero: data.endereco?.numero || "",
-                    estado: data.endereco?.uf || "",
-                    pais: data.endereco?.pais || "",
-                    complemento: data.endereco?.complemento || "",
+                    rua: endereco.rua || endereco.logradouro || "",
+                    cep: endereco.cep || "",
+                    bairro: endereco.bairro || "",
+                    cidade: endereco.cidade || "",
+                    numero: endereco.numero || "",
+                    estado: endereco.uf || endereco.estado || "",
+                    pais: endereco.pais || "Brasil",
+                    complemento: endereco.complemento || "",
 
                     senhaAtual: "",
                     novaSenha: "",
                     confirmarSenha: ""
                 });
-                setMessage({ type: '', text: '' });
+
+                console.log('FormData setado com sucesso');
             })
             .catch(error => {
-                console.error("Erro ao carregar perfil:", error);
-                setMessage({ 
-                    type: 'error', 
-                    text: 'Erro ao carregar dados do perfil. Tente novamente.' 
-                });
-            })
-            .finally(() => setLoading(false));
+                console.error("ERRO AO CARREGAR PERFIL");
+                console.error("Erro:", error);
+                console.error("Error.response:", error.response);
+                console.error("Error.response.data:", error.response?.data);
+                console.error("Error.message:", error.message);
+            });
 
     }, []);
 
@@ -170,7 +179,7 @@ export default function Perfil() {
             cep: formData.cep,
             cidade: formData.cidade,
             bairro: formData.bairro,
-            uf: formData.estado ? formData.estado.substring(0, 2) : "",
+            uf: formData.estado,
             numero: formData.numero,
             complemento: formData.complemento,
             pais: formData.pais,
@@ -181,8 +190,7 @@ export default function Perfil() {
             email: formData.email,
             cpf: formData.cpf,
             telefone: formData.telefone,
-            endereco: enderecoRequest,
-            ...(isChangingPassword ? { senha: formData.novaSenha } : {})
+            endereco: enderecoRequest
         };
 
         Api.put(`/usuarios/${userId}`, usuarioRequest)
@@ -194,22 +202,38 @@ export default function Perfil() {
                 });
                 setIsEditing(false);
                 setIsChangingPassword(false);
-                
-                setFormData(prev => ({
-                    ...prev,
-                    senhaAtual: "",
-                    novaSenha: "",
-                    confirmarSenha: ""
-                }));
+
+                // Recarrega os dados
+                return Api.get(`/usuarios/${userId}`);
+            })
+            .then(response => {
+                const userData = response.data.usuario || response.data.data || response.data;
+                const endereco = userData.endereco || {};
+
+                setFormData({
+                    nome: userData.nome || "",
+                    cpf: userData.cpf || "",
+                    email: userData.email || "",
+                    telefone: userData.telefone || "",
+                    cargo: "Gerente Administrativo",
+                    rua: endereco.rua || "",
+                    cep: endereco.cep || "",
+                    bairro: endereco.bairro || "",
+                    cidade: endereco.cidade || "",
+                    numero: endereco.numero || "",
+                    estado: endereco.uf || endereco.estado || "",
+                    pais: endereco.pais || "Brasil",
+                    complemento: endereco.complemento || ""
+                    // senhaAtual: "",
+                    // novaSenha: "",
+                    // confirmarSenha: ""
+                });
             })
             .catch(error => {
                 console.error("Erro ao salvar:", error);
-                setMessage({ 
-                    type: 'error', 
-                    text: 'Erro ao salvar alterações. Verifique os dados e tente novamente.' 
-                });
-            })
-            .finally(() => setLoading(false));
+                console.error("Detalhes:", error.response?.data);
+                alert('Erro ao salvar as informações. Verifique o console.');
+            });
     };
 
     const toggleEdit = () => {

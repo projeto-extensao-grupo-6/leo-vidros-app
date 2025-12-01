@@ -18,10 +18,17 @@ Api.interceptors.request.use((config) => {
 Api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Permite que algumas requisições não redirecionem automaticamente
+    const skipRedirect = error.config?.skipAuthRedirect;
+    
+    if ((error.response?.status === 401 || error.response?.status === 403) && !skipRedirect) {
+      const message = error.response?.status === 403 
+        ? "Acesso negado. Faça login novamente."
+        : "Sessão expirada. Faça login novamente.";
+      
       Swal.fire({
         icon: "error",
-        text: `Sessão expirada. Faça login novamente.`,
+        text: message,
         timer: 2500,
         showConfirmButton: false,
       });
