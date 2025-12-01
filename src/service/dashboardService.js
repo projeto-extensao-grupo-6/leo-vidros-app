@@ -1,31 +1,40 @@
-import axios from "./api";
+import Api from "../axios/Api";
 
 const API_DASHBOARD = "/dashboard";
 
 export const getQtdItensCriticos = () => {
-    return axios.get(`${API_DASHBOARD}/qtd-itens-criticos`);
+    return Api.get(`${API_DASHBOARD}/qtd-itens-criticos`);
 }
 
 export const getQtdAgendamentosHoje = () => {
-    return axios.get(`${API_DASHBOARD}/qtd-agendamentos-hoje`);
+    return Api.get(`${API_DASHBOARD}/qtd-agendamentos-hoje`);
 }
 
-export const getTaxaOcupacaoServicos = () => {
-    return axios.get(`${API_DASHBOARD}/taxa-ocupacao-servicos`);
+export const getTaxaOcupacaoServicos = async () => {
+    try {
+        const response = await Api.get(`${API_DASHBOARD}/taxa-ocupacao-servicos`);
+        // Se a taxa de ocupação for null, retorna 0
+        if (response.data === null || response.data === undefined || response.data.taxaOcupacaoServicos === null || response.data.taxaOcupacaoServicos === undefined) {
+            return { ...response, data: { ...response.data, taxaOcupacaoServicos: 0 } };
+        }
+        return response;
+    } catch (error) {
+        throw error;
+    }
 }
 
 export const getQtdAgendamentosFuturos = () => {
-    return axios.get(`${API_DASHBOARD}/qtd-agendamentos-futuros`)
+    return Api.get(`${API_DASHBOARD}/qtd-agendamentos-futuros`)
 }
 
 export const getEstoqueCritico = () => {
-    return axios.get(`${API_DASHBOARD}/estoque-critico`);
+    return Api.get(`${API_DASHBOARD}/estoque-critico`);
 }
 
 export const getAgendamentosFuturos = () => {
-    return axios.get(`${API_DASHBOARD}/agendamentos-futuros`);
+    return Api.get(`${API_DASHBOARD}/agendamentos-futuros`);
 }
 
 export const getQtdServicosHoje = () => {
-    return axios.get(`${API_DASHBOARD}/qtd-servicos-hoje`);
+    return Api.get(`${API_DASHBOARD}/qtd-servicos-hoje`);
 }

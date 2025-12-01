@@ -73,6 +73,14 @@ export default function PaginaInicial() {
   const [loading, setLoading] = useState(true);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  const handleEstoqueItemClick = (itemId) => {
+    navigate(`/estoque?item=${itemId}`);
+  };
+
+  const handleAgendamentoItemClick = (agendamentoId) => {
+    navigate(`/agendamentos?id=${agendamentoId}`);
+  };
+
   useEffect(() => {
     const carregarKpis = async () => {
       try {
