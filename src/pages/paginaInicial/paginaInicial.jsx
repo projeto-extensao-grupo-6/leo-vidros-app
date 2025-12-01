@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Kpis from "../../shared/components/kpis/kpis";
 import Api from "../../axios/Api";
-import { getQtdAgendamentosFuturos, getQtdAgendamentosHoje, getQtdItensCriticos, getTaxaOcupacaoServicos, getEstoqueCritico, getAgendamentosFuturos } from "../../service/dashboardService";
+import { getQtdAgendamentosFuturos, getQtdAgendamentosHoje, getQtdItensCriticos, getTaxaOcupacaoServicos, getEstoqueCritico, getAgendamentosFuturos, getQtdServicosHoje} from "../../service/dashboardService";
 
 const isToday = (date) => {
     if (!date) return false;
@@ -61,6 +61,7 @@ export default function PaginaInicial() {
     const [taxaOcupacaoServicos, setTaxaOcupacaoServicos] = useState(0.0);
     const [qtdItensCriticos, setQtdItensCriticos] = useState(0);
     const [agendamentosFuturos, setAgendamentosFuturos] = useState([]);
+    const [qtdServicosHoje, setQtdServicosHoje] = useState(0);
     const [loading, setLoading] = useState(true);
     const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -93,14 +94,16 @@ export default function PaginaInicial() {
           agendamentosFuturosRes,
           itensCriticosRes,
           taxaOcupacaoRes,
-          qtdItensCriticosRes
+          qtdItensCriticosRes,
+          qtdServicosHojeRes
         ] = await Promise.all([
           getQtdAgendamentosHoje(),
           getQtdAgendamentosFuturos(),
           getAgendamentosFuturos(),
           getEstoqueCritico(),
           getTaxaOcupacaoServicos(),
-          getQtdItensCriticos()
+          getQtdItensCriticos(),
+          getQtdServicosHoje()
         ]);
 
       console.log(taxaOcupacaoRes.data);
@@ -110,6 +113,7 @@ export default function PaginaInicial() {
       setTaxaOcupacaoServicos(taxaOcupacaoRes.data.taxaOcupacaoServicos);
       setAgendamentosFuturos(agendamentosFuturosRes.data);
       setItensCriticos(itensCriticosRes.data);
+      setQtdServicosHoje(qtdServicosHojeRes.data.qtdServicosHoje);
     } catch (error) {
         console.error("Erro ao carregar KPIs:", error);
       }
@@ -119,7 +123,7 @@ export default function PaginaInicial() {
 
   const calculatedKpiData = useMemo(() => [
     { title: "Total de Itens em Baixo Estoque", value: qtdItensCriticos, icon: Info, caption: `${qtdItensCriticos} item(ns) requer atenção` },
-    { title: "Agendamentos de Hoje", value: qtdAgendamentosHoje, icon: CalendarDays, caption: `${qtdAgendamentosHoje} serviço(s) hoje` },
+    { title: "Agendamentos de Hoje", value: qtdAgendamentosHoje, icon: CalendarDays, caption: `${qtdServicosHoje} serviço(s) hoje` },
     { title: "Taxa de Ocupação de Serviços", value: `${taxaOcupacaoServicos}%`, icon: TrendingUp, caption: `${qtdAgendamentosFuturos} agendamentos futuros` },
     { title: "Total de Agendamentos Futuros", value: qtdAgendamentosFuturos, icon: Clock, caption: `Próximos serviços` },
   ], [itensCriticos, qtdAgendamentosHoje, taxaOcupacaoServicos, qtdAgendamentosFuturos]);

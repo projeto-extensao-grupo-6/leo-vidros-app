@@ -25,3 +25,7 @@ export const getEstoqueCritico = () => {
 export const getAgendamentosFuturos = () => {
     return axios.get(`${API_DASHBOARD}/agendamentos-futuros`);
 }
+
+export const getQtdServicosHoje = () => {
+    return axios.get(`${API_DASHBOARD}/qtd-servicos-hoje`);
+}
