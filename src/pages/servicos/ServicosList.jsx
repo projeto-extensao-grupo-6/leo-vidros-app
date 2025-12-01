@@ -1,7 +1,120 @@
 import React, { useMemo, useState, useEffect } from "react";
-import "./servicos.css";
-import { FaWrench, FaEdit, FaTrash, FaExternalLinkAlt, FaExclamationTriangle, FaUser } from "react-icons/fa";
-import Api from "../../axios/Api";
+import { FaWrench, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { BiSolidPencil } from "react-icons/bi";
+import SkeletonLoader from "../../shared/components/skeleton/SkeletonLoader";
+import NovoServicoModal from "../../shared/components/pedidosServicosComponents/NovoServicoModal";
+import EditarServicoModal from "../../shared/components/pedidosServicosComponents/EditarServicoModal";
+// import Api from '../../axios/Api';
+
+// ===== DADOS MOCADOS =====
+const MOCK_CLIENTES = [
+    { id: "1", nome: "João Silva" },
+    { id: "2", nome: "Maria Santos" },
+    { id: "3", nome: "Carlos Oliveira" },
+    { id: "4", nome: "Ana Costa" },
+    { id: "5", nome: "Pedro Almeida" },
+];
+
+const MOCK_SERVICOS = [
+    {
+        id: "1",
+        clienteId: "1",
+        clienteNome: "João Silva",
+        data: "2025-11-20",
+        descricao: "Troca de óleo e filtros do motor",
+        status: "Ativo",
+        etapa: "Execução em andamento",
+        progresso: [3, 6]
+    },
+    {
+        id: "2",
+        clienteId: "2",
+        clienteNome: "Maria Santos",
+        data: "2025-11-15",
+        descricao: "Revisão completa de freios ABS",
+        status: "Finalizado",
+        etapa: "Concluído",
+        progresso: [6, 6]
+    },
+    {
+        id: "3",
+        clienteId: "3",
+        clienteNome: "Carlos Oliveira",
+        data: "2025-11-25",
+        descricao: "Alinhamento e balanceamento de rodas",
+        status: "Ativo",
+        etapa: "Aguardando orçamento",
+        progresso: [1, 6]
+    },
+    {
+        id: "4",
+        clienteId: "4",
+        clienteNome: "Ana Costa",
+        data: "2025-11-18",
+        descricao: "Reparo de sistema elétrico e bateria",
+        status: "Ativo",
+        etapa: "Aguardando peças",
+        progresso: [2, 6]
+    },
+    {
+        id: "5",
+        clienteId: "5",
+        clienteNome: "Pedro Almeida",
+        data: "2025-11-22",
+        descricao: "Troca de correia dentada e tensor",
+        status: "Ativo",
+        etapa: "Orçamento aprovado",
+        progresso: [2, 6]
+    },
+    {
+        id: "6",
+        clienteId: "1",
+        clienteNome: "João Silva",
+        data: "2025-11-10",
+        descricao: "Limpeza de bicos injetores",
+        status: "Finalizado",
+        etapa: "Concluído",
+        progresso: [6, 6]
+    },
+    {
+        id: "7",
+        clienteId: "2",
+        clienteNome: "Maria Santos",
+        data: "2025-11-26",
+        descricao: "Substituição de amortecedores dianteiros",
+        status: "Ativo",
+        etapa: "Execução em andamento",
+        progresso: [4, 6]
+    },
+];
+// ===== FIM DADOS MOCADOS =====
+
+function StatusPill({ status }) {
+    const styles = {
+        Ativo: "inline-flex items-center px-2.5 py-1 rounded-2xl text-[11px] font-medium uppercase tracking-wide bg-[#bfdbfe] text-[#1e3a8a]",
+        Finalizado: "inline-flex items-center px-2.5 py-1 rounded-2xl text-[11px] font-medium uppercase tracking-wide bg-[#d1fae5] text-[#065f46]",
+        "Aguardando": "inline-flex items-center px-2.5 py-1 rounded-2xl text-[11px] font-medium uppercase tracking-wide bg-[#fef3c7] text-[#92400e]"
+    };
+    return <span className={styles[status] || styles.Ativo}>{status}</span>;
+}
+
+function Progress({ value = 0, total = 6, dark = false }) {
+    const pct = Math.min(100, Math.round((Number(value) / Number(total)) * 100));
+    return (
+        <div className="flex items-center gap-2 w-full mt-1">
+            <div className="h-2 w-full max-w-[120px] rounded-full bg-slate-200 overflow-hidden">
+                <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                        width: `${pct}%`,
+                        backgroundColor: dark ? "#475569" : "#007EA7"
+                    }}
+                />
+            </div>
+            <span className="text-xs text-slate-500 font-medium">{value}/{total}</span>
+        </div>
+    );
+}
 
 const formatServicoId = (id) => {
     if (!id) return '';
@@ -11,7 +124,7 @@ const formatServicoId = (id) => {
     return id;
 }
 
-const ITEMS_PER_PAGE = 3;
+const ITEMS_PER_PAGE = 5;
 const NOVO_FORM = () => ({
     clienteId: "",
     clienteNome: "",
@@ -28,7 +141,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [modal, setModal] = useState({ confirm: false, view: false, form: false });
+    const [modal, setModal] = useState({ confirm: false, view: false, form: false, novo: false, editar: false });
     const [mode, setMode] = useState("new");
     const [current, setCurrent] = useState(null);
     const [targetId, setTargetId] = useState(null);
@@ -37,34 +150,44 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
 
     const fetchData = async () => {
         setLoading(true);
-        try {
-            const [servicosRes, clientesRes] = await Promise.all([
-                Api.get("/servicos"),
-                Api.get("/clientes")
-            ]);
-            const servicosData = servicosRes.data;
-            const clientesData = clientesRes.data;
-
-            const sortedServicos = servicosData.sort((a, b) => {
+        setTimeout(() => {
+            const sortedServicos = [...MOCK_SERVICOS].sort((a, b) => {
                 const idAisNum = /^\d+$/.test(a.id);
                 const idBisNum = /^\d+$/.test(b.id);
-
-                if (idAisNum && idBisNum) {
-                    return parseInt(b.id, 10) - parseInt(a.id, 10);
-                }
-
+                if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
                 if (a.id < b.id) return 1;
                 if (a.id > b.id) return -1;
                 return 0;
             });
-
             setServicos(sortedServicos);
-            setClientes(clientesData);
+            setClientes(MOCK_CLIENTES);
+            setLoading(false);
+        }, 500);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        try {
+            const response = await Api.get('/servicos', { skipAuthRedirect: true });
+            const servicosData = response.data || [];
+            
+            const sortedServicos = [...servicosData].sort((a, b) => {
+                const idAisNum = /^\d+$/.test(a.id);
+                const idBisNum = /^\d+$/.test(b.id);
+                if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
+                if (a.id < b.id) return 1;
+                if (a.id > b.id) return -1;
+                return 0;
+            });
+            setServicos(sortedServicos);
         } catch (error) {
-            console.error("Erro ao buscar dados:", error);
+            console.error('Erro ao buscar serviços:', error);
+            if (error.response?.status === 403 || error.response?.status === 401) {
+                console.warn('Sem permissão para acessar serviços. Verifique se está logado.');
+            }
+            setServicos([]);
         } finally {
             setLoading(false);
         }
+        */
     };
 
     useEffect(() => {
@@ -73,21 +196,27 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
 
     useEffect(() => {
         if (triggerNovoRegistro) {
-            setMode("new");
-            setForm(NOVO_FORM());
-            setErrors({});
-            setModal((m) => ({ ...m, form: true }));
+            setModal((m) => ({ ...m, novo: true }));
             onNovoRegistroHandled();
         }
     }, [triggerNovoRegistro, onNovoRegistroHandled]);
 
     useEffect(() => {
         const onKey = (e) => {
-            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false });
+            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, []);
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString + 'T00:00:00').toLocaleDateString("pt-BR");
+        } catch (e) {
+            return 'Data inválida';
+        }
+    }
 
     const listaFiltrada = useMemo(() => {
         let lista = servicos;
@@ -100,12 +229,17 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         }
 
         if (statusFilter && statusFilter !== "Todos") {
-            const targetStatus = statusFilter === "Finalizado" ? "Finalizado" : "Ativo";
-            lista = lista.filter(s => s.status === targetStatus);
+            const statusArray = Array.isArray(statusFilter) ? statusFilter : [statusFilter];
+            if (statusArray.length > 0 && !statusArray.includes("Todos")) {
+                lista = lista.filter(s => statusArray.includes(s.status));
+            }
         }
 
         if (etapaFilter && etapaFilter !== "Todos") {
-            lista = lista.filter(s => s.etapa === etapaFilter);
+            const etapaArray = Array.isArray(etapaFilter) ? etapaFilter : [etapaFilter];
+            if (etapaArray.length > 0 && !etapaArray.includes("Todos")) {
+                lista = lista.filter(s => etapaArray.includes(s.etapa));
+            }
         }
 
         return lista;
@@ -119,349 +253,198 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
     useEffect(() => {
         if (page > totalPages && totalPages > 0) setPage(totalPages);
         else if (page === 0 && totalPages > 0) setPage(1);
-    }, [totalPages, page]);
+    }, [totalPages, page, listaFiltrada]);
 
     const proxima = () => page < totalPages && setPage((p) => p + 1);
     const anterior = () => page > 1 && setPage((p) => p - 1);
 
-    const setField = (name, value) => {
-        setForm((f) => ({ ...f, [name]: value }));
-        if (errors[name]) {
-            setErrors(e => ({ ...e, [name]: undefined }));
-        }
-    };
-    const fecharTodos = () => setModal({ confirm: false, view: false, form: false });
-
-    const abrirExibir = (item) => {
-        setCurrent(item);
-        setModal((m) => ({ ...m, view: true }));
-    };
-    const fecharExibir = () => {
-        setCurrent(null);
-        setModal((m) => ({ ...m, view: false }));
-    };
+    const fecharTodos = () => setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
 
     const abrirEditar = (item) => {
-        setMode("edit");
         setCurrent(item);
-        setForm({
-            clienteId: item.clienteId || "",
-            clienteNome: item.clienteNome || "",
-            data: item.data,
-            descricao: item.descricao,
-            status: item.status,
-            etapa: item.etapa,
-            progressoValor: item.progresso?.[0] ?? 1,
-            progressoTotal: item.progresso?.[1] ?? 6,
-        });
-        setErrors({});
-        setModal((m) => ({ ...m, form: true }));
+        setModal((m) => ({ ...m, editar: true }));
     };
 
     const abrirConfirmarExclusao = (id) => {
         setTargetId(id);
         setModal((m) => ({ ...m, confirm: true }));
     };
-    const fecharConfirmarExclusao = () => {
-        setTargetId(null);
-        setModal((m) => ({ ...m, confirm: false }));
-    };
-
-    const validar = (f) => {
-        const e = {};
-        if (!f.clienteId) e.clienteId = "Selecione um cliente.";
-        if (!String(f.descricao).trim()) e.descricao = "Informe a descrição.";
-        if (!f.data) e.data = "Informe a data.";
-        if (Number(f.progressoTotal) <= 0) e.progressoTotal = "Total precisa ser maior que 0.";
-        if (Number(f.progressoValor) < 0 || Number(f.progressoValor) > Number(f.progressoTotal)) e.progressoValor = "Valor entre 0 e total.";
-        return e;
-    };
-
-    const salvar = async (e) => {
-        e?.preventDefault();
-        const selectedClient = clientes.find(c => c.id === form.clienteId);
-        const clienteNomeToSave = selectedClient ? selectedClient.nome : "";
-        const formToValidate = { ...form, clienteNome: clienteNomeToSave };
-        const errs = validar(formToValidate);
-        setErrors(errs);
-        if (Object.keys(errs).length) return;
-
-        const servicoPayload = {
-            clienteId: formToValidate.clienteId,
-            clienteNome: formToValidate.clienteNome,
-            data: formToValidate.data,
-            descricao: formToValidate.descricao.trim(),
-            status: formToValidate.status,
-            etapa: (formToValidate.etapa || "Aguardando orçamento").trim(),
-            progresso: [Number(formToValidate.progressoValor) || 1, Number(formToValidate.progressoTotal) || 6],
-        };
-
-        if (mode === 'new') {
-            delete servicoPayload.id;
-        }
-
-        try {
-            if (mode === 'edit') {
-                await Api.put(`/servicos/${current.id}`, servicoPayload);
-            } else {
-                await Api.post("/servicos", servicoPayload);
-            }
-            
-            await fetchData();
-            setCurrent(null);
-            setModal((m) => ({ ...m, form: false }));
-            if (mode === 'new') setPage(1);
-        } catch (error) {
-            console.error("Erro na operação de salvar:", error);
-        }
-    };
 
     const confirmarExclusao = async () => {
         if (!targetId) return;
+        setServicos(servicos.filter(s => s.id !== targetId));
+        fecharTodos();
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
         try {
             await Api.delete(`/servicos/${targetId}`);
-            await fetchData();
-            fecharConfirmarExclusao();
+            setServicos(servicos.filter(s => s.id !== targetId));
+            fecharTodos();
         } catch (error) {
-            console.error("Erro na exclusão:", error);
+            console.error('Erro ao excluir serviço:', error);
+            alert('Erro ao excluir serviço. Tente novamente.');
         }
+        */
+    };
+
+    const handleNovoServicoSuccess = (novoServico) => {
+        const newId = String(Math.max(...servicos.map(s => parseInt(s.id) || 0)) + 1);
+        const servicoCompleto = {
+            id: newId,
+            clienteId: novoServico.clienteId,
+            clienteNome: novoServico.clienteNome,
+            data: novoServico.data,
+            descricao: novoServico.descricao,
+            status: "Ativo",
+            etapa: "Aguardando orçamento",
+            progresso: [1, 6]
+        };
+        setServicos([servicoCompleto, ...servicos]);
+        setPage(1);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        setPage(1);
+        */
+    };
+
+    const handleEditarServicoSuccess = (servicoAtualizado) => {
+        const updatedServicos = servicos.map(s =>
+            s.id === servicoAtualizado.id ? servicoAtualizado : s
+        );
+        setServicos(updatedServicos);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        */
     };
 
     return (
         <>
-            <div className="text-[13px] text-slate-500 mb-3 text-left font-semibold p-4">Serviços cadastrados</div>
-            <div className="flex flex-col gap-4">
-                {loading && <p>Carregando serviços...</p>}
-                {!loading && pagina.length === 0 && <p>Nenhum serviço encontrado, ajuste seus filtros.</p>}
+            <div className="flex flex-col gap-4 w-full py-4">
+                {loading && <SkeletonLoader count={ITEMS_PER_PAGE} />}
+
+                {!loading && pagina.length === 0 && (
+                    <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        Nenhum serviço encontrado com os filtros atuais.
+                    </div>
+                )}
+
                 {!loading && pagina.map((item) => (
-                    <article key={item.id} className={`rounded-[14px] border border-slate-200 card bg-white p-4 ${item.status === 'Finalizado' ? "pedido-muted" : ""}`}>
-                        <header className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-slate-600">
-                                <FaWrench />
-                                <span className="font-semibold">Pedido de serviço - #{formatServicoId(item.id)}</span>
+                    <article key={item.id} className={`flex flex-col gap-3 rounded-lg border p-5 w-full shadow-sm transition-all hover:shadow-md ${item.status === 'Finalizado' ? "bg-gray-50 border-gray-200 opacity-60" : "bg-white border-slate-200"}`}>
+                        {/* HEADER DO CARD */}
+                        <header className="flex items-center justify-between pb-3 border-b border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-md ${item.status === 'Finalizado' ? 'text-gray-400 bg-gray-200' : 'text-slate-400 bg-slate-100'}`}>
+                                    <FaWrench />
+                                </div>
+                                <div>
+                                    <h3 className={`font-semibold text-sm md:text-base ${item.status === 'Finalizado' ? 'text-gray-600' : 'text-slate-800'}`}>
+                                        Serviço #{formatServicoId(item.id)}
+                                    </h3>
+                                    <span className={`text-xs block md:hidden ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>{formatDate(item.data)}</span>
+                                </div>
                             </div>
+
                             <div className="flex items-center gap-2">
-                                <button type="button" className="icon-btn" title="Editar" onClick={() => abrirEditar(item)}>
-                                    <FaEdit />
+                                <StatusPill status={item.status} />
+                                <div className="hidden md:block h-4 w-px bg-slate-200 mx-1"></div>
+                                <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
+                                    <BiSolidPencil size={18} />
                                 </button>
-                                <button type="button" className="icon-btn" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
-                                    <FaTrash />
-                                </button>
-                                <button type="button" className="icon-btn" title="Exibir" onClick={() => abrirExibir(item)}>
-                                    <FaExternalLinkAlt />
+                                <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
+                                    <FaTrash size={16} />
                                 </button>
                             </div>
                         </header>
 
-                        <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mt-4 border-slate-100 border-t pt-4">
-                            <div className="md:col-span-2">
-                                <div className="text-slate-600 text-sm font-semibold">Nome Cliente</div>
-                                <div className="text-slate-900">{item.clienteNome || `ID: ${item.clienteId}` || 'N/A'}</div>
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
+                            
+                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Cliente</span>
+                                <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.clienteNome}>
+                                    {item.clienteNome || `ID: ${item.clienteId}`}
+                                </span>
                             </div>
-                            <div>
-                                <div className="text-slate-600 text-sm font-semibold">Data Lançamento</div>
-                                <div className="text-slate-900">{item.data ? new Date(item.data + 'T00:00:00').toLocaleDateString("pt-BR") : 'N/A'}</div>
+
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Data</span>
+                                <span className={`text-md font-medium ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
+                                    {formatDate(item.data)}
+                                </span>
                             </div>
-                            <div className="md:col-span-2">
-                                <div className="text-slate-600 text-sm font-semibold">Descrição</div>
-                                <div className="text-slate-900">{item.descricao}</div>
+
+                            <div className="md:col-span-4 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Descrição</span>
+                                <p className={`text-md line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-600'}`} title={item.descricao}>
+                                    {item.descricao}
+                                </p>
                             </div>
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-slate-600 text-sm font-semibold mr-2">Status</div>
-                                <StatusPill status={item.status} />
+
+                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.etapa}>{item.etapa}</span>
+                                <Progress
+                                    value={item.progresso?.[0]}
+                                    total={item.progresso?.[1]}
+                                    dark={item.status === "Finalizado"}
+                                />
                             </div>
-                            <div className="flex flex-col items-center justify-between mt-5">
-                                <div className="text-slate-600 text-sm">{item.etapa}</div>
-                                <Progress value={item.progresso?.[0]} total={item.progresso?.[1]} dark={item.status === "Finalizado"} />
-                            </div>
+
                         </div>
                     </article>
                 ))}
             </div>
 
-            <div className="flex items-center justify-between mt-6 p-5">
-                <div className="text-sm text-slate-600">
-                    Mostrando {listaFiltrada.length ? start + 1 : 0}–{Math.min(end, listaFiltrada.length)} de {listaFiltrada.length} resultados
+            {/* Paginação */}
+            {!loading && listaFiltrada.length > 0 && (
+                <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                    <div className="text-sm text-slate-500">
+                        Mostrando <span className="font-medium text-slate-800">{start + 1}</span> a <span className="font-medium text-slate-800">{Math.min(end, listaFiltrada.length)}</span> de {listaFiltrada.length}
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={anterior} disabled={page === 1} className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-md cursor-pointer hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Anterior
+                        </button>
+                        <button onClick={proxima} disabled={page === totalPages} className="px-4 py-2 text-sm font-medium text-white bg-[#007EA7] rounded-md cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                            Próximo
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <button onClick={anterior} disabled={page === 1} className={`btn btn-ghost ${page === 1 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        Anterior
-                    </button>
-                    <button onClick={proxima} disabled={page === totalPages || totalPages === 0} className={`btn btn-ghost ${page === totalPages || totalPages === 0 ? "opacity-50 cursor-not-allowed" : ""}`}>
-                        Próximo
-                    </button>
-                </div>
-            </div>
+            )}
 
+            {/* MODAL CONFIRMAÇÃO */}
             {modal.confirm && (
-                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharConfirmarExclusao(); }}>
-                    <div className="w-full max-w-xl bg-white rounded-xl shadow-lg p-6">
-                        <div className="flex items-start gap-3">
-                            <FaExclamationTriangle className="text-amber-500 mt-1 text-xl" />
-                            <h2 className="text-[22px] font-bold text-center w-full text-slate-800">Tem certeza que deseja excluir o serviço #{formatServicoId(targetId)}?</h2>
+                <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
+                    <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
+                        <div className="flex flex-col items-center text-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-xl">
+                                <FaExclamationTriangle />
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-800">Excluir Serviço?</h2>
+                            <p className="text-slate-600">
+                                Você está prestes a excluir o serviço <span className="font-bold">#{formatServicoId(targetId)}</span>. Esta ação não pode ser desfeita.
+                            </p>
                         </div>
-                        <div className="mt-6 flex justify-end gap-3">
-                            <button onClick={confirmarExclusao} className="px-5 h-10 rounded-md text-white font-semibold" style={{ backgroundColor: "#007EA7" }}>Sim</button>
-                            <button onClick={fecharConfirmarExclusao} className="px-5 h-10 rounded-md border border-slate-300 bg-white text-slate-800 hover:bg-slate-50">Cancelar</button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {modal.view && current && (
-                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) fecharExibir(); }}>
-                    <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-6">
-                        <h2 className="text-xl font-bold mb-4">Pedido de serviço - #{formatServicoId(current.id)}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <div className="text-sm text-slate-600">Nome Cliente</div>
-                                <div className="font-medium">{current.clienteNome || `ID: ${current.clienteId}` || 'N/A'}</div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-slate-600">Data lançamento</div>
-                                <div className="font-medium">{current.data ? new Date(current.data + 'T00:00:00').toLocaleDateString("pt-BR") : 'N/A'}</div>
-                            </div>
-                            <div className="md:col-span-2">
-                                <div className="text-sm text-slate-600">Descrição</div>
-                                <div className="font-medium">{current.descricao}</div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-slate-600">Status</div>
-                                <StatusPill status={current.status} />
-                            </div>
-                            <div>
-                                <div className="text-sm text-slate-600">Etapa</div>
-                                <div className="font-medium">{current.etapa}</div>
-                            </div>
-                            <div className="md:col-span-2">
-                                <div className="text-sm text-slate-600 mb-2">Progresso</div>
-                                <Progress value={current.progresso?.[0]} total={current.progresso?.[1]} dark={current.status === "Finalizado"} />
-                            </div>
-                        </div>
-                        <div className="mt-6 text-right">
-                            <button onClick={fecharExibir} className="px-5 h-10 rounded-md border border-slate-300 bg-white text-slate-800 hover:bg-slate-50">Fechar</button>
+                        <div className="mt-6 flex gap-3">
+                            <button onClick={fecharTodos} className="flex-1 h-10 rounded-md border border-slate-300 bg-white text-slate-700 font-medium cursor-pointer hover:bg-slate-50">Cancelar</button>
+                            <button onClick={confirmarExclusao} className="flex-1 h-10 rounded-md bg-rose-600 text-white font-medium cursor-pointer hover:bg-rose-700 shadow-sm">Sim, Excluir</button>
                         </div>
                     </div>
                 </div>
             )}
+            
+            <NovoServicoModal 
+                isOpen={modal.novo}
+                onClose={fecharTodos}
+                onSuccess={handleNovoServicoSuccess}
+            />
 
-            {modal.form && (
-                <div className="fixed inset-0 z-9999 grid place-items-center bg-black/30 px-4" onClick={(e) => { if (e.target === e.currentTarget) setModal((m) => ({ ...m, form: false })); }}>
-                    <form onSubmit={salvar} className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-6 max-h-[90vh] flex flex-col">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-slate-100 grid place-items-center text-slate-400">
-                                <FaUser />
-                            </div>
-                            <h2 className="text-[22px] font-bold text-slate-800">{mode === "new" ? "Novo pedido de serviço" : `Editar pedido #${formatServicoId(current?.id)}`}</h2>
-                            <div className="ml-auto flex items-center gap-3">
-                                <label className="inline-flex items-center gap-2 text-slate-700 select-none">
-                                    <span className="text-sm">Status ativo</span>
-                                    <input
-                                        type="checkbox"
-                                        checked={form.status === "Ativo"}
-                                        onChange={(e) => setField("status", e.target.checked ? "Ativo" : "Finalizado")}
-                                        className="peer sr-only"
-                                    />
-                                    <span className="w-11 h-6 rounded-full bg-slate-300 relative transition peer-checked:bg-[#007EA7]">
-                                        <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition peer-checked:left-[22px]" />
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4 overflow-y-auto flex-1 pr-2">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Cliente</label>
-                                <select
-                                    name="clienteId"
-                                    value={form.clienteId}
-                                    onChange={(e) => setField("clienteId", e.target.value)}
-                                    className={`w-full h-11 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 bg-white ${errors.clienteId ? "border-rose-400 focus:ring-rose-200" : "border-slate-300 focus:ring-[#9AD1D4]"}`}
-                                >
-                                    <option value="">Selecione um cliente...</option>
-                                    {clientes.map(cli => (
-                                        <option key={cli.id} value={cli.id}>{cli.nome}</option>
-                                    ))}
-                                </select>
-                                {errors.clienteId && <p className="text-rose-600 text-xs mt-1">{errors.clienteId}</p>}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Data de lançamento</label>
-                                <input
-                                    type="date"
-                                    name="data"
-                                    value={form.data}
-                                    onChange={(e) => setField("data", e.target.value)}
-                                    className={`w-full h-11 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 ${errors.data ? "border-rose-400 focus:ring-rose-200" : "border-slate-300 focus:ring-[#9AD1D4]"}`}
-                                />
-                                {errors.data && <p className="text-rose-600 text-xs mt-1">{errors.data}</p>}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Descrição</label>
-                                <input
-                                    name="descricao"
-                                    value={form.descricao}
-                                    onChange={(e) => setField("descricao", e.target.value)}
-                                    placeholder="Descrição do serviço"
-                                    className={`w-full h-11 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 ${errors.descricao ? "border-rose-400 focus:ring-rose-200" : "border-slate-300 focus:ring-[#9AD1D4]"}`}
-                                />
-                                {errors.descricao && <p className="text-rose-600 text-xs mt-1">{errors.descricao}</p>}
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-1">Etapa</label>
-                                    <input
-                                        name="etapa"
-                                        value={form.etapa}
-                                        onChange={(e) => setField("etapa", e.target.value)}
-                                        placeholder="Ex.: Aguardando orçamento"
-                                        className="w-full h-11 rounded-md border border-slate-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#9AD1D4]"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Progresso (valor)</label>
-                                        <input
-                                            type="number"
-                                            name="progressoValor"
-                                            min={0}
-                                            max={form.progressoTotal}
-                                            value={form.progressoValor}
-                                            onChange={(e) => setField("progressoValor", Number(e.target.value))}
-                                            className={`w-full h-11 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 ${errors.progressoValor ? "border-rose-400 focus:ring-rose-200" : "border-slate-300 focus:ring-[#9AD1D4]"}`}
-                                        />
-                                        {errors.progressoValor && <p className="text-rose-600 text-xs mt-1">{errors.progressoValor}</p>}
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Progresso (total)</label>
-                                        <input
-                                            type="number"
-                                            name="progressoTotal"
-                                            min={1}
-                                            value={form.progressoTotal}
-                                            onChange={(e) => setField("progressoTotal", Number(e.target.value))}
-                                            className={`w-full h-11 rounded-md border px-3 text-sm focus:outline-none focus:ring-2 ${errors.progressoTotal ? "border-rose-400 focus:ring-rose-200" : "border-slate-300 focus:ring-[#9AD1D4]"}`}
-                                        />
-                                        {errors.progressoTotal && <p className="text-rose-600 text-xs mt-1">{errors.progressoTotal}</p>}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 flex justify-end gap-3 pt-4 border-t">
-                            <button type="submit" className="px-5 h-10 rounded-md text-white font-semibold" style={{ backgroundColor: "#007EA7" }}>
-                                {mode === "new" ? "Salvar Pedido" : "Salvar Alterações"}
-                            </button>
-                            <button type="button" onClick={fecharTodos} className="px-5 h-10 rounded-md border border-slate-300 bg-white text-slate-800 hover:bg-slate-50">
-                                Cancelar
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            <EditarServicoModal 
+                isOpen={modal.editar}
+                onClose={fecharTodos}
+                servico={current}
+                onSuccess={handleEditarServicoSuccess}
+            />
         </>
     );
 }
