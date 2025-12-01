@@ -30,10 +30,8 @@ export default function Pedidos() {
     const handleNovoRegistroClick = () => setTriggerNovo(true);
     const handleNovoRegistroHandled = () => setTriggerNovo(false);
 
-    // Verifica se há filtros ativos
     const hasActiveFilters = Object.values(filters).some(arr => arr && arr.length > 0);
 
-    // Converte filtros do dropdown para o formato esperado pelos componentes
     const getStatusFilter = () => {
         if (!filters.situacao || filters.situacao.length === 0 || filters.situacao.includes("Todos")) {
             return "Todos";
@@ -55,7 +53,6 @@ export default function Pedidos() {
         return filters.etapa;
     };
 
-    // Classes das abas
     const tabBaseClass = "px-6 md:px-9 py-3 md:py-4 rounded-t-lg font-semibold text-base md:text-lg transition-all duration-300 flex items-center gap-2 md:gap-3 border-t border-l border-r cursor-pointer select-none translate-y-[1px] shadow-[0_-2px_4px_-2px_rgba(0,0,0,0.1),2px_0_4px_-2px_rgba(0,0,0,0.1),-2px_0_8px_-2px_rgba(0,0,0,0.1)]";
     const activeTabClass = "bg-white text-[#007EA7] border-slate-200";
     const inactiveTabClass = "bg-slate-100 text-slate-500 border-transparent hover:bg-slate-200";
@@ -74,7 +71,7 @@ export default function Pedidos() {
 
                 <div className="w-full flex flex-col items-center px-4">
                     
-                    <div className="text-center mb-8 w-full max-w-[1280px] py-7">
+                    <div className="text-center mb-8 w-full max-w-[1380px] py-7">
                         <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2 flex items-center justify-center gap-2">
                             Pedidos e Serviços
                         </h1>
@@ -84,7 +81,7 @@ export default function Pedidos() {
                     </div>
 
                     <main className="w-full flex justify-center pb-8">
-                        <section className="w-full max-w-[1280px]">
+                        <section className="w-full max-w-[1380px]">
 
                             {/* Abas de Navegação */}
                             <div className="flex items-end gap-2 w-full">

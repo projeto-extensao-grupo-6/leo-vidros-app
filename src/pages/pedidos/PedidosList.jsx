@@ -4,6 +4,7 @@ import { BiSolidPencil } from "react-icons/bi";
 import SkeletonLoader from '../../shared/components/skeleton/SkeletonLoader';
 import NovoPedidoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoModal';
 import EditarPedidoModal from '../../shared/components/pedidosServicosComponents/EditarPedidoModal';
+// import Api from '../../axios/Api';
 
 // ===== DADOS MOCADOS =====
 const MOCK_PEDIDOS = [
@@ -194,6 +195,31 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             setPedidos(sortedPedidos);
             setLoading(false);
         }, 500);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        try {
+            const response = await Api.get('/pedidos', { skipAuthRedirect: true });
+            const pedidosData = response.data || [];
+            
+            const sortedPedidos = [...pedidosData].sort((a, b) => {
+                const idAisNum = /^\d+$/.test(a.id);
+                const idBisNum = /^\d+$/.test(b.id);
+                if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
+                if (a.id < b.id) return 1;
+                if (a.id > b.id) return -1;
+                return 0;
+            });
+            setPedidos(sortedPedidos);
+        } catch (error) {
+            console.error('Erro ao buscar pedidos:', error);
+            if (error.response?.status === 403 || error.response?.status === 401) {
+                console.warn('Sem permissão para acessar pedidos. Verifique se está logado.');
+            }
+            setPedidos([]);
+        } finally {
+            setLoading(false);
+        }
+        */
     };
 
     useEffect(() => {
@@ -273,6 +299,17 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         if (!targetId) return;
         setPedidos(pedidos.filter(p => p.id !== targetId));
         fecharTodos();
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        try {
+            await Api.delete(`/pedidos/${targetId}`);
+            setPedidos(pedidos.filter(p => p.id !== targetId));
+            fecharTodos();
+        } catch (error) {
+            console.error('Erro ao excluir pedido:', error);
+            alert('Erro ao excluir pedido. Tente novamente.');
+        }
+        */
     };
 
     const handleNovoPedidoSuccess = (novoPedido) => {
@@ -292,6 +329,11 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         };
         setPedidos([pedidoCompleto, ...pedidos]);
         setPage(1);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        setPage(1);
+        */
     };
 
     const handleEditarPedidoSuccess = (pedidoAtualizado) => {
@@ -299,6 +341,10 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             p.id === pedidoAtualizado.id ? pedidoAtualizado : p
         );
         setPedidos(updatedPedidos);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        */
     };
 
     return (
@@ -404,7 +450,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             {/* MODAL CONFIRMAÇÃO */}
             {modal.confirm && (
                 <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
-                    <div className=" flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
+                    <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
                         <div className="flex flex-col items-center text-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-xl">
                                 <FaExclamationTriangle />

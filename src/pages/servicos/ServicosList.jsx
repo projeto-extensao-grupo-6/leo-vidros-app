@@ -4,6 +4,7 @@ import { BiSolidPencil } from "react-icons/bi";
 import SkeletonLoader from "../../shared/components/skeleton/SkeletonLoader";
 import NovoServicoModal from "../../shared/components/pedidosServicosComponents/NovoServicoModal";
 import EditarServicoModal from "../../shared/components/pedidosServicosComponents/EditarServicoModal";
+// import Api from '../../axios/Api';
 
 // ===== DADOS MOCADOS =====
 const MOCK_CLIENTES = [
@@ -162,6 +163,31 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             setClientes(MOCK_CLIENTES);
             setLoading(false);
         }, 500);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        try {
+            const response = await Api.get('/servicos', { skipAuthRedirect: true });
+            const servicosData = response.data || [];
+            
+            const sortedServicos = [...servicosData].sort((a, b) => {
+                const idAisNum = /^\d+$/.test(a.id);
+                const idBisNum = /^\d+$/.test(b.id);
+                if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
+                if (a.id < b.id) return 1;
+                if (a.id > b.id) return -1;
+                return 0;
+            });
+            setServicos(sortedServicos);
+        } catch (error) {
+            console.error('Erro ao buscar serviços:', error);
+            if (error.response?.status === 403 || error.response?.status === 401) {
+                console.warn('Sem permissão para acessar serviços. Verifique se está logado.');
+            }
+            setServicos([]);
+        } finally {
+            setLoading(false);
+        }
+        */
     };
 
     useEffect(() => {
@@ -248,6 +274,17 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         if (!targetId) return;
         setServicos(servicos.filter(s => s.id !== targetId));
         fecharTodos();
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        try {
+            await Api.delete(`/servicos/${targetId}`);
+            setServicos(servicos.filter(s => s.id !== targetId));
+            fecharTodos();
+        } catch (error) {
+            console.error('Erro ao excluir serviço:', error);
+            alert('Erro ao excluir serviço. Tente novamente.');
+        }
+        */
     };
 
     const handleNovoServicoSuccess = (novoServico) => {
@@ -264,6 +301,11 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         };
         setServicos([servicoCompleto, ...servicos]);
         setPage(1);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        setPage(1);
+        */
     };
 
     const handleEditarServicoSuccess = (servicoAtualizado) => {
@@ -271,6 +313,10 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             s.id === servicoAtualizado.id ? servicoAtualizado : s
         );
         setServicos(updatedServicos);
+        
+        /* INTEGRAÇÃO COM API - COMENTADO
+        fetchData();
+        */
     };
 
     return (
@@ -303,10 +349,10 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                             <div className="flex items-center gap-2">
                                 <StatusPill status={item.status} />
                                 <div className="hidden md:block h-4 w-px bg-slate-200 mx-1"></div>
-                                <button type="button" className="p-1.5 rounded-md text-slate-500 hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
+                                <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
                                     <BiSolidPencil size={18} />
                                 </button>
-                                <button type="button" className="p-1.5 rounded-md text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
+                                <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
                                     <FaTrash size={16} />
                                 </button>
                             </div>
@@ -369,7 +415,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             {/* MODAL CONFIRMAÇÃO */}
             {modal.confirm && (
                 <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
-                    <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
+                    <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
                         <div className="flex flex-col items-center text-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-xl">
                                 <FaExclamationTriangle />
