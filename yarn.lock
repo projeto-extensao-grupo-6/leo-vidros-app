@@ -640,6 +640,7 @@
   version "4.52.5"
   resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.52.5.tgz"
   integrity sha512-TAcgQh2sSkykPRWLrdyy2AiceMckNf5loITqXxFI5VuQjS5tSuw3WlwdN8qv8vzjLAUTvYaH/mVjSFpbkFbpTg==
+<<<<<<< HEAD
 
 "@standard-schema/spec@^1.0.0":
   version "1.0.0"
@@ -650,6 +651,8 @@
   version "0.3.0"
   resolved "https://registry.npmjs.org/@standard-schema/utils/-/utils-0.3.0.tgz"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
+=======
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
 
 "@tailwindcss/node@4.1.16":
   version "4.1.16"

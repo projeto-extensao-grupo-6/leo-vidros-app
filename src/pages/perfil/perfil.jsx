@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import Api from '../../axios/Api';
 import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+=======
+import api from '../../service/api.js';
+import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff } from 'lucide-react';
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
 import Sidebar from '../../shared/components/sidebar/sidebar';
 import Header from '../../shared/components/header/header';
 import UserImg from '../../assets/User.png';
@@ -52,9 +57,12 @@ export default function Perfil() {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isChangingPassword, setIsChangingPassword] = useState(false);
 
+<<<<<<< HEAD
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
 
+=======
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
     const [formData, setFormData] = useState({
         nome: "",
         cpf: "",
@@ -78,6 +86,7 @@ export default function Perfil() {
         const userId = sessionStorage.getItem('userId');
 
         if (!userId) {
+<<<<<<< HEAD
             console.error("ID do usuário não encontrado no localStorage. Faça o login.");
             setMessage({ type: 'error', text: 'Usuário não autenticado. Faça o login novamente.' });
             return;
@@ -85,6 +94,14 @@ export default function Perfil() {
 
         setLoading(true);
         Api.get(`/usuarios/${userId}`)
+=======
+            console.error("ID do usuário não encontrado no sessionStorage. Faça o login.");
+            //window.location.href = '/login';
+            return;
+        }
+
+        api.get(`/usuarios/${userId}`)
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
             .then(response => {
                 const data = response.data;
 
@@ -104,6 +121,7 @@ export default function Perfil() {
                     pais: data.endereco?.pais || "",
                     complemento: data.endereco?.complemento || "",
 
+<<<<<<< HEAD
                     senhaAtual: "",
                     novaSenha: "",
                     confirmarSenha: ""
@@ -118,6 +136,16 @@ export default function Perfil() {
                 });
             })
             .finally(() => setLoading(false));
+=======
+                    senhaAtual: data.senha || "",
+                    novaSenha: "",
+                    confirmarSenha: ""
+                });
+            })
+            .catch(error => {
+                console.error("Erro ao carregar perfil:", error);
+            });
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
 
     }, []);
 
@@ -126,6 +154,7 @@ export default function Perfil() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+<<<<<<< HEAD
     const validatePasswordChange = () => {
         if (!formData.senhaAtual) {
             setMessage({ type: 'error', text: 'Digite sua senha atual.' });
@@ -150,10 +179,13 @@ export default function Perfil() {
         return true;
     };
 
+=======
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
     const handleSave = () => {
         const userId = sessionStorage.getItem('userId');
 
         if (!userId) {
+<<<<<<< HEAD
             setMessage({ type: 'error', text: 'Não é possível salvar: usuário não autenticado.' });
             return;
         }
@@ -165,6 +197,12 @@ export default function Perfil() {
         setLoading(true);
         setMessage({ type: '', text: '' });
 
+=======
+            console.error("Não é possível salvar: ID do usuário não encontrado.");
+            return;
+        }
+
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
         const enderecoRequest = {
             rua: formData.rua,
             cep: formData.cep,
@@ -182,6 +220,7 @@ export default function Perfil() {
             cpf: formData.cpf,
             telefone: formData.telefone,
             endereco: enderecoRequest,
+<<<<<<< HEAD
             ...(isChangingPassword ? { senha: formData.novaSenha } : {})
         };
 
@@ -210,11 +249,25 @@ export default function Perfil() {
                 });
             })
             .finally(() => setLoading(false));
+=======
+            senha: formData.novaSenha ? formData.novaSenha : formData.senhaAtual
+        };
+
+        api.put(`/usuarios/${userId}`, usuarioRequest)
+            .then(response => {
+                console.log('Salvo com sucesso!', response.data);
+                setIsEditing(false);
+            })
+            .catch(error => {
+                console.error("Erro ao salvar:", error);
+            });
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
     };
 
     const toggleEdit = () => {
         if (isEditing) {
             handleSave();
+<<<<<<< HEAD
         } else {
             setIsEditing(true);
             setMessage({ type: '', text: '' });
@@ -236,6 +289,20 @@ export default function Perfil() {
         );
     };
 
+=======
+
+            if (isChangingPassword) {
+                console.log("Salvando senha:", {
+                    atual: formData.senhaAtual,
+                    nova: formData.novaSenha
+                });
+            }
+        } else {
+            setIsEditing(true);
+        }
+    };
+
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
     return (
         <div className="flex h-screen font-sans overflow-hidden">
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
@@ -248,6 +315,10 @@ export default function Perfil() {
                         <div className="bg-white h-full border-t border-gray-200">
                             <div className="flex flex-col lg:flex-row h-full">
 
+<<<<<<< HEAD
+=======
+                                {/* Coluna Esquerda - Menu Lateral do Perfil */}
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
                                 <div className="lg:w-80 bg-[#003249] text-white p-8 pt-16 flex flex-col border-r border-gray-700">
                                     <h2 className="text-lg font-medium text-gray-300 mb-8 pb-4">
                                         Informações do Perfil
@@ -297,6 +368,10 @@ export default function Perfil() {
                                     </nav>
                                 </div>
 
+<<<<<<< HEAD
+=======
+                                {/* Coluna Direita - Formulário */}
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
                                 <div className="flex-1 p-8 lg:p-12 overflow-y-auto h-full">
                                     <div className="w-full h-full">
 
@@ -311,6 +386,7 @@ export default function Perfil() {
                                             </p>
                                         </div>
 
+<<<<<<< HEAD
                                         <MessageAlert message={message} />
 
                                         {loading && (
@@ -320,6 +396,8 @@ export default function Perfil() {
                                             </div>
                                         )}
 
+=======
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
                                         <div className="space-y-2">
                                             {activeTab === 'personal' ? (
                                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6">
@@ -525,6 +603,7 @@ export default function Perfil() {
                                             <div className="pt-4 flex justify-end">
                                                 <button
                                                     onClick={toggleEdit}
+<<<<<<< HEAD
                                                     disabled={loading}
                                                     className={`flex items-center gap-2 px-4 py-3 cursor-pointer rounded-lg font-semibold text-white shadow-lg transition-all hover:scale-105 ${
                                                         loading 
@@ -536,6 +615,15 @@ export default function Perfil() {
                                                 >
                                                     {loading ? "Salvando..." : isEditing ? "Salvar Alterações" : "Editar Informações"}
                                                     {!loading && (isEditing ? <Save size={20} /> : <Edit2 size={20} />)}
+=======
+                                                    className={`flex items-center gap-2 px-4 py-3 cursor-pointer rounded-lg font-semibold text-white shadow-lg transition-all hover:scale-105 ${isEditing
+                                                        ? "bg-green-700 hover:bg-green-800"
+                                                        : "bg-[#007EA7] hover:bg-[#006fa8]"
+                                                        }`}
+                                                >
+                                                    {isEditing ? "Salvar Alterações" : "Editar Informações"}
+                                                    {isEditing ? <Save size={20} /> : <Edit2 size={20} />}
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
                                                 </button>
                                             </div>
                                         </div>

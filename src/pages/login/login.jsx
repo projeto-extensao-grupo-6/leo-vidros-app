@@ -86,6 +86,103 @@ import Input from "../../shared/components/Ui/Input";
             }}
           />
 
+<<<<<<< HEAD
+=======
+        {/* Formulário */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-md backdrop-blur-sm p-8 rounded-xl"
+        >
+          <div className="flex flex-col gap-6">
+            <div className="mb-10 text-center flex flex-col gap-2">
+              <h1 className="text-3xl font-bold text-[#111827] mb-2">
+                Entre na sua conta
+              </h1>
+              <p className="text-[#6b7280] text-sm">
+                Faça login para continuar
+              </p>
+            </div>
+  import React, { useState } from "react";
+  import { motion, AnimatePresence } from "framer-motion";
+  import AccountCircle from "@mui/icons-material/AccountCircle";
+  import LockIcon from "@mui/icons-material/Lock";
+  import Button from "../../shared/components/buttons/button.component";
+  import { useNavigate } from "react-router-dom"
+
+  function Login() {
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const [error, setError] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
+
+
+    const handleLogin = async (e) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
+
+      try {
+        const response = await fetch("http://localhost:3000/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha }),
+        });
+
+      console.log(response)
+
+        if (!response.ok) throw new Error("Email ou senha inválidos");
+
+        const data = await response.json();
+        const { id, token, firstLogin, nome, email: userEmail} = data;
+        console.log("Login OK:", data);
+
+        localStorage.setItem("userToken", token); 
+        localStorage.setItem("userId", id);
+        localStorage.setItem("userFirstLogin", String(firstLogin));
+        localStorage.setItem("loggedUserName", nome);
+        localStorage.setItem("loggedUserEmail", userEmail);
+
+        setModalOpen(true);
+
+        const redirectPath = firstLogin 
+          ? `/primeiroAcesso/${id}` 
+          : "/paginaInicial";
+
+      setTimeout(() => {
+          setModalOpen(false);
+          navigate(redirectPath);
+        }, 1000);
+        
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const variants = {
+      initial: { opacity: 0, x: 20 },
+      animate: { opacity: 1, x: 0 },
+      exit: { opacity: 0, x: -20 },
+    };
+
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-[#ffffff] to-[#f3f4f6] p-4">
+        <div className="w-full max-w-6xl flex items-center justify-center gap-12">
+          {/* Imagem lateral */}
+          <div
+            className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
+            style={{
+              backgroundImage:
+                'url("/src/assets/images/premium_photo-1672287579489-4e92e57de92a.jpeg")',
+            }}
+          />
+
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
           {/* Formulário */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
@@ -174,7 +271,11 @@ import Input from "../../shared/components/Ui/Input";
                   <button
                     type="button"
                     className="text-sm text-[#007EA7] hover:text-[#005f73] transition"
+<<<<<<< HEAD
                     onClick={() => navigate("/esqueceuSenha")}
+=======
+                    onClick={() => alert("Função de recuperação em breve!")}
+>>>>>>> 049ef229b4d696c628a59dc15a6282cb0f27b81c
                   >
                     Esqueceu sua senha?
                   </button>
