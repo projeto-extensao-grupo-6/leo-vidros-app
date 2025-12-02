@@ -135,6 +135,10 @@ class PedidosService {
         }
     }
 
+    async atualizarServico(id, pedidoData) {
+        return this.atualizarPedido(id, pedidoData);
+    }
+
     async deletarPedido(id) {
         try {
             const response = await Api.delete(`/pedidos/${id}`);
@@ -151,6 +155,10 @@ class PedidosService {
                 status: error.response?.status
             };
         }
+    }
+
+    async deletarServico(id) {
+        return this.deletarPedido(id);
     }
 
     mapearParaBackend(dadosFrontend) {
@@ -222,7 +230,14 @@ class PedidosService {
         }
 
         let servicoInfo = null;
+        let etapaAtual = 'Aguardando orçamento';
+        let progressoValor = 1;
+        let progressoTotal = 6;
+        
         if (isServico && dadosBackend.servico) {
+            // Corrigir o mapeamento da etapa - agora vem de servico.etapa.nome
+            const etapaNome = dadosBackend.servico.etapa?.nome || 'PENDENTE';
+            
             servicoInfo = {
                 id: dadosBackend.servico.id,
                 codigo: dadosBackend.servico.codigo,
@@ -230,11 +245,51 @@ class PedidosService {
                 descricao: dadosBackend.servico.descricao || '',
                 precoBase: dadosBackend.servico.precoBase || 0,
                 ativo: dadosBackend.servico.ativo,
-                etapa: dadosBackend.servico.etapa?.nome || 'Sem etapa'
+                etapa: etapaNome
             };
             
+            // Usar o nome do serviço como descrição principal
             produtosDesc = servicoInfo.nome;
             itensCount = 1;
+            
+            // Mapear etapa para nome amigável e progresso
+            switch (etapaNome.toUpperCase()) {
+                case 'PENDENTE':
+                    etapaAtual = 'Pendente';
+                    progressoValor = 1;
+                    break;
+                case 'AGUARDANDO ORÇAMENTO':
+                    etapaAtual = 'Aguardando Orçamento';
+                    progressoValor = 2;
+                    break;
+                case 'ANÁLISE DO ORÇAMENTO':
+                    etapaAtual = 'Análise do Orçamento';
+                    progressoValor = 3;
+                    break;
+                case 'ORÇAMENTO APROVADO':
+                    etapaAtual = 'Orçamento Aprovado';
+                    progressoValor = 4;
+                    break;
+                case 'SERVIÇO AGENDADO':
+                    etapaAtual = 'Serviço Agendado';
+                    progressoValor = 5;
+                    break;
+                case 'SERVIÇO EM EXECUÇÃO':
+                    etapaAtual = 'Serviço em Execução';
+                    progressoValor = 6;
+                    break;
+                case 'CONCLUÍDO':
+                    etapaAtual = 'Concluído';
+                    progressoValor = 7;
+                    break;
+                case 'CANCELADO':
+                    etapaAtual = 'Cancelado';
+                    progressoValor = 0;
+                    break;
+                default:
+                    etapaAtual = etapaNome;
+                    progressoValor = 1;
+            }
         }
 
         const statusNome = dadosBackend.status?.nome || 'Ativo';
@@ -266,19 +321,23 @@ class PedidosService {
             dataCompra = new Date().toISOString().slice(0, 10);
         }
 
+        // Garantir que o cliente seja "Não informado" quando não existe ou está vazio
+        const clienteNome = dadosBackend.cliente?.nome;
+        const clienteNomeFinal = (clienteNome && clienteNome.trim()) ? clienteNome : 'Não informado';
+
         return {
             id: dadosBackend.id,
-            clienteNome: dadosBackend.cliente?.nome || 'Cliente não informado',
+            clienteNome: clienteNomeFinal,
             clienteId: dadosBackend.cliente?.id,
             clienteInfo: {
-                nome: dadosBackend.cliente?.nome || '',
+                nome: clienteNomeFinal,
                 cpf: dadosBackend.cliente?.cpf || '',
                 email: dadosBackend.cliente?.email || '',
                 telefone: dadosBackend.cliente?.telefone || '',
                 endereco: dadosBackend.cliente?.enderecos?.[0] || null
             },
             produtosDesc: produtosDesc || (isProduto ? 'Produtos não especificados' : 'Serviço não especificado'),
-            descricao: dadosBackend.descricao || '',
+            descricao: dadosBackend.descricao || dadosBackend.servico?.descricao || '',
             dataCompra: dataCompra,
             data: dataCompra,
             formaPagamento: dadosBackend.formaPagamento || 'Não informado',
@@ -288,8 +347,13 @@ class PedidosService {
             ativo: dadosBackend.ativo !== false,
             tipoPedido: dadosBackend.tipoPedido || (isProduto ? 'produto' : 'servico'),
             
-            produtos: produtos,
+            // Para serviços, adicionar campos específicos
+            etapa: etapaAtual,
+            etapaOriginal: isServico ? dadosBackend.servico.etapa?.nome : null, // Manter etapa original para edição
+            progresso: [progressoValor, progressoTotal],
+            servicoNome: servicoInfo?.nome || null,
             
+            produtos: produtos,
             servico: servicoInfo,
             
             observacoes: dadosBackend.descricao || '',
@@ -371,7 +435,9 @@ class PedidosService {
                     servico.id?.toString().padStart(3, '0'),
                     servico.clienteNome,
                     servico.descricao,
-                    servico.etapa
+                    servico.etapa,
+                    servico.servicoNome,
+                    servico.produtosDesc
                 ].join(' ').toLowerCase().includes(termoBusca)
             );
         }

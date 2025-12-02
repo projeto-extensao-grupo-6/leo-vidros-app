@@ -102,10 +102,13 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             ]);
             console.log("Clientes carregados:", clientes);
             console.log("Produtos carregados:", produtos);
-            setClientesExistentes(clientes);
-            setProdutosDisponiveis(produtos);
+            
+            // Ensure arrays are always set, even if API returns unexpected data
+            setClientesExistentes(Array.isArray(clientes) ? clientes : []);
+            setProdutosDisponiveis(Array.isArray(produtos) ? produtos : []);
         } catch (err) {
             console.error("Erro ao carregar dados:", err);
+            // Set empty arrays as fallback
             setClientesExistentes([]);
             setProdutosDisponiveis([]);
         }
@@ -460,7 +463,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                             <ShoppingCart className="w-6 h-6 text-[#828282]" />
                         </div>
                         <h2 className="text-xl font-semibold text-gray-900">
-                            Novo Pedido de Compra
+                            Novo Pedido de Produto
                         </h2>
                     </div>
                 </div>

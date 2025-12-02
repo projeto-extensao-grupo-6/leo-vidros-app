@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Wrench, X, Edit, Save } from "lucide-react";
+import { Wrench, X, Edit, Save, Calendar, ClipboardList } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Api from "../../../axios/Api";
+import PedidosService from "../../../services/pedidosService";
 import AgendamentoModal from "./AgendamentoModal";
 
-// Definição das etapas do serviço
+// Definição das etapas do serviço conforme banco de dados
 const ETAPAS_SERVICO = [
     { valor: "PENDENTE", label: "Pendente", progresso: 1 },
-    { valor: "AGUARDANDO_ORCAMENTO", label: "Aguardando Orçamento", progresso: 2 },
-    { valor: "ANALISE_ORCAMENTO", label: "Análise do Orçamento", progresso: 3 },
-    { valor: "ORCAMENTO_APROVADO", label: "Orçamento Aprovado", progresso: 4 },
-    { valor: "SERVICO_AGENDADO", label: "Serviço Agendado", progresso: 5 },
-    { valor: "SERVICO_EM_EXECUCAO", label: "Serviço em Execução", progresso: 6 },
-    { valor: "CONCLUIDO", label: "Concluído", progresso: 7 },
+    { valor: "AGUARDANDO ORÇAMENTO", label: "Aguardando Orçamento", progresso: 2 },
+    { valor: "ANÁLISE DO ORÇAMENTO", label: "Análise do Orçamento", progresso: 3 },
+    { valor: "ORÇAMENTO APROVADO", label: "Orçamento Aprovado", progresso: 4 },
+    { valor: "SERVIÇO AGENDADO", label: "Serviço Agendado", progresso: 5 },
+    { valor: "SERVIÇO EM EXECUÇÃO", label: "Serviço em Execução", progresso: 6 },
+    { valor: "CONCLUÍDO", label: "Concluído", progresso: 7 },
 ];
 
 const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
@@ -28,12 +30,14 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [mostrarAgendamento, setMostrarAgendamento] = useState(false);
+    const [tipoAgendamento, setTipoAgendamento] = useState(""); // "orcamento" ou "servico"
     const [etapaAnterior, setEtapaAnterior] = useState("");
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (isOpen && servico) {
-            // Normalizar a etapa vinda do backend
-            const etapaNormalizada = servico.etapa?.toUpperCase().replace(/\s+/g, "_") || "PENDENTE";
+            // Usar etapaOriginal se disponível, senão normalizar a etapa
+            const etapaNormalizada = servico.etapaOriginal || servico.etapa?.toUpperCase().replace(/\s+/g, "_") || "PENDENTE";
             
             setFormData({
                 clienteNome: servico.clienteNome || "",
@@ -58,7 +62,7 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
             const etapaInfo = ETAPAS_SERVICO.find(e => e.valor === value);
             
             // Detectar se mudou de PENDENTE para AGUARDANDO_ORCAMENTO
-            if (etapaAnterior === "PENDENTE" && value === "AGUARDANDO_ORCAMENTO") {
+            if (etapaAnterior === "PENDENTE" && value === "AGUARDANDO_ORÇAMENTO") {
                 setMostrarAgendamento(true);
             }
             
@@ -80,39 +84,119 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
         setError(null);
 
         try {
-            const servicoAtualizado = {
-                ...servico,
-                descricao: formData.descricao,
-                status: formData.status,
-                etapa: formData.etapa,
-                progresso: [
-                    parseInt(formData.progressoValor),
-                    7,
-                ],
+            // Montar dados no formato correto para a API
+            const pedidoData = {
+                pedido: {
+                    valorTotal: servico.valorTotal || 0.00,
+                    ativo: formData.status === "Ativo",
+                    formaPagamento: servico.formaPagamento || "A negociar",
+                    observacao: formData.descricao || "",
+                    cliente: {
+                        id: servico.clienteId || servico.clienteInfo?.id,
+                        nome: servico.clienteNome || servico.clienteInfo?.nome || "",
+                        cpf: servico.clienteInfo?.cpf || "",
+                        email: servico.clienteInfo?.email || "",
+                        telefone: servico.clienteInfo?.telefone || "",
+                        status: "Ativo",
+                        enderecos: servico.clienteInfo?.endereco ? [{
+                            id: servico.clienteInfo.endereco.id || 0,
+                            rua: servico.clienteInfo.endereco.rua || "",
+                            complemento: servico.clienteInfo.endereco.complemento || "",
+                            cep: servico.clienteInfo.endereco.cep || "",
+                            cidade: servico.clienteInfo.endereco.cidade || "",
+                            bairro: servico.clienteInfo.endereco.bairro || "",
+                            uf: servico.clienteInfo.endereco.uf || "",
+                            pais: servico.clienteInfo.endereco.pais || "Brasil",
+                            numero: servico.clienteInfo.endereco.numero || 0
+                        }] : []
+                    },
+                    status: {
+                        tipo: "PEDIDO",
+                        nome: formData.status.toUpperCase()
+                    }
+                },
+                servico: {
+                    nome: servico.servicoNome || servico.servico?.nome || "Serviço",
+                    descricao: formData.descricao || "",
+                    precoBase: servico.servico?.precoBase || 0.00,
+                    ativo: true,
+                    etapa: {
+                        tipo: "PEDIDO",
+                        nome: formData.etapa
+                    }
+                }
             };
 
-            // Chamar API para atualizar
-            await Api.put(`/servicos/${servico.id}`, servicoAtualizado);
+            console.log("Dados sendo enviados para API:", JSON.stringify(pedidoData, null, 2));
 
-            if (onSuccess) {
-                onSuccess(servicoAtualizado);
+            // Chamar API diretamente para atualizar
+            const response = await Api.put(`/pedidos/${servico.id}`, pedidoData);
+            
+            if (response.status === 200 || response.status === 204) {
+                if (onSuccess) {
+                    onSuccess({
+                        ...servico,
+                        descricao: formData.descricao,
+                        status: formData.status,
+                        etapa: formData.etapa,
+                        etapaOriginal: formData.etapa,
+                        progresso: [parseInt(formData.progressoValor), 7],
+                    });
+                }
+                setEtapaAnterior(formData.etapa);
+                onClose();
+            } else {
+                setError("Erro ao atualizar serviço");
             }
-            setEtapaAnterior(formData.etapa);
-            onClose();
         } catch (err) {
-            setError(err.message || "Erro ao atualizar serviço");
+            console.error("Erro ao atualizar serviço:", err);
+            const errorMessage = err.response?.data?.message || err.message || "Erro ao atualizar serviço";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleAgendamentoSave = async (dadosAgendamento) => {
-        // Aqui você pode salvar os dados do agendamento na API
-        console.log("Dados do agendamento:", dadosAgendamento);
-        // Exemplo: await Api.post(`/servicos/${servico.id}/agendamento`, dadosAgendamento);
-        
-        // Fechar o modal de agendamento
-        setMostrarAgendamento(false);
+    const handleAgendarOrcamento = () => {
+        // Redirecionar para página de agendamentos com contexto de orçamento
+        navigate('/agendamentos', { 
+            state: { 
+                tipo: 'orcamento',
+                servicoId: servico.id,
+                clienteNome: servico.clienteNome,
+                servicoNome: servico.servicoNome
+            }
+        });
+        onClose(); // Fechar o modal atual
+    };
+
+    const handleAgendarServico = () => {
+        // Redirecionar para página de agendamentos com contexto de serviço
+        navigate('/agendamentos', { 
+            state: { 
+                tipo: 'servico',
+                servicoId: servico.id,
+                clienteNome: servico.clienteNome,
+                servicoNome: servico.servicoNome
+            }
+        });
+        onClose(); // Fechar o modal atual
+    };
+
+    // Função para determinar se deve mostrar o botão de agendar orçamento
+    const mostrarBotaoAgendarOrcamento = () => {
+        const etapaAtual = formData.etapa?.toUpperCase();
+        console.log("Debug - Etapa atual:", etapaAtual, "| Modo edição:", modoEdicao);
+        console.log("Debug - Servico completo:", servico);
+        console.log("Debug - Mostrar botão orçamento:", etapaAtual === "PENDENTE" && !modoEdicao);
+        return etapaAtual === "PENDENTE" && !modoEdicao;
+    };
+
+    // Função para determinar se deve mostrar o botão de agendar serviço
+    const mostrarBotaoAgendarServico = () => {
+        const etapaAtual = formData.etapa?.toUpperCase();
+        console.log("Debug - Mostrar botão serviço:", etapaAtual === "ORÇAMENTO APROVADO" && !modoEdicao);
+        return etapaAtual === "ORÇAMENTO APROVADO" && !modoEdicao;
     };
 
     if (!isOpen || !servico) return null;
@@ -182,6 +266,19 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
                                 readOnly
                             />
                         </div>
+                    </div>
+
+                    {/* Nome do Serviço */}
+                    <div className="flex flex-col gap-1 items-start rounded-md">
+                        <label className="block text-md font-semibold text-gray-700 mb-2">
+                            Nome do Serviço
+                        </label>
+                        <input
+                            type="text"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100"
+                            value={servico?.servicoNome || servico?.servico?.nome || servico?.produtosDesc || 'Serviço não especificado'}
+                            readOnly
+                        />
                     </div>
 
                     {/* Descrição */}
@@ -279,73 +376,93 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
 
                 {/* Footer */}
                 <div className="px-6 py-4 border-t bg-gray-50 flex justify-between">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                    >
-                        Fechar
-                    </button>
-
-                    {modoEdicao ? (
-                        <div className="flex gap-2">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setModoEdicao(false);
-                                    setFormData({
-                                        clienteNome: servico.clienteNome || "",
-                                        data: servico.data || "",
-                                        descricao: servico.descricao || "",
-                                        status: servico.status || "Ativo",
-                                        etapa: etapaAnterior,
-                                        progressoValor: servico.progresso?.[0] || 1,
-                                        progressoTotal: 7,
-                                    });
-                                }}
-                                className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleSave}
-                                disabled={loading}
-                                className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg  cursor-pointer hover:bg-[#006891] transition-colors disabled:opacity-50 flex items-center gap-2 font-semibold"
-                            >
-                                {loading ? (
-                                    <>
-                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                        Salvando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Save className="w-4 h-4" />
-                                        Salvar Alterações
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    ) : (
+                    <div className="flex gap-2">
                         <button
                             type="button"
-                            onClick={() => setModoEdicao(true)}
-                            className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg cursor-pointer hover:bg-[#006891] transition-colors flex items-center gap-2 font-semibold"
+                            onClick={onClose}
+                            className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                         >
-                            <Edit className="w-4 h-4" />
-                            Editar
+                            Fechar
                         </button>
-                    )}
+
+                        {/* Botão Agendar Orçamento - apenas quando etapa é PENDENTE */}
+                        {mostrarBotaoAgendarOrcamento() && (
+                            <button
+                                type="button"
+                                onClick={handleAgendarOrcamento}
+                                className="px-5 py-2.5 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors flex items-center gap-2 font-semibold"
+                            >
+                                <ClipboardList className="w-4 h-4" />
+                                Agendar Orçamento
+                            </button>
+                        )}
+
+                        {/* Botão Agendar Serviço - apenas quando etapa é ORÇAMENTO APROVADO */}
+                        {mostrarBotaoAgendarServico() && (
+                            <button
+                                type="button"
+                                onClick={handleAgendarServico}
+                                className="px-5 py-2.5 bg-green-600 text-white rounded-lg cursor-pointer hover:bg-green-700 transition-colors flex items-center gap-2 font-semibold"
+                            >
+                                <Calendar className="w-4 h-4" />
+                                Agendar Serviço
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="flex gap-2">
+                        {modoEdicao ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setModoEdicao(false);
+                                        setFormData({
+                                            clienteNome: servico.clienteNome || "",
+                                            data: servico.data || "",
+                                            descricao: servico.descricao || "",
+                                            status: servico.status || "Ativo",
+                                            etapa: etapaAnterior,
+                                            progressoValor: servico.progresso?.[0] || 1,
+                                            progressoTotal: 7,
+                                        });
+                                    }}
+                                    className="px-5 py-2.5 border border-gray-300 rounded-lg text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSave}
+                                    disabled={loading}
+                                    className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg  cursor-pointer hover:bg-[#006891] transition-colors disabled:opacity-50 flex items-center gap-2 font-semibold"
+                                >
+                                    {loading ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Salvando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Save className="w-4 h-4" />
+                                            Salvar Alterações
+                                        </>
+                                    )}
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => setModoEdicao(true)}
+                                className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg cursor-pointer hover:bg-[#006891] transition-colors flex items-center gap-2 font-semibold"
+                            >
+                                <Edit className="w-4 h-4" />
+                                Editar
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-            
-            {/* Modal de Agendamento */}
-            <AgendamentoModal
-                isOpen={mostrarAgendamento}
-                onClose={() => setMostrarAgendamento(false)}
-                onSave={handleAgendamentoSave}
-                servicoId={servico?.id}
-            />
         </div>
     );
 };

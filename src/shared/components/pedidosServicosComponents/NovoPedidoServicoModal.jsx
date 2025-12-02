@@ -77,8 +77,7 @@ const DEFAULT_FORM_DATA = {
     // Etapa 3 - Dados do Serviço
     servicos: [],
     observacoes: "",
-    dataAgendamento: "",
-    etapa: "PENDENTE",
+    etapa: "PENDENTE", // Sempre PENDENTE por padrão
     prioridade: "Normal",
 };
 
@@ -813,36 +812,6 @@ const NovoPedidoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             {/* Configurações gerais */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1">
-                                    <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">Etapa</label>
-                                    <div className="relative">
-                                        <select
-                                            name="etapa"
-                                            className="w-full border border-gray-300 rounded-md px-4 py-3 appearance-none"
-                                            value={formData.etapa}
-                                            onChange={handleChange}
-                                        >
-                                            {etapasServico.map((etapa) => (
-                                                <option key={etapa} value={etapa}>{etapa}</option>
-                                            ))}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col gap-1">
-                                    <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">Data de Agendamento</label>
-                                    <input
-                                        type="date"
-                                        name="dataAgendamento"
-                                        className="w-full border border-gray-300 rounded-md px-4 py-3"
-                                        value={formData.dataAgendamento}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-
                             <div className="flex flex-col gap-1">
                                 <label className="block text-sm font-semibold text-gray-900 mb-2 text-left">Observações Gerais</label>
                                 <textarea
@@ -936,11 +905,6 @@ const NovoPedidoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                                 <h4 className="font-semibold text-gray-900 mb-3">Detalhes</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     <p><span className="text-gray-600">Etapa:</span> <span className="font-medium">{formData.etapa}</span></p>
-                                    {formData.dataAgendamento && (
-                                        <p><span className="text-gray-600">Agendamento:</span> <span className="font-medium">
-                                            {new Date(formData.dataAgendamento + "T00:00:00").toLocaleDateString("pt-BR")}
-                                        </span></p>
-                                    )}
                                 </div>
                                 {formData.observacoes && (
                                     <div className="mt-3 pt-3 border-t">

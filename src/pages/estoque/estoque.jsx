@@ -256,6 +256,22 @@ const handleSaveItem = useCallback(async (itemData) => {
   }
 }, [editingItem, fetchEstoque, parseCurrency]);
 
+// Novo callback para lidar com o sucesso do modal de produto
+const handleProductSuccess = useCallback(async (savedProduct) => {
+  console.log("Produto salvo com sucesso:", savedProduct);
+  
+  // Recarregar o estoque para mostrar o novo produto
+  await fetchEstoque();
+  
+  // Fechar modal e mostrar sucesso
+  setIsNovoItemModalOpen(false);
+  setIsSuccessModalOpen(true);
+  
+  setTimeout(() => {
+    setIsSuccessModalOpen(false);
+  }, 3000);
+}, [fetchEstoque]);
+
   const handleViewDetails = useCallback((estoqueId) => {
     console.log("🔍 Navegando para estoque ID:", estoqueId);
     if (!estoqueId) {
@@ -618,6 +634,7 @@ const handleSaveItem = useCallback(async (itemData) => {
         isOpen={isNovoItemModalOpen}
         onClose={() => setIsNovoItemModalOpen(false)}
         onSave={handleSaveItem}
+        onSuccess={handleProductSuccess}
         item={editingItem}
       />
 

@@ -280,15 +280,21 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                                     {formatCurrency(item.valorTotal)}
                                 </span>
                             </div>
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
+                                <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Pagamento</span>
+                                <span className={`text-md font-medium text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
+                                    {item.formaPagamento}
+                                </span>
+                            </div>
 
-                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-1">
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Produtos</span>
                                 <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.produtosDesc}>
                                     {item.produtosDesc}
                                 </span>
                             </div>
 
-                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-1">
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Descrição</span>
                                 <p className={`text-md line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-600'}`} title={item.descricao}>
                                     {item.descricao || '-'}
@@ -296,11 +302,12 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                             </div>
 
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
-                                <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Pagamento</span>
-                                <span className={`text-md font-medium text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
-                                    {item.formaPagamento}
+                                <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Cliente</span>
+                                <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.clienteNome}>
+                                    {item.clienteNome}
                                 </span>
                             </div>
+
 
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Data da Compra</span>

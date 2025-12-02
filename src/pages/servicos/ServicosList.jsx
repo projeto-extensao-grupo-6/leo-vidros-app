@@ -201,29 +201,10 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
     };
 
     const handleEditarServicoSuccess = async (servicoAtualizado) => {
-        try {
-            // Mapear dados do frontend para o formato do backend
-            const dadosMapeados = PedidosService.mapearParaBackend(servicoAtualizado);
-            
-            const result = await PedidosService.atualizarServico(servicoAtualizado.id, dadosMapeados);
-            
-            if (result.success) {
-                // Recarregar a lista de serviços
-                await fetchData();
-                console.log('Serviço atualizado com sucesso');
-            } else {
-                console.error('Erro ao atualizar serviço:', result.error);
-                alert(`Erro ao atualizar serviço: ${result.error}`);
-                
-                // Se houver erros de validação, podemos tratá-los
-                if (result.validationErrors && Object.keys(result.validationErrors).length > 0) {
-                    console.error('Erros de validação:', result.validationErrors);
-                }
-            }
-        } catch (error) {
-            console.error('Erro inesperado ao atualizar serviço:', error);
-            alert('Erro inesperado ao atualizar serviço. Tente novamente.');
-        }
+        // O modal EditarServicoModal já faz a chamada correta para a API
+        // Apenas recarregar a lista de serviços
+        await fetchData();
+        console.log('Serviço atualizado com sucesso');
     };
 
     return (
@@ -283,7 +264,33 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
                             
-                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-2">
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Preço</span>
+                                <span className={`text-md font-medium ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
+                                    {item.valorTotal > 0 
+                                        ? `R$ ${item.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` 
+                                        : item.servico?.precoBase > 0 
+                                            ? `R$ ${item.servico.precoBase.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                            : 'A negociar'
+                                    }
+                                </span>
+                            </div>
+
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Serviço</span>
+                                <p className={`text-md font-medium line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.servicoNome || item.produtosDesc}>
+                                    {item.servicoNome || item.produtosDesc || 'Serviço não especificado'}
+                                </p>
+                            </div>
+
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Descrição</span>
+                                <p className={`text-sm line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`} title={item.descricao}>
+                                    {item.descricao || 'Sem descrição'}
+                                </p>
+                            </div>
+
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
                                 <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Cliente</span>
                                 <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.clienteNome}>
                                     {item.clienteNome || `ID: ${item.clienteId}`}
@@ -291,26 +298,20 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                             </div>
 
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
-                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Data</span>
-                                <span className={`text-md font-medium ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
-                                    {formatDate(item.data)}
-                                </span>
-                            </div>
-
-                            <div className="md:col-span-4 flex flex-col items-start justify-start gap-2">
-                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Descrição</span>
-                                <p className={`text-md line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-600'}`} title={item.descricao}>
-                                    {item.descricao}
-                                </p>
-                            </div>
-
-                            <div className="md:col-span-3 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Etapa</span>
                                 <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.etapa}>{item.etapa}</span>
                                 <Progress
                                     value={item.progresso?.[0]}
                                     total={item.progresso?.[1]}
                                     dark={item.status === "Finalizado"}
                                 />
+                            </div>
+
+                            <div className="md:col-span-2 flex flex-col items-start justify-start gap-2">
+                                <span className={`text-md font-bold mb-1 ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Data</span>
+                                <span className={`text-md font-medium ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
+                                    {formatDate(item.data)}
+                                </span>
                             </div>
 
                         </div>

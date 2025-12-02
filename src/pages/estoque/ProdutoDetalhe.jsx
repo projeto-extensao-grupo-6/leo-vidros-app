@@ -597,7 +597,6 @@ export default function ProductDetailPage() {
                         <XAxis 
                           dataKey="date" 
                           stroke="#6b7280"
-                          reversed
                           style={{ fontSize: '12px' }}
                         />
                         <YAxis 
