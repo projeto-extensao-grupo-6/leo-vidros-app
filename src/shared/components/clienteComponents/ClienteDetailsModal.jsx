@@ -9,24 +9,21 @@ const formatCurrency = (value) => {
 };
 
 export default function ClienteDetailsModal({ open, onClose, cliente, servicos: servicosProp }) {
-  // não renderiza nada se não houver cliente selecionado
+
   if (!cliente) return null;
 
-  const PEDIDOS_URL = "/servicos";
+  const PEDIDOS_URL = "/pedidos";
   const [servicos, setServicos] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // determina endereço principal: primeiro do cliente passado ou do primeiro pedido
   const endereco =
     cliente?.enderecos?.[0] ||
     servicosProp?.find((p) => p.cliente)?.cliente?.enderecos?.[0] ||
     undefined;
 
-  // carrega histórico: agora sempre busca pelo id do cliente via axios quando o modal abre
   useEffect(() => {
     let isMounted = true;
 
-    // se for passada a lista completa via prop, filtramos localmente (opcional)
     if (Array.isArray(servicosProp) && servicosProp.length > 0) {
       const filtered = servicosProp.filter((p) => p.cliente?.id === cliente.id);
       setServicos(filtered);
@@ -35,7 +32,6 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
       };
     }
 
-    // quando o modal abrir e houver cliente com id, buscar os servicos via API
     const fetchServicosPorCliente = async () => {
       if (!open || !cliente?.id) {
         setServicos([]);

@@ -110,15 +110,6 @@ const getClienteInicial = () => ({
   uf: "",
 });
 
-const getNovoServico = () => ({
-  id: `temp-${Date.now()}`,
-  servico: "",
-  valor: 0,
-  dataOrcamento: new Date().toISOString().split("T")[0],
-  dataServico: "",
-  formaPagamento: "N/A",
-  desconto: 0.1
-});
 
 export default function ClienteFormModal({
   open,
@@ -128,7 +119,6 @@ export default function ClienteFormModal({
   clienteInicial,
 }) {
   const [clienteData, setClienteData] = useState(getClienteInicial());
-  const [historico, setHistorico] = useState([]);
 
 useEffect(() => {
   if (modoEdicao && clienteInicial) {
@@ -152,11 +142,9 @@ useEffect(() => {
       endereco: endereco.rua,
     });
 
-    setHistorico(clienteInicial.historicoServicos || []);
 
   } else {
     setClienteData(getClienteInicial());
-    setHistorico([]);
   }
 }, [open, modoEdicao, clienteInicial]);
 
@@ -173,27 +161,6 @@ useEffect(() => {
     }));
   };
 
-  const handleHistoricoChange = (index, fieldName, value) => {
-    const novoHistorico = [...historico];
-    if (!novoHistorico[index]) novoHistorico[index] = {};
-
-    let finalValue = value;
-    if (fieldName === "valor" || fieldName === "desconto") {
-      finalValue = parseFloat(value) || 0;
-    }
-
-    novoHistorico[index] = { ...novoHistorico[index], [fieldName]: finalValue };
-    setHistorico(novoHistorico);
-  };
-
-  const handleAddServico = () => {
-    setHistorico([...historico, getNovoServico()]);
-  };
-
-  const handleRemoveServico = (index) => {
-    const novoHistorico = historico.filter((_, i) => i !== index);
-    setHistorico(novoHistorico);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -230,87 +197,19 @@ useEffect(() => {
       createdCliente = clienteInicial || null;
     }
 
-    // se onSubmit retornou um token (string) — não é o cliente criado
     if (typeof createdCliente === "string") {
-      // log para debugging e fallback para clienteInicial
       console.warn("onSubmit returned a string (possible token). Ignoring as createdCliente:", createdCliente);
       createdCliente = clienteInicial || null;
     }
 
-    const clienteId = createdCliente?.id || clienteInicial?.id || undefined;
-
-    if (historico && historico.length > 0) {
-      const formatDecimal = (val) => {
-        const n = parseFloat(val);
-        return isNaN(n) ? "0.00" : n.toFixed(2);
-      };
-
-      const pedidosToPost = historico.map((h) => {
-        const valor = formatDecimal(h.valor);
-        return {
-          valorTotal: valor,
-          ativo: true,
-          observacao: h.servico || h.observacao || "",
-          formaPagamento: h.formaPagamento || "N/A",
-          tipoPedido: null,
-          cliente: clienteId ? { id: clienteId } : {
-            nome: dadosCompletos.nome,
-            cpf: dadosCompletos.cpf,
-            email: dadosCompletos.email,
-            telefone: dadosCompletos.telefone,
-            status: dadosCompletos.status,
-            enderecos: dadosCompletos.enderecos,
-          },
-          status: { nome: "PENDENTE", tipo: "AGENDAMENTO" },
-          produtos: [],
-          servico: {
-            nome: h.servico || "",
-            descricao: h.descricao || h.servico || "",
-            precoBase: valor,
-            ativo: true,
-            etapa: { nome: h.etapaNome || "PENDENTE", tipo: "PEDIDO" },
-          },
-        };
-      });
-
-      console.log(pedidosToPost)
-
-      try {
-        for (const p of pedidosToPost) {
-          const payload = JSON.parse(JSON.stringify(p));
-          if (!payload) continue;
-          console.log("Criando pedido com payload:", payload);
-
-          const token = localStorage.getItem("token");
-          const headers = token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" };
-
-          await api.post("/pedidos", payload, { headers });
-        }
-      } catch (err) {
-        console.error("Erro ao criar pedidos:", err);
-      }
-    }
-
-    handleClose();
-  };
+  }
 
   const handleClose = () => {
     onClose();
     setTimeout(() => {
       setClienteData(getClienteInicial());
-      setHistorico([]);
     }, 300);
   };
-
-  const opcoesPagamento = [
-    { value: "N/A", label: "N/A" },
-    { value: "Debito", label: "Débito" },
-    { value: "Pix", label: "Pix" },
-    { value: "Dinheiro", label: "Dinheiro" },
-    { value: "Credito (1x)", label: "Crédito (1x)" },
-    { value: "Credito (2x)", label: "Crédito (2x)" },
-    { value: "Credito (3x)", label: "Crédito (3x)" },
-  ];
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
@@ -462,180 +361,6 @@ useEffect(() => {
                 />
               </Stack>
             </Box>
-
-            {clienteData.status !== "Ativo" && (
-              <Box>
-                <Typography variant="h6" mb={2}>
-                  Histórico de serviços prestados
-                </Typography>
-
-                <Stack spacing={3}>
-                  {historico.map((hist, index) => (
-                    <Box
-                      key={hist.id || index}
-                      bgcolor="white"
-                      p={3}
-                      borderRadius={2}
-                      border={1}
-                      borderColor="grey.200"
-                      position="relative"
-                    >
-                      <IconButton
-                        aria-label="Deletar serviço"
-                        onClick={() => handleRemoveServico(index)}
-                        color="error"
-                        sx={{ position: "absolute", top: 8, right: 8 }}
-                      >
-                        <DeleteOutline />
-                      </IconButton>
-
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label={`Serviço ${index + 1}`}
-                            value={hist.servico || ""}
-                            onChange={(e) =>
-                              handleHistoricoChange(index, "servico", e.target.value)
-                            }
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <SettingsOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <TextField
-                            fullWidth
-                            label="Valor"
-                            type="number"
-                            value={hist.valor || ""}
-                            onChange={(e) =>
-                              handleHistoricoChange(index, "valor", e.target.value)
-                            }
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <MonetizationOnOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={6} sm={4}>
-                          <TextField
-                            fullWidth
-                            label="Desconto (%)"
-                            type="number"
-                            value={hist.desconto || ""}
-                            onChange={(e) =>
-                              handleHistoricoChange(index, "desconto", e.target.value)
-                            }
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <PercentOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-
-                        <Grid item xs={12} sm={4}>
-                          <TextField
-                            select 
-                            fullWidth
-                            label="Forma de Pagamento"
-                            value={hist.formaPagamento || "N/A"}
-                            onChange={(e) =>
-                              handleHistoricoChange(
-                                index,
-                                "formaPagamento",
-                                e.target.value
-                              )
-                            }
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <PaymentOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          >
-                            {opcoesPagamento.map((option) => (
-                              <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        </Grid>
-
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            fullWidth
-                            label="Data Orçamento"
-                            type="date"
-                            value={hist.dataOrcamento || ""}
-                            onChange={(e) =>
-                              handleHistoricoChange(
-                                index,
-                                "dataOrcamento",
-                                e.target.value
-                              )
-                            }
-                            InputLabelProps={{ shrink: true }}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <EventOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <TextField
-                            fullWidth
-                            label="Data Serviço"
-                            type="date"
-                            value={hist.dataServico || ""}
-                            onChange={(e) =>
-                              handleHistoricoChange(
-                                index,
-                                "dataServico",
-                                e.target.value
-                              )
-                            }
-                            InputLabelProps={{ shrink: true }}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <EventOutlined fontSize="small" />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </Box>
-                  ))}
-
-                  <Box>
-                    <Button
-                      startIcon={<Add />}
-                      onClick={handleAddServico}
-                      variant="outlined"
-                      size="medium"
-                    >
-                      Adicionar Serviço
-                    </Button>
-                  </Box>
-                </Stack>
-              </Box>
-            )}
             
           </Stack>
         </DialogContent>
