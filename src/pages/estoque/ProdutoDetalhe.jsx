@@ -372,7 +372,7 @@ export default function ProductDetailPage() {
 
                   <div className="bg-gradient-to-br from-[#007EA7] to-[#006891] rounded-lg border-2 border-[#005a7a] p-6">
                     <p className="text-sm text-white font-bold mb-2">Disponível</p>
-                    <p className="text-2xl font-bold text-white">{estoque.quantidadeDisponivel - estoque.reservado}</p>
+                    <p className="text-2xl font-bold text-white">{Math.max(0, estoque.quantidadeDisponivel - estoque.reservado)}</p>
                     <p className="text-xs text-blue-100 mt-2">Pronto para uso</p>
                   </div>
 

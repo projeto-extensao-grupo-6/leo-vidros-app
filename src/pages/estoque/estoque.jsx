@@ -155,14 +155,20 @@ export default function Estoque() {
       items = items.filter((item) => {
         const quantidade = item.quantidadeDisponivel;
         const estoqueMinimo = item.produto.estoqueMinimo;
-        
-        const situacao =
-          quantidade === 0
-            ? "Fora de estoque"
-            : quantidade < estoqueMinimo
-            ? "Abaixo do normal"
-            : "Disponível";
-            
+        const reservado = item.reservado;
+    
+        let situacao = "";
+    
+        if (quantidade === 0 && reservado > 0) {
+          situacao = "Reservado";
+        } else if (quantidade === 0) {
+          situacao = "Fora de estoque";
+        } else if (quantidade < estoqueMinimo) {
+          situacao = "Abaixo do normal";
+        } else {
+          situacao = "Disponível";
+        }
+    
         return situacaoFilters.includes(situacao);
       });
     }
@@ -411,13 +417,19 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
     return paginationData.items.map((item) => {
       const quantidade = item.quantidadeDisponivel;
       const estoqueMinimo = item.produto.estoqueMinimo;
+      const reservado = item.reservado;
       
-      const situacao =
-        quantidade === 0
-          ? "Fora de estoque"
-          : quantidade < estoqueMinimo
-          ? "Abaixo do normal"
-          : "Disponível";
+      let situacao = "";
+      
+      if (quantidade === 0 && reservado > 0) {
+        situacao = "Reservado";
+      } else if (quantidade === 0) {
+        situacao = "Fora de estoque";
+      } else if (quantidade < estoqueMinimo) {
+        situacao = "Abaixo do normal";
+      } else {
+        situacao = "Disponível";
+      }
     
       return {
         ...item,
