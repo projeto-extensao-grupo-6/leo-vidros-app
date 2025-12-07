@@ -22,7 +22,7 @@ import {
 } from "@mui/icons-material";
 import Logo from "../../../assets/logo/logo.png";
 import DefaultAvatar from '../../../assets/Avatar.png';
-  
+
 export default function Header({ toggleSidebar, sidebarOpen }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -48,7 +48,7 @@ export default function Header({ toggleSidebar, sidebarOpen }) {
       else
         setUserPhoto(DefaultAvatar);
     } else {
-        setUserPhoto(Logo);
+        setUserPhoto(DefaultAvatar);
 
     }
 
