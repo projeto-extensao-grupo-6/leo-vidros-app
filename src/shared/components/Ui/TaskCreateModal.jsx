@@ -282,34 +282,21 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           // Garante que temos um ID válido
           const pedidoId = dto.id || dto.pedidoId || dto.idPedido;
           
-          // Monta uma label descritiva baseada nos dados disponíveis
+          // Monta uma label descritiva baseada nos dados disponíveis - apenas nome/descrição
           let label = '';
           
           if (dto.descricao) {
               label = dto.descricao;
           } else if (dto.nome) {
               label = dto.nome;
+          } else if (dto.servico?.nome) {
+              label = dto.servico.nome;
+          } else if (dto.servico?.descricao) {
+              label = dto.servico.descricao;
+          } else if (pedidoId) {
+              label = `Pedido #${pedidoId}`;
           } else {
-              // Usa informações do cliente ou serviço
-              const clienteNome = dto.cliente?.nome || dto.servico?.cliente?.nome;
-              const servicoNome = dto.servico?.nome || dto.servico?.descricao;
-              
-              if (clienteNome && servicoNome) {
-                  label = `${clienteNome} - ${servicoNome}`;
-              } else if (clienteNome) {
-                  label = `Pedido de ${clienteNome}`;
-              } else if (servicoNome) {
-                  label = servicoNome;
-              } else if (pedidoId) {
-                  label = `Pedido #${pedidoId}`;
-              } else {
-                  label = `Pedido sem identificação`;
-              }
-              
-              // Adiciona a etapa se disponível
-              if (dto.etapa?.nome) {
-                  label += ` (${dto.etapa.nome})`;
-              }
+              label = `Pedido sem identificação`;
           }
           
           console.log('✅ Label gerada:', label);
@@ -778,30 +765,40 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
 
               {/* Informações do Cliente */}
               {clienteInfo && (
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center mb-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                      <span className="text-blue-600 font-bold text-lg">{clienteInfo.nome?.charAt(0)?.toUpperCase()}</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-sm font-bold text-gray-900">{clienteInfo.nome}</h3>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${clienteInfo.status === 'Ativo' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
-                        {clienteInfo.status}
-                      </span>
-                    </div>
+                <div className="flex flex-col gap-4 bg-white border border-gray-200 rounded-lg p-4 shadow-md">
+
+                  {/* Cabeçalho: Nome + Status */}
+                  <div className="flex items-center justify-center gap-2 justify-between">
+                    <h3 className="text-lg font-bold text-gray-900">{clienteInfo.nome}</h3>
+
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-semibold ${clienteInfo.status === "Ativo"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-200 text-gray-600"
+                        }`}
+                    >
+                      {clienteInfo.status}
+                    </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+
+                  {/* Informações */}
+                  <div className="flex flex-col items-start justify-start gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500 font-medium">CPF:</span>
-                      <p className="text-gray-900 font-semibold">{clienteInfo.cpf || '-'}</p>
+                      <p className="text-gray-900 font-semibold">
+                        CPF: {clienteInfo.cpf || "-"}
+                      </p>
                     </div>
+
                     <div>
-                      <span className="text-gray-500 font-medium">Telefone:</span>
-                      <p className="text-gray-900 font-semibold">{clienteInfo.telefone || '-'}</p>
+                      <p className="text-gray-900 font-semibold">
+                        Telefone: {clienteInfo.telefone || "-"}
+                      </p>
                     </div>
+
                     <div className="col-span-2">
-                      <span className="text-gray-500 font-medium">Email:</span>
-                      <p className="text-gray-900 font-semibold truncate">{clienteInfo.email || '-'}</p>
+                      <p className="text-gray-900 font-semibold break-all">
+                        Email: {clienteInfo.email || "-"}
+                      </p>
                     </div>
                   </div>
                 </div>

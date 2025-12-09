@@ -78,7 +78,7 @@ const EstoqueItemRow = ({
        
         <button
           onClick={onViewDetails}
-          className="p-2 rounded-md hover:bg-blue-50 text-[#007EA7] transition-colors duration-150"
+          className="p-2 rounded-md hover:bg-blue-50 text-[#007EA7] transition-colors duration-150 cursor-pointer"
           title="Ver detalhes"
           aria-label={`Ver detalhes de ${nome}`}
         >

@@ -13,13 +13,20 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
   };
 
   const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Sao_Paulo'
     });
+  };
+
+  const formatQuantity = (value) => {
+    if (typeof value !== 'number') value = parseFloat(value) || 0;
+    return Number.isInteger(value) ? value : value.toFixed(2);
   };
 
   const getOrigemInfo = (origem) => {
@@ -96,7 +103,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
         </div>
 
         {/* Conteúdo do Modal - Estilo Chat */}
-        <div className="p-6 space-y-6 max-h-[calc(90vh-200px)] overflow-y-auto">
+        <div className="flex flex-col gap-3 p-6 space-y-6 max-h-[calc(90vh-200px)] overflow-y-auto">
           {/* Mensagem Principal da Movimentação */}
           <div className="flex justify-center w-full">
             <div className={`w-full max-w-2xl rounded-xl p-6 shadow-md ${
@@ -115,7 +122,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
                 </span>
               </div>
               <p className={`text-2xl font-bold text-center ${isEntrada ? 'text-green-800' : 'text-red-800'}`}>
-                {isEntrada ? '+' : '-'}{movimento.quantidade} {produto?.unidademedida}
+                {isEntrada ? '+' : '-'}{formatQuantity(movimento.quantidade)} {produto?.unidademedida}
               </p>
               <p className={`text-sm text-center mt-3 ${isEntrada ? 'text-green-600' : 'text-red-600'}`}>
                 {formatDateTime(movimento.dataHora)}
@@ -156,17 +163,17 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
                 )}
                 <div className="flex justify-between items-center py-3 border-b border-gray-200">
                   <span className="font-medium">Quantidade Anterior:</span>
-                  <span className="font-semibold text-gray-900">{quantidadeAnterior} {produto?.unidademedida}</span>
+                  <span className="font-semibold text-gray-900">{formatQuantity(quantidadeAnterior)} {produto?.unidademedida}</span>
                 </div>
                 <div className="flex justify-between items-center py-3 border-b border-gray-200">
                   <span className="font-medium">Quantidade Movimentada:</span>
                   <span className={`font-bold text-lg ${isEntrada ? 'text-green-600' : 'text-red-600'}`}>
-                    {isEntrada ? '+' : '-'}{movimento.quantidade} {produto?.unidademedida}
+                    {isEntrada ? '+' : '-'}{formatQuantity(movimento.quantidade)} {produto?.unidademedida}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-3">
                   <span className="font-medium">Quantidade Atual:</span>
-                  <span className="font-bold text-gray-900 text-lg">{movimento.quantidadeAtual} {produto?.unidademedida}</span>
+                  <span className="font-bold text-gray-900 text-lg">{formatQuantity(movimento.quantidadeAtual)} {produto?.unidademedida}</span>
                 </div>
               </div>
             </div>
@@ -180,7 +187,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
                   <User className="w-5 h-5 text-blue-600" />
                   <span className="font-bold text-blue-800 text-lg">Usuário Responsável</span>
                 </div>
-                <div className="space-y-3 text-base text-blue-700 text-center">
+                <div className="flex flex-col gap-2 space-y-3 text-base text-blue-700 text-center">
                   <p className="font-bold text-xl text-blue-900">{movimento.usuario.nome}</p>
                   <div className="flex items-center justify-center gap-2">
                     <Mail className="w-4 h-4" />
@@ -200,8 +207,8 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
 
           {/* Observação */}
           {movimento.observacao && (
-            <div className="flex justify-center w-full">
-              <div className="bg-gradient-to-br from-yellow-50 to-white border-2 border-yellow-200 rounded-xl p-6 w-full max-w-2xl shadow-sm">
+            <div className="flex justify-center gap-2 w-full">
+              <div className="flex flex-col gap-2 bg-gradient-to-br from-yellow-50 to-white border-2 border-yellow-200 rounded-xl p-6 w-full max-w-2xl shadow-sm">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <MessageCircle className="w-5 h-5 text-yellow-600" />
                   <span className="font-bold text-yellow-800 text-lg">Observação</span>
@@ -323,7 +330,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
         <div className="flex justify-end p-6 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100 sticky bottom-0 z-10">
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
+            className="px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg cursor-pointer hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
           >
             Fechar
           </button>

@@ -33,6 +33,7 @@ const useProductAPI = () => {
         produtoId: produtoId,
         localizacao: estoqueData.localizacao,
         quantidadeTotal: parseInt(estoqueData.qtdTotal) || 0,
+        dataHora: new Date().toISOString()
       });
 
       return response.data;

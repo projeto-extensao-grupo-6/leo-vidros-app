@@ -57,7 +57,8 @@ const EntradaSaidaEstoque = ({ isOpen, onClose, itemIds, estoque }) => {
             const requestBody = {
                 produtoId: item.id,
                 localizacao: item.localizacao,
-                quantidadeTotal: parseInt(quantidade, 10) || 0
+                quantidadeTotal: parseInt(quantidade, 10) || 0,
+                dataHora: new Date().toISOString()
             };
 
             await Api.post(endpoint, requestBody);
