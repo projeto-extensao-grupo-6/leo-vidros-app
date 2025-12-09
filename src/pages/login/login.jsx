@@ -3,6 +3,8 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Button from "../../shared/components/buttons/button.component";
 import { useNavigate } from "react-router-dom"
 import Input from "../../shared/components/Ui/Input";
@@ -13,6 +15,7 @@ import Input from "../../shared/components/Ui/Input";
     const [error, setError] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
 
@@ -83,10 +86,10 @@ import Input from "../../shared/components/Ui/Input";
         <div className="w-full max-w-6xl flex items-center justify-center gap-12">
           {/* Imagem lateral */}
           <div
-            className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
+            className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg/20"
             style={{
               backgroundImage:
-                'url("/src/assets/images/premium_photo-1672287579489-4e92e57de92a.jpeg")',
+                'url("src/assets/images/GlazierAdobeStock_576236137.jpeg")'
             }}
           />
 
@@ -99,7 +102,7 @@ import Input from "../../shared/components/Ui/Input";
           >
             <div className="flex flex-col gap-6">
               <div className="mb-10 text-center flex flex-col gap-2">
-                <h1 className="text-3xl font-bold text-[#111827] mb-2">
+                <h1 className="text-4xl font-bold text-[#111827] mb-2">
                   Entre na sua conta
                 </h1>
                 <p className="text-[#6b7280] text-sm">
@@ -108,7 +111,7 @@ import Input from "../../shared/components/Ui/Input";
               </div>
 
               {/* Formulário */}
-              <form onSubmit={handleLogin} className="space-y-8">
+              <form onSubmit={handleLogin} className="flex flex-col gap-5">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key="login"
@@ -117,7 +120,7 @@ import Input from "../../shared/components/Ui/Input";
                     animate="animate"
                     exit="exit"
                     transition={{ duration: 0.4 }}
-                    className="space-y-6"
+                    className="flex flex-col gap-6"
                   >
                     <div className="space-y-3">
                       <label
@@ -151,12 +154,23 @@ import Input from "../../shared/components/Ui/Input";
                         <LockIcon className="text-[#6b7280] text-3xl" />
                         <input
                           id="senha"
-                          type="password"
+                          type={showPassword ? "text" : "password"}
                           placeholder="Digite sua senha"
                           value={senha}
                           onChange={(e) => setSenha(e.target.value)}
                           className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
                         />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-[#6b7280] hover:text-[#111827] transition-colors cursor-pointer"
+                        >
+                          {showPassword ? (
+                            <VisibilityOff className="text-3xl" />
+                          ) : (
+                            <Visibility className="text-3xl" />
+                          )}
+                        </button>
                       </div>
                     </div>
                   </motion.div>
@@ -177,7 +191,7 @@ import Input from "../../shared/components/Ui/Input";
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    className="text-sm text-[#007EA7] hover:text-[#005f73] transition"
+                    className="text-sm text-[#007EA7] hover:text-[#005f73] transition cursor-pointer"
                     onClick={() => navigate("/esqueceuSenha")}
                   >
                     Esqueceu sua senha?
@@ -191,7 +205,7 @@ import Input from "../../shared/components/Ui/Input";
                     variant="primary"
                     size="lg"
                     disabled={loading}
-                    className="w-full bg-[#007EA7] hover:bg-[#005f73] text-white font-medium py-4 rounded-lg transition-colors"
+                    className="w-full bg-[#007EA7] hover:bg-[#005f73] text-white font-medium py-4 rounded-lg transition-colors cursor-pointer"
                   >
                     {loading ? "Entrando..." : "Entrar"}
                   </Button>
@@ -210,7 +224,7 @@ import Input from "../../shared/components/Ui/Input";
                   <button
                     type="button"
                     onClick={() => (window.location.href = "/cadastro")}
-                    className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors"
+                    className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
                   >
                     Cadastre-se
                   </button>
@@ -232,28 +246,32 @@ import Input from "../../shared/components/Ui/Input";
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
-                className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center"
+                className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg
-                    className="w-6 h-6 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-15 h-15 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-[#111827] text-center">
+                    Login realizado com sucesso!
+                  </h2>
+                  <p className="text-[#6b7280] text-center">
+                    Redirecionando...
+                  </p>
                 </div>
-                <h2 className="text-xl font-bold text-[#111827] mb-2">
-                  Login realizado com sucesso!
-                </h2>
-                <p className="text-[#6b7280]">Redirecionando...</p>
               </motion.div>
             </motion.div>
           )}

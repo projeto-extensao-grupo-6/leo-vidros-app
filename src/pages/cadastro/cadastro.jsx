@@ -107,7 +107,7 @@ function Cadastro() {
       <div className="w-full max-w-6xl flex items-center justify-center gap-12">
         <div
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
-          style={{ backgroundImage: 'url("/src/assets/images/premium_photo-1672287579489-4e92e57de92a.jpeg")' }}
+          style={{ backgroundImage: 'url("/src/assets/images/GlazierAdobeStock_576236137.jpeg")' }}
         />
 
         <motion.div
@@ -116,9 +116,9 @@ function Cadastro() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md p-8 rounded-xl"
         >
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-8">
             <div className="mb-10 text-center flex flex-col gap-2">
-              <h1 className="text-3xl font-bold text-[#111827] mb-2">Criar conta</h1>
+              <h1 className="text-4xl font-bold text-[#111827] mb-2">Criar conta</h1>
               <p className="text-[#6b7280] text-sm">Preencha os dados para criar sua conta</p>
             </div>
 
@@ -206,11 +206,11 @@ function Cadastro() {
               )}
 
               <div className="flex gap-3 items-center justify-center pt-4">
-                <Button type="submit" variant="primary" size="lg" disabled={loading} className="flex-1 bg-[#007EA7] text-white font-medium py-4 rounded-lg max-w-sm">
+                <Button type="submit" variant="primary" size="lg" disabled={loading} className="flex-1 bg-[#007EA7] text-white font-medium py-4 rounded-lg max-w-xl cursor-pointer">
                   {loading ? "Processando..." : step < 4 ? "Próximo" : "Solicitar cadastro"}
                 </Button>
                 {step > 1 && (
-                  <button type="button" onClick={() => setStep(step - 1)} className="px-8 py-4 text-[#007EA7] hover:bg-[#f0f0f0] rounded-lg transition-colors font-medium">
+                  <button type="button" onClick={() => setStep(step - 1)} className="px-8 py-4 text-[#007EA7] hover:bg-[#f0f0f0] rounded-lg transition-colors font-medium cursor-pointer">
                     Voltar
                   </button>
                 )}
@@ -221,27 +221,54 @@ function Cadastro() {
               <div className="h-px bg-black w-full" />
             </div>
 
-            <div className="text-center">
-              <button type="button" onClick={() => (window.location.href = "/login")} className="text-black hover:text-[#333333] transition-colors text-sm">
-                Já tem conta? Voltar para Login
-              </button>
-            </div>
+              <div className="text-center">
+                <p className="text-sm text-[#6b7280]">
+                  Já possui uma conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => (window.location.href = "/login")}
+                    className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
+                  >
+                    Login
+                  </button>
+                </p>
+              </div>
           </div>
         </motion.div>
       </div>
 
       <AnimatePresence>
         {modalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setModalOpen(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center" onClick={(e) => e.stopPropagation()}>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" 
+            onClick={() => setModalOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.95, opacity: 0 }} 
+              className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full" 
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-15 h-15 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-[#111827] text-center">
+                  Cadastro realizado com sucesso!
+                </h2>
+                <p className="text-[#6b7280] text-center">
+                  Aguarde a aprovação do administrador.
+                </p>
+                <p className="text-sm text-[#9ca3af] text-center">
+                  Redirecionando...
+                </p>
               </div>
-              <h2 className="text-xl font-bold text-[#111827] mb-2">Cadastro realizado com sucesso!</h2>
-              <p className="text-[#6b7280]">Aguarde a aprovação do administrador.</p>
-              <p className="text-sm text-[#9ca3af] mt-4">Redirecionando...</p>
             </motion.div>
           </motion.div>
         )}

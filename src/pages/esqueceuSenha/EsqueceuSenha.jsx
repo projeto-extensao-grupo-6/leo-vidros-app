@@ -87,7 +87,7 @@ const EsqueceuSenha = () => {
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
           style={{
             backgroundImage:
-              'url("/src/assets/images/premium_photo-1672287579489-4e92e57de92a.jpeg")',
+              'url("/src/assets/images/GlaserAdobeStock_741312364.jpeg")'
           }}
         />
 
@@ -106,8 +106,8 @@ const EsqueceuSenha = () => {
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-2 text-[#007EA7] hover:text-[#005f73] transition-colors"
               >
-                <ArrowBackIcon className="text-xl" />
-                <span className="text-sm font-medium">Voltar ao login</span>
+                <ArrowBackIcon className="text-xl cursor-pointer" />
+                <span className="text-md font-semibold cursor-pointer">Voltar ao login</span>
               </button>
             </div>
 
@@ -163,7 +163,7 @@ const EsqueceuSenha = () => {
                   variant="primary"
                   size="lg"
                   disabled={loading || !email.trim()}
-                  className="w-full bg-[#007EA7] hover:bg-[#005f73] text-white font-medium py-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#007EA7] hover:bg-[#005f73] text-white font-medium py-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {loading ? "Verificando..." : "Enviar senha temporária"}
                 </Button>
@@ -182,7 +182,7 @@ const EsqueceuSenha = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/cadastro")}
-                  className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors"
+                  className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
                 >
                   Cadastre-se
                 </button>
@@ -206,33 +206,35 @@ const EsqueceuSenha = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center"
+              className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-[#111827] text-center">
+                  Email verificado!
+                </h2>
+                <p className="text-[#6b7280] text-center">
+                  Senha temporária sendo enviada para seu e-mail...
+                </p>
+                <p className="text-sm text-[#6b7280] text-center">
+                  Redirecionando para o login...
+                </p>
               </div>
-              <h2 className="text-xl font-bold text-[#111827] mb-2">
-                Email verificado!
-              </h2>
-              <p className="text-[#6b7280] mb-4">
-                Senha temporária sendo enviada para seu e-mail...
-              </p>
-              <p className="text-sm text-[#6b7280]">
-                Redirecionando para o login...
-              </p>
             </motion.div>
           </motion.div>
         )}
