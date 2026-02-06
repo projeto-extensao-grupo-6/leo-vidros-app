@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
 
 export default function Agendamentos() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

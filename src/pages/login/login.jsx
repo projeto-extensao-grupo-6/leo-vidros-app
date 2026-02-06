@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import LockIcon from "@mui/icons-material/Lock";
-import Button from "../../shared/components/buttons/button.component";
+import { UserCircle, Lock } from "lucide-react";
+import Button from "../../shared/components/ui/buttons/button.component";
 import { useNavigate } from "react-router-dom"
-import Input from "../../shared/components/Ui/Input";
+import Input from "../../shared/components/ui/Input";
 
   function Login() {
     const [email, setEmail] = useState("");
@@ -120,44 +119,32 @@ import Input from "../../shared/components/Ui/Input";
                     className="space-y-6"
                   >
                     <div className="space-y-3">
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-[#6b7280] text-left"
-                      >
-                        Email
-                      </label>
-                      <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                        <AccountCircle className="text-[#6b7280] text-3xl" />
-                        <input
-                          id="email"
-                          type="email"
-                          placeholder="Digite seu email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                        />
-                      </div>
+                      <Input
+                        id="email"
+                        type="email"
+                        label="Email"
+                        placeholder="Digite seu email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        startIcon={<UserCircle size={24} />}
+                        variant="standard"
+                        size="md"
+                      />
                     </div>
 
                     {/* Senha */}
                     <div className="space-y-3">
-                      <label
-                        htmlFor="senha"
-                        className="block text-sm font-medium text-[#6b7280] text-left"
-                      >
-                        Senha
-                      </label>
-                      <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                        <LockIcon className="text-[#6b7280] text-3xl" />
-                        <input
-                          id="senha"
-                          type="password"
-                          placeholder="Digite sua senha"
-                          value={senha}
-                          onChange={(e) => setSenha(e.target.value)}
-                          className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                        />
-                      </div>
+                      <Input
+                        id="senha"
+                        type="password"
+                        label="Senha"
+                        placeholder="Digite sua senha"
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                        startIcon={<Lock size={24} />}
+                        variant="standard"
+                        size="md"
+                      />
                     </div>
                   </motion.div>
                 </AnimatePresence>

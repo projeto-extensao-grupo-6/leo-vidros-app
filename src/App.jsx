@@ -2,12 +2,13 @@ import React from 'react';
 import './App.css';
 import { RouterProvider } from 'react-router-dom';
 import { routes } from './provider/route.jsx';
+import ErrorBoundary from './shared/components/common/ErrorBoundary';
 
 function App() {
   return (
-      <>
-        <RouterProvider router={routes} />
-      </>
+    <ErrorBoundary>
+      <RouterProvider router={routes} />
+    </ErrorBoundary>
   );
 }
 

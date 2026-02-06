@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
-import {
-  Button,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Checkbox,
-  IconButton,
-  Chip,
-} from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Button from "../../shared/components/ui/buttons/button.component";
+import Input from "../../shared/components/ui/Input";
+import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../shared/components/ui/Table/Table";
+import { Paper } from "../../shared/components/ui/Utilities/Utilities";
+import { Checkbox } from "../../shared/components/ui/Checkbox/Checkbox";
+import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
+import { Chip } from "../../shared/components/ui/Chip/Chip";
+import { Pencil, Trash2 } from "lucide-react";
 
-import FuncionarioForm from "../../shared/components/modalFuncionarios/FuncionarioForm";
-import DeleteFuncionario from "../../shared/components/modalFuncionarios/DeleteFuncionario";
-import Api from "../../axios/Api";
+import FuncionarioForm from "../../features/funcionarios/components/FuncionarioForm";
+import DeleteFuncionario from "../../features/funcionarios/components/DeleteFuncionario";
+import apiClient from "../../core/api/axios.config";
 
 export default function Funcionarios() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -39,7 +32,7 @@ export default function Funcionarios() {
 
   const fetchFuncionarios = async () => {
     try {
-      const response = await Api.get("/funcionarios");
+      const response = await apiClient.get("/funcionarios");
       // Garantindo que sempre seja um array
       const data = Array.isArray(response.data) ? response.data : [];
       setFuncionarios(data);
@@ -83,9 +76,9 @@ export default function Funcionarios() {
     try {
       if (modoEdicao && funcionarioSelecionado) {
         const funcAtualizado = { ...funcionarioSelecionado, ...novoFunc };
-        await Api.put(`/funcionarios/${funcionarioSelecionado.id}`, funcAtualizado);
+        await apiClient.put(`/funcionarios/${funcionarioSelecionado.id}`, funcAtualizado);
       } else {
-        await Api.post("/funcionarios", novoFunc);
+        await apiClient.post("/funcionarios", novoFunc);
       }
       fetchFuncionarios();
     } catch (error) {
@@ -95,7 +88,7 @@ export default function Funcionarios() {
 
   const deletarFuncionario = async (id) => {
     try {
-      await Api.delete(`/funcionarios/${id}`);
+      await apiClient.delete(`/funcionarios/${id}`);
       setFuncionarios((prev) => prev.filter((f) => f.id !== id));
     } catch (error) {
       console.error("Erro ao deletar funcionário:", error);
@@ -121,18 +114,18 @@ export default function Funcionarios() {
             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
                 <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#007EA7", "&:hover": { backgroundColor: "#00698A" } }}
+                  variant="primary"
                   onClick={abrirModalCriar}
                 >
                   Novo Funcionário
                 </Button>
-                <TextField
-                  size="small"
+                <Input
+                  type="search"
+                  size="sm"
                   placeholder="Busque por nome..."
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
-                  className="w-full sm:w-80"
+                  containerClassName="w-full sm:w-80"
                 />
               </div>
 
@@ -176,10 +169,10 @@ export default function Funcionarios() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <IconButton size="small" onClick={() => abrirModalEditar(f)}>
-                              <Edit fontSize="small" />
+                              <Pencil size={16} />
                             </IconButton>
                             <IconButton size="small" onClick={() => abrirModalDeletar(f)}>
-                              <Delete fontSize="small" />
+                              <Trash2 size={16} />
                             </IconButton>
                           </div>
                         </TableCell>
@@ -197,16 +190,16 @@ export default function Funcionarios() {
                 </span>
                 <div className="flex gap-2">
                   <Button
-                    variant="outlined"
-                    size="small"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
                     disabled={pagina === 1}
                   >
                     Anterior
                   </Button>
                   <Button
-                    variant="outlined"
-                    size="small"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
                     disabled={pagina === totalPaginas}
                   >

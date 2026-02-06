@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Input from "../../shared/components/ui/Input";
 import PedidosList from "./PedidosList";
 import ServicosList from "../servicos/ServicosList";
-import FilterDropdown from "../../shared/components/pedidosServicosComponents/FilterDropdown";
-import { FaBoxOpen, FaWrench, FaFilter, FaSearch } from "react-icons/fa";
-import { ChevronDown } from "lucide-react";
+import FilterDropdown from "../../features/pedidos/components/FilterDropdown";
+import { Package, Wrench, Filter, Search, ChevronDown } from "lucide-react";
 
 export default function Pedidos() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -89,7 +89,7 @@ export default function Pedidos() {
                                     onClick={() => setActiveTab('pedidos')}
                                     className={`${tabBaseClass} ${activeTab === 'pedidos' ? activeTabClass : inactiveTabClass} text-black`}
                                 >
-                                    <FaBoxOpen className={activeTab === 'pedidos' ? "text-[#002A4B]" : "text-slate-400"} />
+                                    <Package size={18} className={activeTab === 'pedidos' ? "text-[#002A4B]" : "text-slate-400"} />
                                     Produtos
                                 </button>
 
@@ -97,7 +97,7 @@ export default function Pedidos() {
                                     onClick={() => setActiveTab('servicos')}
                                     className={`${tabBaseClass} ${activeTab === 'servicos' ? activeTabClass : inactiveTabClass} text-black`}
                                 >
-                                    <FaWrench className={activeTab === 'servicos' ? "text-[#002A4B]" : "text-slate-400"} />
+                                    <Wrench size={18} className={activeTab === 'servicos' ? "text-[#002A4B]" : "text-slate-400"} />
                                     Serviços
                                 </button>
                             </div>
@@ -116,14 +116,16 @@ export default function Pedidos() {
                                     </button>
 
                                     <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                                        <div className="relative w-full md:w-[350px]">
-                                            <input
+                                        <div className="w-full md:w-[350px]">
+                                            <Input
+                                                type="search"
                                                 placeholder="Busque Por.."
                                                 value={busca}
                                                 onChange={(e) => setBusca(e.target.value)}
-                                                className="w-full h-10 pl-10 pr-4 rounded-md border border-slate-200 bg-slate-50 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#007EA7] focus:bg-white transition-all"
+                                                size="md"
+                                                startIcon={<Search size={14} />}
+                                                className="bg-slate-50"
                                             />
-                                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
                                         </div>
 
                                         <div className="relative w-full md:w-auto py-1">
@@ -135,7 +137,7 @@ export default function Pedidos() {
                                                     }`}
                                                 title="Filtrar"
                                             >
-                                                <FaFilter className={`w-3 h-3 ${hasActiveFilters ? "text-[#007EA7]" : "text-slate-800"}`} />
+                                                <Filter size={14} className={hasActiveFilters ? "text-[#007EA7]" : "text-slate-800"} />
                                                 Filtrar
                                                 <ChevronDown className={`text-slate-400 w-4 h-4 ml-1 transition-transform ${isFilterDropdownOpen ? "rotate-180" : ""}`} />
                                             </button>

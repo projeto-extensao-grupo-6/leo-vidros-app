@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Package, TrendingUp, TrendingDown, Edit2, Check, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
-import Api from '../../axios/Api.jsx';
+import Header from "../../shared/css/layout/Header/header.jsx";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar.jsx";
+import apiClient from '../../core/api/axios.config';
+import Input from "../../shared/components/ui/Input";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -34,13 +35,13 @@ export default function ProductDetailPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const estoqueResponse = await Api.get(`/estoques/${id}`);
+        const estoqueResponse = await apiClient.get(`/estoques/${id}`);
         if (estoqueResponse.status !== 200) throw new Error('Produto não encontrado');
         const estoqueData = estoqueResponse.data;
         setEstoque(estoqueData);
         
         
-        const historicoResponse = await Api.get(`/historicos-estoques/${id}`);
+        const historicoResponse = await apiClient.get(`/historicos-estoques/${id}`);
         if (historicoResponse.status === 200) {
           const historicoData = historicoResponse.data;
           
@@ -89,7 +90,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -120,7 +121,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -146,7 +147,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -175,7 +176,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -204,7 +205,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -228,7 +229,7 @@ export default function ProductDetailPage() {
     setEstoque(updatedEstoque);
     
     try {
-      await Api.put(`/produtos/${id}`, updatedProduto, {
+      await apiClient.put(`/produtos/${id}`, updatedProduto, {
         headers: { 'Content-Type': 'application/json' }
       });
     } catch (error) {
@@ -260,12 +261,12 @@ export default function ProductDetailPage() {
       <div className="relative">
         {isEditing ? (
           <div className="flex items-center gap-2">
-            <input
+            <Input
               type={type}
               value={value}
               onChange={(e) => handleChange(e.target.value)}
               onBlur={() => setEditing(prev => ({ ...prev, [field]: false }))}
-              className="flex-1 px-3 py-2 border-2 border-[#005a7a] rounded-md focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] text-sm"
+              size="sm"
               autoFocus
             />
             <Check className="w-4 h-4 text-green-600" />
@@ -537,22 +538,22 @@ export default function ProductDetailPage() {
                         <div className="flex-1 grid grid-cols-2 gap-3">
                           <div>
                             <label className="block text-left text-xs font-bold text-gray-600 mb-1">Tipo</label>
-                            <input
+                            <Input
                               type="text"
                               value={attr.tipo}
                               onChange={(e) => handleAtributoChange(index, 'tipo', e.target.value)}
                               placeholder="Ex: cor, espessura"
-                              className="w-full px-3 py-2 border-2 border-[#005a7a] rounded-md text-sm focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7]"
+                              size="sm"
                             />
                           </div>
                           <div>
                             <label className="block text-left text-xs font-bold text-gray-600 mb-1">Valor</label>
-                            <input
+                            <Input
                               type="text"
                               value={attr.valor}
                               onChange={(e) => handleAtributoChange(index, 'valor', e.target.value)}
                               placeholder="Ex: Incolor, 4mm"
-                              className="w-full px-3 py-2 border-2 border-[#005a7a] rounded-md text-sm focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7]"
+                              size="sm"
                             />
                           </div>
                         </div>

@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GoogleMap, Marker, LoadScript, DirectionsRenderer } from '@react-google-maps/api';
 import { Reorder, AnimatePresence } from 'framer-motion';
-import Header from '../../shared/components/header/header';
-import Sidebar from '../../shared/components/sidebar/sidebar';
+import Header from '../../shared/css/layout/Header/header';
+import Sidebar from '../../shared/css/layout/Sidebar/sidebar';
+import Input from "../../shared/components/ui/Input";
 import {
   ArrowLeft,
   MapPin,
@@ -316,16 +317,18 @@ export default function RotasResponsivoCompacto() {
                     <MapPin size={14} /> Adicionar a Rota
                   </h3>
                   <div className="flex gap-2 items-center py-1">
-                    <input
+                    <Input
                       ref={cepInputRef}
                       onInput={(e) => (e.target.value = maskCep(e.target.value))}
-                      className="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#002B4E]"
+                      size="sm"
                       placeholder="CEP"
+                      containerClassName="flex-1"
                     />
-                    <input
+                    <Input
                       ref={numeroInputRef}
-                      className="w-10 sm:w-24 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#002B4E]"
+                      size="sm"
                       placeholder="Nº"
+                      containerClassName="w-10 sm:w-24"
                     />
                     <button
                       onClick={() => addCep(cepInputRef.current.value, numeroInputRef.current.value)}
@@ -435,8 +438,8 @@ export default function RotasResponsivoCompacto() {
 
                             {editingId === addr.id ? (
                               <div className="flex-1 flex gap-1">
-                                <input id={`edit-cep-${addr.id}`} defaultValue={addr.cep} className="w-full border border-blue-400 p-1 rounded text-[12px]" />
-                                <input id={`edit-num-${addr.id}`} defaultValue={addr.numero} className="w-10 border border-blue-400 p-1 rounded text-[12px]" />
+                                <Input id={`edit-cep-${addr.id}`} defaultValue={addr.cep} size="sm" containerClassName="w-full" />
+                                <Input id={`edit-num-${addr.id}`} defaultValue={addr.numero} size="sm" containerClassName="w-10" />
                                 <button onClick={() => saveEdit(addr.id, document.getElementById(`edit-cep-${addr.id}`).value, document.getElementById(`edit-num-${addr.id}`).value)} className="bg-green-600 text-white px-1.5 rounded text-[12px] cursor-pointer">OK</button>
                               </div>
                             ) : (

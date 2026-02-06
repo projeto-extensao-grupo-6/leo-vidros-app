@@ -1,10 +1,10 @@
-import Api from '../axios/Api';
+import apiClient from '../core/api/axios.config';
 
 class PedidosService {
     
     async buscarTodos() {
         try {
-            const response = await Api.get('/pedidos');
+            const response = await apiClient.get('/pedidos');
             return {
                 success: true,
                 data: response.data || [],
@@ -22,7 +22,7 @@ class PedidosService {
 
     async buscarPedidosDeServico() {
         try {
-            const response = await Api.get('/pedidos/servicos');
+            const response = await apiClient.get('/pedidos/servicos');
             return {
                 success: true,
                 data: response.data || [],
@@ -40,7 +40,7 @@ class PedidosService {
 
     async buscarPedidosDeProduto() {
         try {
-            const response = await Api.get('/pedidos/produtos');
+            const response = await apiClient.get('/pedidos/produtos');
             return {
                 success: true,
                 data: response.data || [],
@@ -58,7 +58,7 @@ class PedidosService {
 
     async buscarPorId(id) {
         try {
-            const response = await Api.get(`/pedidos/${id}`);
+            const response = await apiClient.get(`/pedidos/${id}`);
             return {
                 success: true,
                 data: response.data,
@@ -76,7 +76,7 @@ class PedidosService {
 
     async buscarPorTipoAndEtapa(nomeEtapa) {
         try {
-            const response = await Api.get('/pedidos/findAllBy', {
+            const response = await apiClient.get('/pedidos/findAllBy', {
                 params: { nome: nomeEtapa }
             });
             return {
@@ -100,7 +100,7 @@ class PedidosService {
                 throw new Error('Dados do pedido são obrigatórios');
             }
 
-            const response = await Api.post('/pedidos', pedidoData);
+            const response = await apiClient.post('/pedidos', pedidoData);
             return {
                 success: true,
                 data: response.data,
@@ -118,7 +118,7 @@ class PedidosService {
     }
     async atualizarPedido(id, pedidoData) {
         try {
-            const response = await Api.put(`/pedidos/${id}`, pedidoData);
+            const response = await apiClient.put(`/pedidos/${id}`, pedidoData);
             return {
                 success: true,
                 data: response.data,
@@ -141,7 +141,7 @@ class PedidosService {
 
     async deletarPedido(id) {
         try {
-            const response = await Api.delete(`/pedidos/${id}`);
+            const response = await apiClient.delete(`/pedidos/${id}`);
             return {
                 success: true,
                 data: response.data,

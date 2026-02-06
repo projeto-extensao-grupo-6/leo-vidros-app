@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
 import { Search, Check, X, CheckCheck, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import ModalConfirmacao from "../../shared/components/modalAceiteOrRecusa/ModalAceiteOrRecusa";
-import Api from "../../axios/Api";
+import ModalConfirmacao from "../../shared/components/ui/ModalAceiteOrRecusa/ModalAceiteOrRecusa";
+import apiClient from "../../core/api/axios.config";
+import Input from "../../shared/components/ui/Input";
 
 const ITENS_POR_PAGINA = 10;
 
@@ -44,7 +45,7 @@ export default function Acesso() {
         url = `/solicitacoes?status=${statusAtual}`;
       }
   
-      const response = await Api.get(url);
+      const response = await apiClient.get(url);
       // Garantindo que sempre seja um array
       const data = Array.isArray(response.data) ? response.data : [];
       setSolicitacoes(data);
@@ -73,7 +74,7 @@ export default function Acesso() {
         options.body = JSON.stringify({ status: statusBackend });
       }
   
-      return Api.request({
+      return apiClient.request({
         url: endpoint,
         method: options.method,
         data: options.method !== 'GET' ? JSON.parse(options.body) : undefined,
@@ -227,14 +228,14 @@ export default function Acesso() {
 
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
                  <div className="relative w-full md:w-1/2 lg:w-1/3">
-                    <input
-                        type="text"
+                    <Input
+                        type="search"
                         placeholder="Buscar Por Nome"
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] text-sm"
+                        startIcon={<Search className="w-5 h-5 text-gray-400" />}
+                        fullWidth={true}
                     />
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                  </div>
                  {activeTab === 'Pendentes' && (
                     <div className="flex gap-2 w-full md:w-auto justify-end relative z-50">
@@ -257,14 +258,14 @@ export default function Acesso() {
               </div>
 
               <div className="mb-4 border-b border-gray-200">
-                  <nav className="-mb-px flex space-x-6" aria-label="Tabs">
+                  <nav className="mt-4 flex space-x-6" aria-label="Tabs">
                       {['Pendentes', 'Aprovados', 'Recusados'].map((tab) => (
                       <button
                           key={tab}
                           onClick={() => changeTab(tab)}
-                          className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors duration-150 ease-in-out focus:outline-none
+                          className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg transition-colors duration-150 ease-in-out focus:outline-none
                             ${activeTab === tab
-                                ? 'border-[#007EA7] text-[#007EA7]'
+                                ? 'border-[#007EA7] text-[#007EA7] bg-gray-100 rounded-t-md'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                             }`}
                           aria-current={activeTab === tab ? 'page' : undefined}
@@ -279,10 +280,10 @@ export default function Acesso() {
                 <div className="flex items-center bg-gray-50 border-b border-gray-200 min-h-[48px] rounded-t-md text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <div className="py-3 w-[5%] flex justify-center px-4">
                     {activeTab === 'Pendentes' && (
-                        <input type="checkbox"
+                        <Input
+                               type="checkbox"
                                checked={isAllSelectedOnPage}
-                               onChange={handleSelectAllChange}
-                               className="w-4 h-4 text-[#003d6b] border-gray-300 rounded focus:ring-[#003d6b]" />
+                               onChange={handleSelectAllChange} />
                     )}
                   </div>
                   <div className="py-3 w-[20%] px-4">Nome</div>
@@ -303,11 +304,10 @@ export default function Acesso() {
                       <div key={s.id} className="flex items-center border-b last:border-b-0 hover:bg-gray-50 min-h-[56px] text-sm">
                          <div className="w-[5%] flex justify-center px-4">
                             {activeTab === 'Pendentes' && (
-                                <input
+                                <Input
                                     type="checkbox"
                                     checked={selectedItems.includes(s.id)}
                                     onChange={() => handleCheckboxChange(s.id)}
-                                    className="w-4 h-4 text-[#003d6b] border-gray-300 rounded focus:ring-[#003d6b]"
                                 />
                             )}
                          </div>

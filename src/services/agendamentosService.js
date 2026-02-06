@@ -1,9 +1,9 @@
-import Api from "../axios/Api";
+import apiClient from "../core/api/axios.config";
 
 export const agendamentosService = {
   create: async (agendamento) => {
     try {
-      const response = await Api.post("/agendamentos", agendamento);
+      const response = await apiClient.post("/agendamentos", agendamento);
       return response.data;
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -13,7 +13,7 @@ export const agendamentosService = {
 
   getAll: async () => {
     try {
-      const response = await Api.get("/agendamentos");
+      const response = await apiClient.get("/agendamentos");
       return response.data;
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -23,7 +23,7 @@ export const agendamentosService = {
 
   getById: async (id) => {
     try {
-      const response = await Api.get(`/agendamentos/${id}`);
+      const response = await apiClient.get(`/agendamentos/${id}`);
       return response.data;
     } catch (error) {
       console.error("Erro na requisição:", error);
@@ -34,7 +34,7 @@ export const agendamentosService = {
   delete: async (id) => {
     try {
       console.log(` Deletando agendamento ${id}...`);
-      const response = await Api.delete(`/agendamentos/${id}`);
+      const response = await apiClient.delete(`/agendamentos/${id}`);
       console.log(` Agendamento ${id} deletado com sucesso`);
       return response.data;
     } catch (error) {

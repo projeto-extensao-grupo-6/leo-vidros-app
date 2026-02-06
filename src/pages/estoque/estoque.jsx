@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import Api from "../../axios/Api";
+import apiClient from "../../core/api/axios.config";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Input from "../../shared/components/ui/Input";
 import {
   Package,
   Search,
@@ -12,14 +13,14 @@ import {
   ChevronDown,
   ArrowRightLeft,
 } from "lucide-react";
-import NovoProdutoModal from "../../shared/components/modalEstoque/NovoProdutoModal";
-import SucessoModal from "../../shared/components/modalEstoque/SucessoModal";
-import ExportarModal from "../../shared/components/modalEstoque/ExportarModal";
-import EstoqueItemRow from "../../shared/components/modalEstoque/EstoqueItemRow";
-import CalendarDropdown from "../../shared/components/estoque/CalendarDropdown";
-import FilterDropdown from "../../shared/components/estoque/FilterDropdown";
-import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSaidaEstoque";
-import InativarProdutoModal from "../../shared/components/modalEstoque/InativarProdutoModal";
+import NovoProdutoModal from "../../features/estoque/components/NovoProdutoModal";
+import SucessoModal from "../../features/estoque/components/SucessoModal";
+import ExportarModal from "../../features/estoque/components/ExportarModal";
+import EstoqueItemRow from "../../features/estoque/components/EstoqueItemRow";
+import CalendarDropdown from "../../features/estoque/components/CalendarDropdown";
+import FilterDropdown from "../../features/estoque/components/FilterDropdown";
+import EntradaSaidaEstoque from "../../features/estoque/components/EntradaSaidaEstoque";
+import InativarProdutoModal from "../../features/estoque/components/InativarProdutoModal";
 
 const ITENS_POR_PAGINA = 6;
 
@@ -107,7 +108,7 @@ export default function Estoque() {
       setLoading(true);
       setError(null);
   
-      const response = await Api.get("/estoques");
+      const response = await apiClient.get("/estoques");
       const data = response.data;
   
       if (!data || data.length === 0) {
@@ -238,7 +239,7 @@ const handleSaveItem = useCallback(async (itemData) => {
     };
 
     if (editingItem) {
-      await Api.put(`/estoques/${editingItem.id}`, itemPayload);
+      await apiClient.put(`/estoques/${editingItem.id}`, itemPayload);
     }
 
     await fetchEstoque();
@@ -298,7 +299,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
           quantidadeTotal: Math.max(0, newQuantity),
         };
 
-        return Api.put(`/estoques/${estoqueId}`, updatedItem);
+        return apiClient.put(`/estoques/${estoqueId}`, updatedItem);
       });
 
       await Promise.all(updates);
@@ -315,7 +316,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
 
   const confirmarInativacao = useCallback(async () => {
     try {
-      await Api.put(`/produtos/stand-by/${selectedEstoqueId}`, {
+      await apiClient.put(`/produtos/stand-by/${selectedEstoqueId}`, {
         status: false
       });
   
@@ -475,16 +476,14 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                 <div className="flex items-center gap-3 w-full justify-end">
                   {/* Busca */}
                   <div className="relative w-full max-w-lg">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Busque Por Nome ou Descrição..."
-                        value={busca}
-                        onChange={(e) => setBusca(e.target.value)}
-                        className="w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] text-sm"
-                      />
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    </div>
+                    <Input
+                      type="search"
+                      placeholder="Busque Por Nome ou Descrição..."
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      startIcon={<Search className="w-5 h-5 text-gray-400" />}
+                      fullWidth={true}
+                    />
                   </div>
 
                   {/* Filtros */}
@@ -541,11 +540,10 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                 {/* Cabeçalho da tabela */}
                 <div className="flex items-center bg-gray-50 border-b border-gray-200 mb-2 min-h-48px rounded-t-md text-xs font-bold text-gray-700 uppercase tracking-wider">
                   <div className="py-3 w-[5%] pl-4 pr-1">
-                    <input
+                    <Input
                       type="checkbox"
                       checked={isAllSelectedOnPage}
                       onChange={handleSelectAllChange}
-                      className="w-4 h-4 text-[#003d6b] border-gray-300 rounded focus:ring-[#003d6b]"
                     />
                   </div>
                   <div className="py-3 w-[15%] pl-2 pr-1">Nome</div>

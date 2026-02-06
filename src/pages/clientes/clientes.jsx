@@ -1,35 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Button from "../../shared/components/ui/buttons/button.component";
+import Input from "../../shared/components/ui/Input";
+import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../shared/components/ui/Table/Table";
+import { Paper, Typography, Divider, Collapse } from "../../shared/components/ui/Utilities/Utilities";
+import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
+import { Chip } from "../../shared/components/ui/Chip/Chip";
+import { Checkbox } from "../../shared/components/ui/Checkbox/Checkbox";
 import {
-  Button,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
-  Chip,
-  Typography,
-  MenuItem,
-  Divider,
-  Checkbox,
-  Collapse,
-} from "@mui/material";
-import {
-  Edit,
-  FileDownloadOutlined,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  VisibilityOutlined,
-} from "@mui/icons-material";
-import ClienteFormModal from "../../shared/components/clienteComponents/ClienteFormModal";
-import ClienteDetailsModal from "../../shared/components/clienteComponents/ClienteDetailsModal";
-import Api from "../../axios/Api";
+  Pencil,
+  Download,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+} from "lucide-react";
+import ClienteFormModal from "../../features/clientes/components/ClienteFormModal";
+import ClienteDetailsModal from "../../features/clientes/components/ClienteDetailsModal";
+import apiClient from "../../core/api/axios.config";
 
 const formatCurrency = (value) => {
   if (value == null || isNaN(value)) return "R$ 0,00";
@@ -121,7 +110,7 @@ export default function Clientes() {
 
   const fetchClientes = async () => {
     try {
-      const response = await Api.get("/clientes");
+      const response = await apiClient.get("/clientes");
       // Garantindo que sempre seja um array
       const data = Array.isArray(response.data) ? response.data : [];
       setClientes(data);
@@ -175,7 +164,7 @@ export default function Clientes() {
       try {
         const clienteAtualizado = { ...clienteSelecionado, ...dadosCliente };
 
-        await Api.put(`/clientes/${clienteSelecionado.id}`, clienteAtualizado);
+        await apiClient.put(`/clientes/${clienteSelecionado.id}`, clienteAtualizado);
 
         setClientes((prev) =>
           prev.map((c) =>
@@ -191,7 +180,7 @@ export default function Clientes() {
 
         const novoClienteComId = { ...dadosCliente};
 
-        const response = await Api.post("/clientes", novoClienteComId);
+        const response = await apiClient.post("/clientes", novoClienteComId);
 
         const novoCliente = response.data;
         setClientes((prev) => [novoCliente, ...prev]);
@@ -276,54 +265,57 @@ export default function Clientes() {
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 flex flex-col flex-1 overflow-hidden">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                 <Button
-                  variant="contained"
-                  className="bg-[#007EA7] font-bold py-2 px-5 rounded-md hover:bg-[#006891] text-white"
+                  variant="primary"
+                  size="md"
                   onClick={abrirModalCriar}
                 >
                   Novo Cliente
                 </Button>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
-                  <TextField
-                    size="small"
+                  <Input
+                    type="search"
+                    size="sm"
                     placeholder="Busque por nome..."
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    className="w-full sm:w-48"
+                    containerClassName="w-full sm:w-48"
                   />
 
-                  <TextField
-                    select
-                    size="small"
+                  <Input
+                    type="select"
+                    size="sm"
                     label="Ordenar"
                     value={ordenar}
                     onChange={(e) => setOrdenar(e.target.value)}
-                    className="w-full sm:w-32"
-                  >
-                    <MenuItem value="recentes">Recentes</MenuItem>
-                    <MenuItem value="antigos">Antigos</MenuItem>
-                    <MenuItem value="az">A-Z</MenuItem>
-                    <MenuItem value="za">Z-A</MenuItem>
-                  </TextField>
+                    containerClassName="w-full sm:w-32"
+                    options={[
+                      { value: "recentes", label: "Recentes" },
+                      { value: "antigos", label: "Antigos" },
+                      { value: "az", label: "A-Z" },
+                      { value: "za", label: "Z-A" }
+                    ]}
+                  />
 
-                  <TextField
-                    select
-                    size="small"
+                  <Input
+                    type="select"
+                    size="sm"
                     label="Situação"
                     value={situacao}
                     onChange={(e) => setSituacao(e.target.value)}
-                    className="w-full sm:w-32"
-                  >
-                    <MenuItem value="Todos">Todos</MenuItem>
-                    <MenuItem value="Ativo">Ativo</MenuItem>
-                    <MenuItem value="Inativo">Inativo</MenuItem>
-                    <MenuItem value="Finalizado">Finalizado</MenuItem>
-                  </TextField>
+                    containerClassName="w-full sm:w-32"
+                    options={[
+                      { value: "Todos", label: "Todos" },
+                      { value: "Ativo", label: "Ativo" },
+                      { value: "Inativo", label: "Inativo" },
+                      { value: "Finalizado", label: "Finalizado" }
+                    ]}
+                  />
 
                   <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<FileDownloadOutlined />}
+                    variant="outline"
+                    size="sm"
+                    startIcon={<Download size={16} />}
                     className="w-full sm:w-auto text-xs"
                     onClick={handleExportar}
                     disabled={selecionados.length === 0}
@@ -367,7 +359,7 @@ export default function Clientes() {
                       {clientesPagina.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} align="center">
-                            <Typography p={2} color="textSecondary">
+                            <Typography className="p-2 text-gray-600">
                               {busca
                                 ? "Nenhum resultado encontrado."
                                 : "Nenhum cliente cadastrado."}
@@ -392,7 +384,7 @@ export default function Clientes() {
                                 tabIndex={-1}
                                 selected={isItemSelected}
                               >
-                                <TableCell padding="checkbox" sx={{ py: 0 }}>
+                                <TableCell padding="checkbox" className="py-0">
                                   <Checkbox
                                     color="primary"
                                     checked={isItemSelected}
@@ -403,18 +395,17 @@ export default function Clientes() {
                                 </TableCell>
                                 <TableCell
                                   id={`client-checkbox-${c.id}`}
-                                  sx={{ color: '#424242', py: 1 }}
-                                  className="truncate"
+                                  className="truncate text-[#424242] py-1"
                                 >
                                   {c.nome}
                                 </TableCell>
-                                <TableCell sx={{ color: '#424242', py: 1 }} className="truncate">
+                                <TableCell className="truncate text-[#424242] py-1">
                                   {formatPhone(c.telefone)}
                                 </TableCell>
-                                <TableCell sx={{ color: '#424242', py: 1 }} className="truncate hidden sm:table-cell">
+                                <TableCell className="truncate hidden sm:table-cell text-[#424242] py-1">
                                   {c.email}
                                 </TableCell>
-                                <TableCell sx={{ py: 1 }}>
+                                <TableCell className="py-1">
                                   <div className="flex flex-col xl:flex-row items-start xl:items-center gap-2">
                                     <Chip
                                       label={c.status}
@@ -429,25 +420,17 @@ export default function Clientes() {
                                       size="small"
                                     />
                                     <Button
-                                      size="small"
-                                      startIcon={<VisibilityOutlined />}
-                                      sx={{
-                                        color: '#424242',
-                                        textTransform: 'none',
-                                        fontSize: '0.75rem',
-                                        minWidth: 'auto',
-                                        padding: '2px 8px',
-                                        '&:hover': {
-                                          backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                                        }
-                                      }}
+                                      size="sm"
+                                      variant="outline"
+                                      startIcon={<Eye size={16} />}
+                                      className="text-xs"
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       <span className="hidden lg:inline">Visualizar</span>
                                     </Button>
                                   </div>
                                 </TableCell>
-                                <TableCell sx={{ py: 1 }}>
+                                <TableCell className="py-1">
                                   <div className="flex items-center gap-1">
                                     <IconButton
                                       size="small"
@@ -456,7 +439,7 @@ export default function Clientes() {
                                         abrirModalEditar(c);
                                       }}
                                     >
-                                      <Edit fontSize="small" />
+                                      <Pencil size={16} />
                                     </IconButton>
                                     <IconButton
                                       size="small"
@@ -466,9 +449,9 @@ export default function Clientes() {
                                       }}
                                     >
                                       {openRowId === c.id ? (
-                                        <KeyboardArrowUp />
+                                        <ChevronUp size={16} />
                                       ) : (
-                                        <KeyboardArrowDown />
+                                        <ChevronDown size={16} />
                                       )}
                                     </IconButton>
                                   </div>
@@ -548,8 +531,8 @@ export default function Clientes() {
                   </span>
                   <div className="flex gap-2">
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
                       disabled={pagina === 1}
                       className="text-xs"
@@ -557,8 +540,8 @@ export default function Clientes() {
                       Anterior
                     </Button>
                     <Button
-                      variant="outlined"
-                      size="small"
+                      variant="outline"
+                      size="sm"
                       onClick={() =>
                         setPagina((prev) => Math.min(prev + 1, totalPaginas))
                       }

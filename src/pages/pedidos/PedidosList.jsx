@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { FaBox, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
-import { BiSolidPencil } from "react-icons/bi";
-import SkeletonLoader from '../../shared/components/skeleton/SkeletonLoader';
-import NovoPedidoProdutoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoProdutoModal';
-import EditarPedidoModal from '../../shared/components/pedidosServicosComponents/EditarPedidoModal';
+import { Trash2, AlertTriangle, Pencil } from 'lucide-react';
+import SkeletonLoader from '../../shared/components/feedback/SkeletonLoader/SkeletonLoader';
+import NovoPedidoProdutoModal from '../../features/pedidos/components/NovoPedidoProdutoModal';
+import EditarPedidoModal from '../../features/pedidos/components/EditarPedidoModal';
 import PedidosService from '../../services/pedidosService';
 
 const ITEMS_PER_PAGE = 5;
@@ -262,10 +261,10 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                                 <StatusBadge status={item.status} />
                                 <div className="hidden md:block h-4 w-px bg-slate-200 mx-1"></div>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
-                                    <BiSolidPencil size={18} />
+                                    <Pencil size={18} />
                                 </button>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
-                                    <FaTrash size={16} />
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
                         </header>
@@ -344,7 +343,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                     <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
                         <div className="flex flex-col items-center text-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-xl">
-                                <FaExclamationTriangle />
+                                <AlertTriangle size={24} />
                             </div>
                             <h2 className="text-xl font-bold text-slate-800">Excluir Pedido?</h2>
                             <p className="text-slate-600">

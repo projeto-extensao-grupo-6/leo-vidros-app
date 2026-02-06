@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import EmailIcon from "@mui/icons-material/Email";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Button from "../../shared/components/buttons/button.component";
+import { Mail, ArrowLeft } from "lucide-react";
+import Button from "../../shared/components/ui/buttons/button.component";
 import { useNavigate } from "react-router-dom";
-import Api from "../../axios/Api";
+import apiClient from "../../core/api/axios.config";
 import Swal from "sweetalert2";
+import Input from "../../shared/components/ui/Input";
 
 const EsqueceuSenha = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +19,7 @@ const EsqueceuSenha = () => {
 
     try {
       // Verificar se o email existe e enviar senha temporária
-      const response = await Api.post("/auth/forgot-password", { email });
+      const response = await apiClient.post("/auth/forgot-password", { email });
 
       if (response.status === 200) {
         // Email encontrado e senha temporária enviada
@@ -106,7 +106,7 @@ const EsqueceuSenha = () => {
                 onClick={() => navigate("/login")}
                 className="flex items-center gap-2 text-[#007EA7] hover:text-[#005f73] transition-colors"
               >
-                <ArrowBackIcon className="text-xl" />
+                <ArrowLeft size={20} />
                 <span className="text-sm font-medium">Voltar ao login</span>
               </button>
             </div>
@@ -133,25 +133,19 @@ const EsqueceuSenha = () => {
                   className="space-y-6"
                 >
                   <div className="space-y-3">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-[#6b7280] text-left"
-                    >
-                      E-mail
-                    </label>
-                    <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                      <EmailIcon className="text-[#6b7280] text-3xl" />
-                      <input
-                        id="email"
-                        type="email"
-                        placeholder="Digite seu e-mail"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                        required
-                        disabled={loading}
-                      />
-                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      label="E-mail"
+                      placeholder="Digite seu e-mail"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      startIcon={<Mail size={24} />}
+                      variant="standard"
+                      size="md"
+                      required
+                      disabled={loading}
+                    />
                   </div>
                 </motion.div>
               </AnimatePresence>

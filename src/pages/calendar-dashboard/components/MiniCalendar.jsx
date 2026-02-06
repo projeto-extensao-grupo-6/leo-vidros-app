@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import Icon from '../../../shared/components/AppIcon';
-import Button from '../../../shared/components/buttons/button.component';
+import Icon from '../../../shared/components/common/AppIcon';
+import Button from '../../../shared/components/ui/buttons/button.component';
 
 const MiniCalendar = ({ selectedDate, onDateSelect }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());

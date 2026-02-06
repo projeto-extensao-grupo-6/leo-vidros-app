@@ -1,9 +1,8 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { FaWrench, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import { BiSolidPencil } from "react-icons/bi";
-import SkeletonLoader from "../../shared/components/skeleton/SkeletonLoader";
-import NovoPedidoServicoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoServicoModal';
-import EditarServicoModal from "../../shared/components/pedidosServicosComponents/EditarServicoModal";
+import { Wrench, Trash2, AlertTriangle, Pencil } from "lucide-react";
+import SkeletonLoader from "../../shared/components/feedback/SkeletonLoader/SkeletonLoader";
+import NovoPedidoServicoModal from '../../features/pedidos/components/NovoPedidoServicoModal';
+import EditarServicoModal from "../../features/pedidos/components/EditarServicoModal";
 import PedidosService from '../../services/pedidosService';
 
 function StatusPill({ status }) {
@@ -240,7 +239,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                         <header className="flex items-center justify-between pb-3 border-b border-slate-100">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-md ${item.status === 'Finalizado' ? 'text-gray-400 bg-gray-200' : 'text-slate-400 bg-slate-100'}`}>
-                                    <FaWrench />
+                                    <Wrench size={16} />
                                 </div>
                                 <div>
                                     <h3 className={`font-semibold text-sm md:text-base ${item.status === 'Finalizado' ? 'text-gray-600' : 'text-slate-800'}`}>
@@ -254,10 +253,10 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                                 <StatusPill status={item.status} />
                                 <div className="hidden md:block h-4 w-px bg-slate-200 mx-1"></div>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
-                                    <BiSolidPencil size={18} />
+                                    <Pencil size={18} />
                                 </button>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
-                                    <FaTrash size={16} />
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
                         </header>
@@ -342,7 +341,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                     <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">
                         <div className="flex flex-col items-center text-center gap-3">
                             <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-xl">
-                                <FaExclamationTriangle />
+                                <AlertTriangle size={24} />
                             </div>
                             <h2 className="text-xl font-bold text-slate-800">Excluir Serviço?</h2>
                             <p className="text-slate-600">

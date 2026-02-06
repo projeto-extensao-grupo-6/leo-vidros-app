@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from "react";
-import TaskCreateModal from "../../shared/components/Ui/TaskCreateModal";
+import { useState, useEffect } from "react";
+import TaskCreateModal from "../../shared/components/ui/TaskCreateModal";
 import MiniCalendar from "./components/MiniCalendar";
-import SharedCalendarList from "./components/SharedCalendar";
 import CalendarView from "./components/CalendarView";
 import UpcomingEvents from "./components/UpcomingEvents";
-import Icon from "../../shared/components/AppIcon";
-import Button from "../../shared/components/buttons/button.component";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
-import Api from "../../axios/Api";
+import Icon from "../../shared/components/common/AppIcon";
+import Button from "../../shared/components/ui/buttons/button.component";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import apiClient from "../../core/api/axios.config";
 
 const CalendarDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,7 +21,7 @@ const CalendarDashboard = () => {
 
   const fetchAgendamentos = async () => {
     try {
-      const response = await Api.get("/agendamentos");
+      const response = await apiClient.get("/agendamentos");
       const data = response.data;
 
       const transformedTasks = data.map((agendamento) => {
@@ -136,7 +135,7 @@ const CalendarDashboard = () => {
       <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       
-      <div className="bg-background h-full pt-15">
+      <div className="bg-background h-full">
         <div className="h-[calc(100vh-80px)] flex">
           {/* Left Sidebar */}
           <div

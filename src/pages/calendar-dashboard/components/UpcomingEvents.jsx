@@ -1,7 +1,8 @@
 import React from 'react';
 import { format, addDays, isToday, isTomorrow, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import Icon from '../../../shared/components/AppIcon';
+import Icon from '../../../shared/components/common/AppIcon';
+import { AGENDAMENTO_STATUS } from '../../../core/constants';
 
 const UpcomingEvents = ({ events = [] }) => {
   // Filtrar e ordenar eventos futuros (próximos 7 dias)
@@ -43,9 +44,9 @@ const UpcomingEvents = ({ events = [] }) => {
 
   const getPriorityColor = (status) => {
     // Baseado no statusAgendamento do backend
-    if (status?.nome === "PENDENTE") return 'border-l-warning';
-    if (status?.nome === "CONFIRMADO") return 'border-l-success';
-    if (status?.nome === "CANCELADO") return 'border-l-error';
+    if (status?.nome === AGENDAMENTO_STATUS.PENDENTE) return 'border-l-warning';
+    if (status?.nome === AGENDAMENTO_STATUS.CONFIRMADO) return 'border-l-success';
+    if (status?.nome === AGENDAMENTO_STATUS.CANCELADO) return 'border-l-error';
     return 'border-l-muted';
   };
 

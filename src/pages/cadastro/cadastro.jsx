@@ -1,17 +1,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import Input from "../../shared/components/Ui/Input.jsx";
-import AccountCircle from "@mui/icons-material/AccountCircle";
-import EmailIcon from "@mui/icons-material/Email";
-import BadgeIcon from "@mui/icons-material/Badge";
-import PhoneIcon from "@mui/icons-material/Phone";
-import Stepper from "@mui/material/Stepper";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import { QontoConnector, QontoStepIcon } from "../../shared/components/steppers/QontoStepper.jsx";
-import Button from "../../shared/components/buttons/button.component";
-import Api from "../../axios/Api";
+import Input from "../../shared/components/ui/Input.jsx";
+import { UserCircle, Mail, CreditCard, Phone } from "lucide-react";
+import { Stepper, Step, StepLabel } from "../../shared/components/ui/Stepper/Stepper";
+import { QontoConnector, QontoStepIcon } from "../../shared/components/ui/Steppers/QontoStepper.jsx";
+import Button from "../../shared/components/ui/buttons/button.component";
+import apiClient from "../../core/api/axios.config";
 
 function Cadastro() {
   const [step, setStep] = useState(1);
@@ -78,7 +73,7 @@ function Cadastro() {
         email,
       };
 
-      const response = await Api.post("/solicitacoes", dadosCadastro);
+      const response = await apiClient.post("/solicitacoes", dadosCadastro);
 
       console.log("Cadastro OK:", response.data);
 
@@ -136,65 +131,61 @@ function Cadastro() {
               <AnimatePresence mode="wait">
                 {step === 1 && (
                   <motion.div key="step1" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Nome</label>
-                    <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                      <AccountCircle className="text-[#6b7280] text-3xl" />
-                      <input
-                        type="text"
-                        placeholder="Digite seu nome"
-                        value={nome}
-                        onChange={(e) => setNome(e.target.value)}
-                        className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                      />
-                    </div>
+                    <Input
+                      type="text"
+                      label="Nome"
+                      placeholder="Digite seu nome"
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                      startIcon={<UserCircle size={24} />}
+                      variant="standard"
+                      size="md"
+                    />
                   </motion.div>
                 )}
 
                 {step === 2 && (
                   <motion.div key="step2" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Email</label>
-                    <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                      <EmailIcon className="text-[#6b7280] text-3xl" />
-                      <input
-                        type="email"
-                        placeholder="Digite seu email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                      />
-                    </div>
+                    <Input
+                      type="email"
+                      label="Email"
+                      placeholder="Digite seu email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      startIcon={<Mail size={24} />}
+                      variant="standard"
+                      size="md"
+                    />
                   </motion.div>
                 )}
 
                 {step === 3 && (
                   <motion.div key="step3" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">CPF</label>
-                    <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                      <BadgeIcon className="text-[#6b7280] text-3xl" />
-                      <input
-                        type="text"
-                        placeholder="Digite seu CPF"
-                        value={cpf}
-                        onChange={handleCpfChange}
-                        className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                      />
-                    </div>
+                    <Input
+                      type="text"
+                      label="CPF"
+                      placeholder="Digite seu CPF"
+                      value={cpf}
+                      onChange={handleCpfChange}
+                      startIcon={<CreditCard size={24} />}
+                      variant="standard"
+                      size="md"
+                    />
                   </motion.div>
                 )}
 
                 {step === 4 && (
                   <motion.div key="step4" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Telefone</label>
-                    <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
-                      <PhoneIcon className="text-[#6b7280] text-3xl" />
-                      <input
-                        type="text"
-                        placeholder="Digite seu telefone"
-                        value={telefone}
-                        onChange={handleTelefoneChange}
-                        className="w-full bg-transparent text-[#111827] placeholder-[#9ca3af] focus:outline-none text-lg py-3"
-                      />
-                    </div>
+                    <Input
+                      type="text"
+                      label="Telefone"
+                      placeholder="Digite seu telefone"
+                      value={telefone}
+                      onChange={handleTelefoneChange}
+                      startIcon={<Phone size={24} />}
+                      variant="standard"
+                      size="md"
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>

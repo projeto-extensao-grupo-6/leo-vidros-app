@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Lock, Check, X, Eye, EyeOff } from 'lucide-react'; 
-import { TextField, Button, Paper, IconButton, InputAdornment } from "@mui/material";
-import Api from "../../axios/Api"; 
+import { Paper } from "../../shared/components/ui/Utilities/Utilities";
+import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
+import Input from "../../shared/components/ui/Input";
+import Button from "../../shared/components/ui/buttons/button.component";
+import apiClient from "../../core/api/axios.config"; 
 
 const PasswordRequirement = ({ text, isValid }) => (
     <div className={`flex items-center gap-2 text-base transition-colors duration-200 font-[Inter] ${
@@ -73,7 +76,7 @@ export default function NovaSenha() {
         setIsLoading(true);
 
         try {
-            const response = await Api.put("/usuarios/definir-senha", {
+            const response = await apiClient.put("/usuarios/definir-senha", {
                 idUsuario: parseInt(idUsuario),
                 novaSenha: novaSenha
             });
@@ -123,83 +126,54 @@ export default function NovaSenha() {
                     <form onSubmit={handleSubmit} className="w-full max-w-sm">
 
                         <div className="mb-8 text-left">
-                            <label htmlFor="novaSenha" className="block text-gray-700 font-medium mb-3 text-base">Nova senha:</label>
-                            <TextField
-                                fullWidth
+                            <Input
+                                label="Nova senha:"
                                 type={showNovaSenha ? 'text' : 'password'}
                                 id="novaSenha"
                                 placeholder="********"
                                 value={novaSenha}
                                 onChange={(e) => setNovaSenha(e.target.value)}
                                 required
-                                size="medium"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '8px', 
-                                        backgroundColor: inputBgColor,
-                                        paddingLeft: '12px',
-                                        '& fieldset': { border: 'none' },
-                                        '&.Mui-focused': { boxShadow: '0 0 0 2px #007EA740' }, 
-                                    },
-                                   
-                                    marginBottom: '20px' 
-                                }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <Lock className="w-6 h-6 mr-3 text-gray-500" />
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={() => handleToggleShowPassword('novaSenha')}
-                                                edge="end"
-                                            >
-                                                {showNovaSenha ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                size="md"
+                                variant="filled"
+                                startIcon={<Lock size={20} className="text-gray-500" />}
+                                endIcon={
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleToggleShowPassword('novaSenha')}
+                                        edge="end"
+                                        className="-mr-2"
+                                    >
+                                        {showNovaSenha ? <EyeOff size={20} className="text-gray-500" /> : <Eye size={20} className="text-gray-500" />}
+                                    </IconButton>
+                                }
+                                containerClassName="mb-5"
                             />
                         </div>
 
                         <div className="mb-10 text-left">
-                            <label htmlFor="confirmaSenha" className="block text-gray-700 font-medium mb-3 text-base">Digite a senha novamente:</label>
-                            <TextField
-                                fullWidth
+                            <Input
+                                label="Digite a senha novamente:"
                                 type={showConfirmaSenha ? 'text' : 'password'}
                                 id="confirmaSenha"
                                 placeholder="********"
                                 value={confirmaSenha}
                                 onChange={(e) => setConfirmaSenha(e.target.value)}
                                 required
-                                size="medium"
-                                error={confirmaSenha.length > 0 && !passwordsMatch}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        borderRadius: '8px',
-                                        backgroundColor: inputBgColor,
-                                        paddingLeft: '12px',
-                                        '& fieldset': { border: 'none' },
-                                        '&.Mui-focused': { boxShadow: '0 0 0 2px #007EA740' },
-                                    },
-                                }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <Lock className="w-6 h-6 mr-3 text-gray-500" />
-                                    ),
-                                    endAdornment: (
-                                        <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label="toggle password visibility"
-                                                onClick={() => handleToggleShowPassword('confirmaSenha')}
-                                                edge="end"
-                                            >
-                                                {showConfirmaSenha ? <EyeOff className="w-5 h-5 text-gray-500" /> : <Eye className="w-5 h-5 text-gray-500" />}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    ),
-                                }}
+                                size="md"
+                                variant="filled"
+                                error={confirmaSenha.length > 0 && !passwordsMatch ? "As senhas não coincidem" : ""}
+                                startIcon={<Lock size={20} className="text-gray-500" />}
+                                endIcon={
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => handleToggleShowPassword('confirmaSenha')}
+                                        edge="end"
+                                        className="-mr-2"
+                                    >
+                                        {showConfirmaSenha ? <EyeOff size={20} className="text-gray-500" /> : <Eye size={20} className="text-gray-500" />}
+                                    </IconButton>
+                                }
                             />
                         </div>
 
@@ -224,24 +198,10 @@ export default function NovaSenha() {
 
                         <Button
                             type="submit"
-                            variant="contained"
+                            variant="primary"
                             fullWidth
                             disabled={!isFormValid || isLoading}
-                            sx={{
-                                backgroundColor: primaryDarkColor,
-                                '&:hover': { backgroundColor: '#002a4b' },
-                                '&.Mui-disabled': {
-                                    backgroundColor: '#002a4b', 
-                                    color: '#ffffff'
-                                },
-                                padding: '16px 0', 
-                                fontSize: '1.2rem',
-                                fontWeight: 'bold',
-                                borderRadius: '8px',
-                                transition: 'all 0.3s',
-                                fontFamily: 'Inter'
-                            }}
-                            className="mt-4" 
+                            className="mt-4 py-4 text-xl font-bold"
                         >
                             {isLoading ? 'Definindo Senha...' : 'Definir senha'}
                         </Button>

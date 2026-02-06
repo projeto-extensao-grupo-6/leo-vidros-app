@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../shared/css/layout/Header/header";
+import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
 import {
   Info,
   CalendarDays,
@@ -10,7 +10,7 @@ import {
   SlidersHorizontal,
   ExternalLink,
 } from "lucide-react";
-import Kpis from "../../shared/components/kpis/kpis";
+import Kpis from "../../shared/components/common/KPIs/kpis";
 import {
   getQtdAgendamentosFuturos,
   getQtdAgendamentosHoje,

@@ -1,42 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import Api from '../../axios/Api';
+import apiClient from '../../core/api/axios.config';
 import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import Sidebar from '../../shared/components/sidebar/sidebar';
-import Header from '../../shared/components/header/header';
+import Sidebar from '../../shared/css/layout/Sidebar/sidebar';
+import Header from '../../shared/css/layout/Header/header';
 import UserImg from '../../assets/User.png';
+import Input from "../../shared/components/ui/Input";
 
 const InputField = ({ label, name, value, onChange, type = "text", disabled = false, className = "", showPasswordToggle = false, onTogglePassword, showPassword }) => (
     <div className={`flex flex-col ${className}`}>
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
-            {label}
-        </label>
-        <div className="relative">
-            <input
-                type={showPasswordToggle ? (showPassword ? "text" : "password") : type}
-                name={name}
-                value={value}
-                onChange={onChange}
-                disabled={disabled}
-                className={`w-full border rounded-lg px-4 py-3 text-gray-800 text-base transition-all duration-200 outline-none ${disabled
-                    ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white border-gray-300 focus:border-[#003d6b] focus:ring-2 focus:ring-blue-100"
-                    } ${showPasswordToggle ? "pr-10" : ""}`}
-            />
-            {disabled && !showPasswordToggle && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                    <Lock className="h-4 w-4 text-gray-400" />
-                </div>
-            )}
-            {showPasswordToggle && !disabled && (
+        <Input
+            label={label}
+            type={showPasswordToggle ? (showPassword ? "text" : "password") : type}
+            name={name}
+            value={value}
+            onChange={onChange}
+            disabled={disabled}
+            size="md"
+            endIcon={showPasswordToggle && !disabled ? (
                 <button
                     type="button"
                     onClick={onTogglePassword}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700"
                 >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
-            )}
-        </div>
+            ) : disabled && !showPasswordToggle ? <Lock className="h-4 w-4 text-gray-400" /> : null}
+        />
     </div>
 );
 
@@ -84,7 +73,7 @@ export default function Perfil() {
         }
 
         setLoading(true);
-        Api.get(`/usuarios/${userId}`)
+        apiClient.get(`/usuarios/${userId}`)
             .then(response => {
                 const userData = response.data.usuario || response.data.data || response.data;
 
@@ -199,7 +188,7 @@ export default function Perfil() {
             endereco: enderecoRequest
         };
 
-        Api.put(`/usuarios/${userId}`, usuarioRequest)
+        apiClient.put(`/usuarios/${userId}`, usuarioRequest)
             .then(response => {
                 console.log('Salvo com sucesso!', response.data);
                 setMessage({ 

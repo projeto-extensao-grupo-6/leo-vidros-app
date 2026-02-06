@@ -1,4 +1,4 @@
-import Api from '../axios/Api';
+import apiClient from '../core/api/axios.config';
 import PedidosService from './pedidosService';
 
 /**
@@ -12,7 +12,7 @@ class ServicosService {
      */
     async buscarTodos() {
         try {
-            const response = await Api.get('/pedidos');
+            const response = await apiClient.get('/pedidos');
             
             // Filtrar apenas pedidos que são serviços (têm campo servico preenchido)
             const servicos = response.data?.filter(pedido => pedido.servico) || [];
@@ -37,7 +37,7 @@ class ServicosService {
      */
     async buscarPorId(id) {
         try {
-            const response = await Api.get(`/pedidos/${id}`);
+            const response = await apiClient.get(`/pedidos/${id}`);
             
             // Verificar se o pedido é um serviço
             if (!response.data.servico) {
@@ -68,7 +68,7 @@ class ServicosService {
      */
     async buscarPorEtapa(nomeEtapa) {
         try {
-            const response = await Api.get('/pedidos/findAllBy', {
+            const response = await apiClient.get('/pedidos/findAllBy', {
                 params: { nome: nomeEtapa }
             });
             
@@ -100,7 +100,7 @@ class ServicosService {
                 throw new Error('Dados do serviço são obrigatórios');
             }
 
-            const response = await Api.post('/pedidos', servicoData);
+            const response = await apiClient.post('/pedidos', servicoData);
             return {
                 success: true,
                 data: response.data,
@@ -122,7 +122,7 @@ class ServicosService {
      */
     async atualizarServico(id, servicoData) {
         try {
-            const response = await Api.put(`/pedidos/${id}`, servicoData);
+            const response = await apiClient.put(`/pedidos/${id}`, servicoData);
             return {
                 success: true,
                 data: response.data,
@@ -144,7 +144,7 @@ class ServicosService {
      */
     async deletarServico(id) {
         try {
-            const response = await Api.delete(`/pedidos/${id}`);
+            const response = await apiClient.delete(`/pedidos/${id}`);
             return {
                 success: true,
                 data: response.data,
