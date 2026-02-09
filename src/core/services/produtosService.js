@@ -1,4 +1,4 @@
-import { BaseService } from "../core/services/BaseService";
+import { BaseService } from "./BaseService";
 
 class ProdutosService extends BaseService {
   constructor() {

@@ -1,4 +1,4 @@
-import apiClient from "../core/api/axios.config";
+import apiClient from "../api/axios.config";
 
 const API_DASHBOARD = "/dashboard";
 
