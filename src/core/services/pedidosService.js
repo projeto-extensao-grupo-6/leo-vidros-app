@@ -1,162 +1,124 @@
-import apiClient from '../api/axios.config';
+import { BaseService } from './BaseService';
+import { API_ENDPOINTS } from '../api/endpoints';
 
-class PedidosService {
-    
+/**
+ * Service para gerenciamento de pedidos e serviços
+ * Extende BaseService para herdar métodos CRUD padrão
+ */
+class PedidosService extends BaseService {
+    constructor() {
+        super(API_ENDPOINTS.ORDERS);
+    }
+
+    /**
+     * Busca todos os pedidos
+     * @returns {Promise} Lista de pedidos
+     */
     async buscarTodos() {
-        try {
-            const response = await apiClient.get('/pedidos');
-            return {
-                success: true,
-                data: response.data || [],
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar pedidos:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar pedidos',
-                status: error.response?.status
-            };
-        }
+        return this.getAll();
     }
 
+    /**
+     * Busca pedidos de serviço
+     * @returns {Promise} Lista de pedidos de serviço
+     */
     async buscarPedidosDeServico() {
-        try {
-            const response = await apiClient.get('/pedidos/servicos');
-            return {
-                success: true,
-                data: response.data || [],
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar pedidos de serviço:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar pedidos de serviço',
-                status: error.response?.status
-            };
-        }
+        return this.customGet('servicos');
     }
 
+    /**
+     * Busca pedidos de produto
+     * @returns {Promise} Lista de pedidos de produto
+     */
     async buscarPedidosDeProduto() {
-        try {
-            const response = await apiClient.get('/pedidos/produtos');
-            return {
-                success: true,
-                data: response.data || [],
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar pedidos de produto:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar pedidos de produto',
-                status: error.response?.status
-            };
-        }
+        return this.customGet('produtos');
     }
 
+    /**
+     * Busca pedido por ID
+     * @param {string|number} id - ID do pedido
+     * @returns {Promise} Pedido encontrado
+     */
     async buscarPorId(id) {
-        try {
-            const response = await apiClient.get(`/pedidos/${id}`);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar pedido por ID:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Pedido não encontrado',
-                status: error.response?.status
-            };
-        }
+        return this.getById(id);
     }
 
+    /**
+     * Busca pedidos por tipo e etapa
+     * @param {string} nomeEtapa - Nome da etapa
+     * @returns {Promise} Lista de pedidos filtrados
+     */
     async buscarPorTipoAndEtapa(nomeEtapa) {
-        try {
-            const response = await apiClient.get('/pedidos/findAllBy', {
-                params: { nome: nomeEtapa }
-            });
-            return {
-                success: true,
-                data: response.data || [],
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar pedidos por etapa:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar pedidos por etapa',
-                status: error.response?.status
-            };
-        }
+        return this.customGet('findAllBy', {
+            params: { nome: nomeEtapa }
+        });
     }
 
+    /**
+     * Cria um novo pedido
+     * @param {Object} pedidoData - Dados do pedido
+     * @returns {Promise} Pedido criado
+     */
     async criarPedido(pedidoData) {
-        try {
-            if (!pedidoData.pedido) {
-                throw new Error('Dados do pedido são obrigatórios');
-            }
-
-            const response = await apiClient.post('/pedidos', pedidoData);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao criar pedido:', error);
+        if (!pedidoData.pedido) {
             return {
                 success: false,
-                error: error.response?.data?.message || 'Erro ao criar pedido',
-                status: error.response?.status,
-                validationErrors: error.response?.data?.errors || {}
+                error: 'Dados do pedido são obrigatórios',
+                validationErrors: {}
             };
         }
+        
+        const result = await this.create(pedidoData);
+        
+        // Adicionar validationErrors se houver
+        if (!result.success && result.details?.errors) {
+            result.validationErrors = result.details.errors;
+        }
+        
+        return result;
     }
+
+    /**
+     * Atualiza um pedido existente
+     * @param {string|number} id - ID do pedido
+     * @param {Object} pedidoData - Dados atualizados
+     * @returns {Promise} Pedido atualizado
+     */
     async atualizarPedido(id, pedidoData) {
-        try {
-            const response = await apiClient.put(`/pedidos/${id}`, pedidoData);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao atualizar pedido:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao atualizar pedido',
-                status: error.response?.status,
-                validationErrors: error.response?.data?.errors || {}
-            };
+        const result = await this.update(id, pedidoData);
+        
+        // Adicionar validationErrors se houver
+        if (!result.success && result.details?.errors) {
+            result.validationErrors = result.details.errors;
         }
+        
+        return result;
     }
 
+    /**
+     * Atualiza um serviço (alias para atualizarPedido)
+     * @param {string|number} id - ID do serviço
+     * @param {Object} pedidoData - Dados atualizados
+     * @returns {Promise} Serviço atualizado
+     */
     async atualizarServico(id, pedidoData) {
         return this.atualizarPedido(id, pedidoData);
     }
 
+    /**
+     * Deleta um pedido
+     * @param {string|number} id - ID do pedido
+     * @returns {Promise} Resultado da operação
+     */
     async deletarPedido(id) {
-        try {
-            const response = await apiClient.delete(`/pedidos/${id}`);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao deletar pedido:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao deletar pedido',
-                status: error.response?.status
-            };
-        }
+        return this.delete(id);
     }
 
+    /**
+     * Deleta um serviço (alias para deletarPedido)
+     * @param {string|number} id - ID do serviço
+     * @returns {Promise} Resultado da operação
+     */
     async deletarServico(id) {
         return this.deletarPedido(id);
     }

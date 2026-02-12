@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Modal, ModalHeader, ModalBody, ModalFooter, ModalTitle } from "../../../shared/components/ui/Modal/Modal";
-import { Typography } from "../../../shared/components/ui/Utilities/Utilities";
-import Input from "../../../shared/components/ui/Input";
-import Button from "../../../shared/components/ui/buttons/button.component";
+import { Modal, ModalHeader, ModalBody, ModalFooter, ModalTitle } from "../../../components/ui/Modal";
+import { Typography } from "../../../components/ui/Utilities";
+import Input from "../../../components/ui/Input";
+import Button from "../../../components/ui/Button";
 
 export default function DeleteFuncionario({ open, setOpen, funcionario, deletarFuncionario }) {
   const [confirmNome, setConfirmNome] = useState("");

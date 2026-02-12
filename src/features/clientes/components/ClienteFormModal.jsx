@@ -17,7 +17,7 @@ import {
   Input,
   MaskedInput,
   Button
-} from "../../../shared/components/ui";
+} from "../../../components/ui";
 
 import {
   User,

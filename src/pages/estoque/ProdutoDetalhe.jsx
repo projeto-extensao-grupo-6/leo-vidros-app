@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Package, TrendingUp, TrendingDown, Edit2, Check, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
-import Header from "../../shared/css/layout/Header/header.jsx";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar.jsx";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
 import apiClient from '../../core/api/axios.config';
-import Input from "../../shared/components/ui/Input";
+import Input from "../../components/ui/Input";
 
 export default function ProductDetailPage() {
   const { id } = useParams();

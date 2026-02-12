@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import apiClient from '../../core/api/axios.config';
 import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import Sidebar from '../../shared/css/layout/Sidebar/sidebar';
-import Header from '../../shared/css/layout/Header/header';
+import Sidebar from '../../components/layout/Sidebar';
+import Header from '../../components/layout/Header';
 import UserImg from '../../assets/User.png';
-import Input from "../../shared/components/ui/Input";
+import Input from "../../components/ui/Input";
 
 const InputField = ({ label, name, value, onChange, type = "text", disabled = false, className = "", showPasswordToggle = false, onTogglePassword, showPassword }) => (
     <div className={`flex flex-col ${className}`}>

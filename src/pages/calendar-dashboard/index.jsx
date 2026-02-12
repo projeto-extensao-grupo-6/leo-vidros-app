@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import TaskCreateModal from "../../shared/components/ui/TaskCreateModal";
+import TaskCreateModal from "../../components/ui/TaskCreateModal";
 import MiniCalendar from "./components/MiniCalendar";
 import CalendarView from "./components/CalendarView";
 import UpcomingEvents from "./components/UpcomingEvents";
 import Icon from "../../shared/components/common/AppIcon";
-import Button from "../../shared/components/ui/buttons/button.component";
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Button from "../../components/ui/Button";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
 import apiClient from "../../core/api/axios.config";
 
 const CalendarDashboard = () => {

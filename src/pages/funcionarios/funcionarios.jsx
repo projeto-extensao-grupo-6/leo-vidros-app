@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
-import Button from "../../shared/components/ui/buttons/button.component";
-import Input from "../../shared/components/ui/Input";
-import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../shared/components/ui/Table/Table";
-import { Paper } from "../../shared/components/ui/Utilities/Utilities";
-import { Checkbox } from "../../shared/components/ui/Checkbox/Checkbox";
-import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
-import { Chip } from "../../shared/components/ui/Chip/Chip";
-import { Pencil, Trash2 } from "lucide-react";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../components/ui/Table";
+import { Paper } from "../../components/ui/Utilities";
+import { Checkbox } from "../../components/ui/Checkbox";
+import { IconButton } from "../../components/ui/IconButton";
+import { Chip } from "../../components/ui/Chip";
+import { Pencil, Trash2, Search } from "lucide-react";
 
 import FuncionarioForm from "../../features/funcionarios/components/FuncionarioForm";
 import DeleteFuncionario from "../../features/funcionarios/components/DeleteFuncionario";
@@ -102,7 +102,7 @@ export default function Funcionarios() {
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <div className="h-80px" />
 
-        <main className="flex-1 p-25">
+        <main className="flex-1 p-16">
           <div className="mx-auto">
             <div className="mb-10 text-center pb-7">
               <h1 className="text-3xl font-bold text-gray-800">Controle de funcionário</h1>
@@ -112,7 +112,7 @@ export default function Funcionarios() {
             </div>
 
             <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pb-6">
                 <Button
                   variant="primary"
                   onClick={abrirModalCriar}
@@ -121,8 +121,9 @@ export default function Funcionarios() {
                 </Button>
                 <Input
                   type="search"
-                  size="sm"
+                  size="md"
                   placeholder="Busque por nome..."
+                  startIcon={<Search size={14} />}
                   value={busca}
                   onChange={(e) => setBusca(e.target.value)}
                   containerClassName="w-full sm:w-80"

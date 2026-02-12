@@ -13,7 +13,7 @@ import {
   eachDayOfInterval,
   parseISO,
 } from "date-fns";
-import Button from "../../../shared/components/ui/buttons/button.component";
+import Button from "../../../components/ui/Button";
 import { ptBR } from "date-fns/locale";
 import {
   ChevronLeft,
@@ -30,7 +30,7 @@ import {
   useEventDetails,
   useDeleteAgendamento,
   useEventsByDate,
-} from "../hooks/useCalendarEvents";
+} from "../../../features/calendar/hooks/useCalendarEvents";
 import {
   getBadgeColor,
   getEventDate,

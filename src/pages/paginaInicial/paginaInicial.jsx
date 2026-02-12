@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
 import {
   Info,
   CalendarDays,
@@ -19,7 +19,7 @@ import {
   getEstoqueCritico,
   getAgendamentosFuturos,
   getQtdServicosHoje
-} from "../../services/dashboardService";
+} from "../../core/services/dashboardService";
 
 const isToday = (date) => {
   if (!date) return false;
@@ -146,10 +146,10 @@ export default function PaginaInicial() {
   ], [itensCriticos, qtdAgendamentosHoje, taxaOcupacaoServicos, qtdAgendamentosFuturos, qtdServicosHoje]);
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-[Inter]">
+    <div className="flex bg-gray-50 min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header
           ref={headerRef}
           toggleSidebar={toggleSidebar}
@@ -157,11 +157,10 @@ export default function PaginaInicial() {
         />
 
         <main
-          className="flex-1 flex flex-col items-center justify-start px-6 sm:px-8 md:px-10 py-10 gap-10 transition-all duration-300"
-          style={{ paddingTop: `${headerHeight + 40}px` }}
+          className="flex-1 flex flex-col items-center justify-start p-16 md:px-10 gap-10 transition-all duration-300"
         >
           {/* Título */}
-          <div className="text-center mb-4 px-2 w-full max-w-[1600px]">
+          <div className="mb-10 text-center pb-7">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2">
               Painel de Controle
             </h1>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
-import { getEventDate } from "../utils/eventHelpers";
+import { getEventDate } from "../../../pages/calendar-dashboard/utils/eventHelpers";
 import apiClient from "../../../core/api/axios.config";
 
 export const useEventDetails = (initialEvent) => {

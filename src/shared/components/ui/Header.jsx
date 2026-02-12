@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Icon from '../AppIcon';
-import Button from '../buttons/button.component';
+import Icon from '../common/AppIcon';
+import Button from './buttons/button.component';
 
 const Header = () => {
   const navigate = useNavigate();

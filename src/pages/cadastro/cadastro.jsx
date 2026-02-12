@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import Input from "../../shared/components/ui/Input.jsx";
+import Input from "../../components/ui/Input";
 import { UserCircle, Mail, CreditCard, Phone } from "lucide-react";
-import { Stepper, Step, StepLabel } from "../../shared/components/ui/Stepper/Stepper";
-import { QontoConnector, QontoStepIcon } from "../../shared/components/ui/Steppers/QontoStepper.jsx";
-import Button from "../../shared/components/ui/buttons/button.component";
+import { Stepper, Step, StepLabel } from "../../components/ui/Stepper";
+import { QontoConnector, QontoStepIcon } from "../../components/ui/QontoStepper";
+import Button from "../../components/ui/Button";
 import apiClient from "../../core/api/axios.config";
 
 function Cadastro() {
@@ -117,8 +117,8 @@ function Cadastro() {
               <p className="text-[#6b7280] text-sm">Preencha os dados para criar sua conta</p>
             </div>
 
-            <div className="mb-10">
-              <Stepper alternativeLabel activeStep={step - 1} connector={<QontoConnector />}>
+            <div className="mb-10 w-full">
+              <Stepper alternativeLabel activeStep={step - 1} connector={<QontoConnector />} orientation="horizontal">
                 {steps.map((label) => (
                   <Step key={label}>
                     <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>

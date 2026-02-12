@@ -3,7 +3,7 @@ import { Trash2, AlertTriangle, Pencil } from 'lucide-react';
 import SkeletonLoader from '../../shared/components/feedback/SkeletonLoader/SkeletonLoader';
 import NovoPedidoProdutoModal from '../../features/pedidos/components/NovoPedidoProdutoModal';
 import EditarPedidoModal from '../../features/pedidos/components/EditarPedidoModal';
-import PedidosService from '../../services/pedidosService';
+import PedidosService from '../../core/services/pedidosService';
 
 const ITEMS_PER_PAGE = 5;
 

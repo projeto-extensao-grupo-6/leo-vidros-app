@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserCircle, Lock } from "lucide-react";
-import Button from "../../shared/components/ui/buttons/button.component";
+import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom"
-import Input from "../../shared/components/ui/Input";
+import Input from "../../components/ui/Input";
 
   function Login() {
     const [email, setEmail] = useState("");

@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { GoogleMap, Marker, LoadScript, DirectionsRenderer } from '@react-google-maps/api';
 import { Reorder, AnimatePresence } from 'framer-motion';
-import Header from '../../shared/css/layout/Header/header';
-import Sidebar from '../../shared/css/layout/Sidebar/sidebar';
-import Input from "../../shared/components/ui/Input";
+import Header from '../../components/layout/Header';
+import Sidebar from '../../components/layout/Sidebar';
+import Input from "../../components/ui/Input";
 import {
   ArrowLeft,
   MapPin,

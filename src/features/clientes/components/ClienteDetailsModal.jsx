@@ -1,4 +1,4 @@
-import { Modal } from "../../../shared/components/ui/Modal/Modal";
+import { Modal } from "../../../components/ui/Modal";
 
 export default function ClienteDetailsModal({ open, onClose, cliente }) {
   if (!cliente) return null;

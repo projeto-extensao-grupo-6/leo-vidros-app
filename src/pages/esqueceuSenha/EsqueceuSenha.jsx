@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, ArrowLeft } from "lucide-react";
-import Button from "../../shared/components/ui/buttons/button.component";
+import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../core/api/axios.config";
 import Swal from "sweetalert2";
-import Input from "../../shared/components/ui/Input";
+import Input from "../../components/ui/Input";
 
 const EsqueceuSenha = () => {
   const [email, setEmail] = useState("");

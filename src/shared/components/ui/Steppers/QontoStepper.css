@@ -4,6 +4,7 @@
 .qonto-connector-line {
   border-top-width: 3px;
   border-radius: 1px;
+  width: 70%;
   height: 3px;
   background-color: var(--color-background);
   position: relative;

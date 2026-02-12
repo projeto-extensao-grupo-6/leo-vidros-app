@@ -135,7 +135,7 @@ const Input = React.forwardRef(({
                     <label
                         htmlFor={inputId}
                         className={cn(
-                            "block text-sm font-medium",
+                            "block text-sm font-medium text-start py-3",
                             error ? "text-red-600" : "text-gray-700",
                             disabled && "opacity-50"
                         )}
@@ -197,7 +197,7 @@ const Input = React.forwardRef(({
                     <label
                         htmlFor={inputId}
                         className={cn(
-                            "block text-sm font-medium",
+                            "block text-sm font-semibold text-start py-3",
                             error ? "text-red-600" : "text-gray-700",
                             disabled && "opacity-50"
                         )}
@@ -238,7 +238,7 @@ const Input = React.forwardRef(({
                 <label
                     htmlFor={inputId}
                     className={cn(
-                        "block text-sm font-medium",
+                        "block text-sm font-medium text-start py-3",
                         error ? "text-red-600" : "text-gray-700",
                         disabled && "opacity-50"
                     )}

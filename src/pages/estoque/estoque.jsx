@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import apiClient from "../../core/api/axios.config";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
-import Input from "../../shared/components/ui/Input";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
+import Input from "../../components/ui/Input";
 import {
   Package,
   Search,
@@ -12,6 +12,7 @@ import {
   Download,
   ChevronDown,
   ArrowRightLeft,
+  Plus
 } from "lucide-react";
 import NovoProdutoModal from "../../features/estoque/components/NovoProdutoModal";
 import SucessoModal from "../../features/estoque/components/SucessoModal";
@@ -437,11 +438,10 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
       
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="pt-20 lg:pt-80px" />
 
-        <main className="flex-1 item-center p-4 md:p-8">
+        <main className="flex-1 p-16">
           {/* Cabeçalho */}
-          <div className="text-center mb-8 px-2 w-full max-w-[1600px]">
+          <div className="mb-10 text-center pb-7">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2 flex items-center justify-center gap-2">
               Controle de Estoque
             </h1>
@@ -459,6 +459,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                 <div className="flex gap-2 w-full md:w-auto">
                   <button
                     onClick={openNewItemModal}
+                    startIcon={<Plus size={18} />}
                     className="bg-[#007EA7] text-white font-semibold py-2 px-5 rounded-md hover:bg-[#006891] transition-colors flex items-center justify-center whitespace-nowrap gap-2 cursor-pointer"
                   >
                     Novo Item

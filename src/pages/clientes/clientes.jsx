@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
-import Button from "../../shared/components/ui/buttons/button.component";
-import Input from "../../shared/components/ui/Input";
-import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../shared/components/ui/Table/Table";
-import { Paper, Typography, Divider, Collapse } from "../../shared/components/ui/Utilities/Utilities";
-import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
-import { Chip } from "../../shared/components/ui/Chip/Chip";
-import { Checkbox } from "../../shared/components/ui/Checkbox/Checkbox";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import { Table, TableBody, TableCell, TableContainer, TableHeader as TableHead, TableRow } from "../../components/ui/Table";
+import { Paper, Typography, Divider, Collapse } from "../../components/ui/Utilities";
+import { IconButton } from "../../components/ui/IconButton";
+import { Chip } from "../../components/ui/Chip";
+import { Checkbox } from "../../components/ui/Checkbox";
 import {
   Pencil,
   Download,
@@ -251,11 +251,10 @@ export default function Clientes() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="h-[80px]" />
 
-        <main className="flex-1 p-8 overflow-hidden">
+        <main className="flex-1 p-16">
           <div className="max-w-[1800px] mx-auto h-full flex flex-col">
-            <div className="mb-10 text-center">
+            <div className="mb-10 text-center pb-7">
               <h1 className="text-3xl font-bold text-gray-800">Clientes</h1>
               <p className="text-gray-500 text-lg">
                 Visualize todos os clientes de sua empresa

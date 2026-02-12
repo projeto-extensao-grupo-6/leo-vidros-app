@@ -15,7 +15,7 @@ import {
   Input,
   MaskedInput,
   Button
-} from "../../../shared/components/ui";
+} from "../../../components/ui";
 import { User } from "lucide-react";
 import { CONTRATO_TIPOS, CONTRATO_TIPOS_OPTIONS } from "../../../core/constants";
 

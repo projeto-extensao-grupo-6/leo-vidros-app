@@ -19,8 +19,7 @@ export const Stepper = ({
   return (
     <div 
       className={cn(
-        "flex items-center",
-        alternativeLabel ? "flex-col" : "flex-row",
+        "flex items-center flex-row w-full",
         className
       )}
       {...props}
@@ -38,7 +37,7 @@ export const Stepper = ({
               completed: isCompleted,
             })}
             {!isLast && connector && (
-              <div className={cn("flex-1", alternativeLabel ? "h-12" : "mx-2")}>
+              <div className={cn("flex-1", alternativeLabel ? "h" : "mx-2")}>
                 {React.cloneElement(connector, { active: isActive, completed: isCompleted })}
               </div>
             )}

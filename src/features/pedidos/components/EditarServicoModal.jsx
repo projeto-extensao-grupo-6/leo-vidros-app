@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Wrench, X, Edit, Save, Calendar, ClipboardList } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../../core/api/axios.config";
-import PedidosService from "../../../services/pedidosService";
+import PedidosService from "../../../core/services/pedidosService";
 import AgendamentoModal from "./AgendamentoModal";
 import { SERVICO_ETAPAS, SERVICO_ETAPAS_OPTIONS } from "../../../core/constants";
 

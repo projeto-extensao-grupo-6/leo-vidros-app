@@ -6,7 +6,7 @@ import {
   Box,
   Typography,
   Avatar
-} from "../../../components/ui";
+} from "../../ui";
 import {
   Menu as MenuIcon,
   ChevronDown as ExpandMore,

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Lock, Check, X, Eye, EyeOff } from 'lucide-react'; 
-import { Paper } from "../../shared/components/ui/Utilities/Utilities";
-import { IconButton } from "../../shared/components/ui/IconButton/IconButton";
-import Input from "../../shared/components/ui/Input";
-import Button from "../../shared/components/ui/buttons/button.component";
+import { Paper } from "../../components/ui/Utilities";
+import { IconButton } from "../../components/ui/IconButton";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 import apiClient from "../../core/api/axios.config"; 
 
 const PasswordRequirement = ({ text, isValid }) => (

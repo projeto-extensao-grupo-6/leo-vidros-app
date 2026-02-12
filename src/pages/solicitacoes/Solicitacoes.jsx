@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Header from "../../shared/css/layout/Header/header";
-import Sidebar from "../../shared/css/layout/Sidebar/sidebar";
+import Header from "../../components/layout/Header";
+import Sidebar from "../../components/layout/Sidebar";
 import { Search, Check, X, CheckCheck, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import ModalConfirmacao from "../../shared/components/ui/ModalAceiteOrRecusa/ModalAceiteOrRecusa";
+import ModalConfirmacao from "../../components/ui/ModalAceiteOrRecusa";
 import apiClient from "../../core/api/axios.config";
-import Input from "../../shared/components/ui/Input";
+import Input from "../../components/ui/Input";
 
 const ITENS_POR_PAGINA = 10;
 
@@ -212,18 +212,17 @@ export default function Acesso() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="h-[80px]" />
 
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-16">
           <div className="max-w-[1800px] mx-auto">
-
-            <div className="mb-10 text-center">
-              <h1 className="text-3xl font-bold text-gray-800">Controle de acesso</h1>
+            <div className="mb-10 text-center pb-7">
+              <h1 className="text-3xl font-bold text-gray-800">
+                Controle de acesso
+              </h1>
               <p className="text-gray-500 text-lg">
                 Visualize todas as solicitações de acessos de sua empresa
               </p>
             </div>
-            <br />
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
 
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">

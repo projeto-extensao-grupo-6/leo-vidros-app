@@ -3,7 +3,7 @@ import { Wrench, Trash2, AlertTriangle, Pencil } from "lucide-react";
 import SkeletonLoader from "../../shared/components/feedback/SkeletonLoader/SkeletonLoader";
 import NovoPedidoServicoModal from '../../features/pedidos/components/NovoPedidoServicoModal';
 import EditarServicoModal from "../../features/pedidos/components/EditarServicoModal";
-import PedidosService from '../../services/pedidosService';
+import PedidosService from '../../core/services/pedidosService';
 
 function StatusPill({ status }) {
     const styles = {

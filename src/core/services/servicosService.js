@@ -1,163 +1,126 @@
-import apiClient from '../api/axios.config';
-import PedidosService from './pedidosService';
+import { BaseService } from './BaseService';
+import { API_ENDPOINTS } from '../api/endpoints';
 
 /**
  * Serviço para integração com API de Serviços do backend Spring
- * Utiliza o mesmo endpoint de pedidos, mas filtra por serviços
+ * Extende BaseService e utiliza o endpoint de pedidos, filtrando por serviços
  */
-class ServicosService {
-    
+class ServicosService extends BaseService {
+    constructor() {
+        super(API_ENDPOINTS.ORDERS);
+    }
+
     /**
      * Buscar todos os serviços (pedidos do tipo serviço)
+     * @returns {Promise} Lista de serviços
      */
     async buscarTodos() {
-        try {
-            const response = await apiClient.get('/pedidos');
-            
+        const result = await this.getAll();
+        
+        if (result.success) {
             // Filtrar apenas pedidos que são serviços (têm campo servico preenchido)
-            const servicos = response.data?.filter(pedido => pedido.servico) || [];
-            
+            const servicos = result.data?.filter(pedido => pedido.servico) || [];
             return {
-                success: true,
-                data: servicos,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar serviços:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar serviços',
-                status: error.response?.status
+                ...result,
+                data: servicos
             };
         }
+        
+        return result;
     }
 
     /**
      * Buscar serviço por ID
+     * @param {string|number} id - ID do serviço
+     * @returns {Promise} Serviço encontrado
      */
     async buscarPorId(id) {
-        try {
-            const response = await apiClient.get(`/pedidos/${id}`);
-            
+        const result = await this.getById(id);
+        
+        if (result.success) {
             // Verificar se o pedido é um serviço
-            if (!response.data.servico) {
+            if (!result.data.servico) {
                 return {
                     success: false,
                     error: 'Este pedido não é um serviço',
                     status: 400
                 };
             }
-            
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar serviço por ID:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Serviço não encontrado',
-                status: error.response?.status
-            };
         }
+        
+        return result;
     }
 
     /**
      * Buscar serviços por etapa
+     * @param {string} nomeEtapa - Nome da etapa
+     * @returns {Promise} Lista de serviços filtrados
      */
     async buscarPorEtapa(nomeEtapa) {
-        try {
-            const response = await apiClient.get('/pedidos/findAllBy', {
-                params: { nome: nomeEtapa }
-            });
-            
+        const result = await this.customGet('findAllBy', {
+            params: { nome: nomeEtapa }
+        });
+        
+        if (result.success) {
             // Filtrar apenas pedidos que são serviços
-            const servicos = response.data?.filter(pedido => pedido.servico) || [];
-            
+            const servicos = result.data?.filter(pedido => pedido.servico) || [];
             return {
-                success: true,
-                data: servicos,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao buscar serviços por etapa:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao buscar serviços por etapa',
-                status: error.response?.status
+                ...result,
+                data: servicos
             };
         }
+        
+        return result;
     }
 
     /**
      * Criar novo serviço
+     * @param {Object} servicoData - Dados do serviço
+     * @returns {Promise} Serviço criado
      */
     async criarServico(servicoData) {
-        try {
-            // Validação básica
-            if (!servicoData.servico) {
-                throw new Error('Dados do serviço são obrigatórios');
-            }
-
-            const response = await apiClient.post('/pedidos', servicoData);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao criar serviço:', error);
+        if (!servicoData.servico) {
             return {
                 success: false,
-                error: error.response?.data?.message || 'Erro ao criar serviço',
-                status: error.response?.status,
-                validationErrors: error.response?.data?.errors || {}
+                error: 'Dados do serviço são obrigatórios',
+                validationErrors: {}
             };
         }
+
+        const result = await this.create(servicoData);
+        
+        // Adicionar validationErrors se houver
+        if (!result.success && result.details?.errors) {
+            result.validationErrors = result.details.errors;
+        }
+        
+        return result;
     }
 
     /**
      * Atualizar serviço existente
+     * @param {string|number} id - ID do serviço
+     * @param {Object} servicoData - Dados atualizados
+     * @returns {Promise} Serviço atualizado
      */
     async atualizarServico(id, servicoData) {
-        try {
-            const response = await apiClient.put(`/pedidos/${id}`, servicoData);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao atualizar serviço:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao atualizar serviço',
-                status: error.response?.status,
-                validationErrors: error.response?.data?.errors || {}
-            };
+        const result = await this.update(id, servicoData);
+        
+        // Adicionar validationErrors se houver
+        if (!result.success && result.details?.errors) {
+            result.validationErrors = result.details.errors;
         }
+        
+        return result;
     }
 
     /**
      * Deletar serviço
+     * @param {string|number} id - ID do serviço
+     * @returns {Promise} Resultado da operação
      */
     async deletarServico(id) {
-        try {
-            const response = await apiClient.delete(`/pedidos/${id}`);
-            return {
-                success: true,
-                data: response.data,
-                status: response.status
-            };
-        } catch (error) {
-            console.error('Erro ao deletar serviço:', error);
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Erro ao deletar serviço',
-                status: error.response?.status
-            };
-        }
+        return this.delete(id);
     }
 
     /**
