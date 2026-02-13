@@ -19,40 +19,48 @@ const MaskedInput = forwardRef(({
   onAccept,
   onChange,
   value,
+  icon,
   ...inputProps 
 }, ref) => {
   return (
-    <div className="w-full">
+    <div className="w-full space-y-1">
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-start py-3 text-gray-700">
           {label}
         </label>
       )}
-      <IMaskInput
-        mask={mask}
-        value={value}
-        unmask={false} // Mantém a máscara no valor
-        onAccept={(value, maskRef) => {
-          // Chama o callback personalizado se existir
-          if (onAccept) {
-            onAccept(value, maskRef);
-          }
-          // Chama o onChange do react-hook-form
-          if (onChange) {
-            onChange({ target: { value } });
-          }
-        }}
-        {...inputProps}
-        className={`
-          w-full px-4 py-2 border rounded-lg 
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
-          disabled:bg-gray-100 disabled:cursor-not-allowed
-          ${error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300'}
-          ${inputProps.className || ''}
-        `}
-      />
+      <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+            {icon}
+          </div>
+        )}
+        <IMaskInput
+          mask={mask}
+          value={value}
+          unmask={false}
+          onAccept={(value, maskRef) => {
+            if (onAccept) {
+              onAccept(value, maskRef);
+            }
+            if (onChange) {
+              onChange({ target: { value } });
+            }
+          }}
+          {...inputProps}
+          className={`
+            w-full h-10 px-3 py-2 border rounded-md transition-all duration-200
+            border-gray-300 bg-white placeholder:text-gray-400
+            focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+            disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50
+            ${icon ? 'pl-10' : ''}
+            ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
+            ${inputProps.className || ''}
+          `}
+        />
+      </div>
       {error && (
-        <p className="mt-1 text-sm text-red-500">{error}</p>
+        <p className="text-xs text-red-600 mt-1">{error}</p>
       )}
     </div>
   );

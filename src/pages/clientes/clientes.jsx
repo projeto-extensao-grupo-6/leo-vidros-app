@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
+  Plus
 } from "lucide-react";
 import ClienteFormModal from "../../features/clientes/components/ClienteFormModal";
 import ClienteDetailsModal from "../../features/clientes/components/ClienteDetailsModal";
@@ -265,6 +266,7 @@ export default function Clientes() {
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                 <Button
                   variant="primary"
+                  startIcon={<Plus size={16} className="lg:w-[18px] lg:h-[18px] shrink-0" />}
                   size="md"
                   onClick={abrirModalCriar}
                 >
@@ -284,7 +286,6 @@ export default function Clientes() {
                   <Input
                     type="select"
                     size="sm"
-                    label="Ordenar"
                     value={ordenar}
                     onChange={(e) => setOrdenar(e.target.value)}
                     containerClassName="w-full sm:w-32"
@@ -299,7 +300,6 @@ export default function Clientes() {
                   <Input
                     type="select"
                     size="sm"
-                    label="Situação"
                     value={situacao}
                     onChange={(e) => setSituacao(e.target.value)}
                     containerClassName="w-full sm:w-32"
@@ -313,13 +313,12 @@ export default function Clientes() {
 
                   <Button
                     variant="outline"
-                    size="sm"
-                    startIcon={<Download size={16} />}
-                    className="w-full sm:w-auto text-xs"
+                    size="md"
+                    endIcon={<Download size={16} />}
                     onClick={handleExportar}
                     disabled={selecionados.length === 0}
                   >
-                    {`Exportar ${selecionados.length}`}
+                    {`Exportar `}
                   </Button>
                 </div>
               </div>

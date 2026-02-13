@@ -4,7 +4,8 @@ import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, Chec
 import Sidebar from '../../components/layout/Sidebar';
 import Header from '../../components/layout/Header';
 import UserImg from '../../assets/User.png';
-import Input from "../../components/ui/Input";
+import { Input, Button } from "../../components/ui";
+import SuccessModal from "../../components/ui/SuccessModal";
 
 const InputField = ({ label, name, value, onChange, type = "text", disabled = false, className = "", showPasswordToggle = false, onTogglePassword, showPassword }) => (
     <div className={`flex flex-col ${className}`}>
@@ -43,6 +44,7 @@ export default function Perfil() {
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const [formData, setFormData] = useState({
         nome: "",
@@ -191,10 +193,7 @@ export default function Perfil() {
         apiClient.put(`/usuarios/${userId}`, usuarioRequest)
             .then(response => {
                 console.log('Salvo com sucesso!', response.data);
-                setMessage({ 
-                    type: 'success', 
-                    text: isChangingPassword ? 'Perfil e senha atualizados com sucesso!' : 'Perfil atualizado com sucesso!' 
-                });
+                setShowSuccessModal(true);
                 setIsEditing(false);
                 setIsChangingPassword(false);
 
@@ -205,6 +204,11 @@ export default function Perfil() {
                     novaSenha: "",
                     confirmarSenha: ""
                 }));
+
+                // Fecha o modal após 2 segundos
+                setTimeout(() => {
+                    setShowSuccessModal(false);
+                }, 2000);
             })
             .catch(error => {
                 console.error("Erro ao salvar:", error);
@@ -251,8 +255,8 @@ export default function Perfil() {
                 <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
                 <main className="flex-1 overflow-hidden">
-                    <div className="h-full pt-15">
-                        <div className="bg-white h-full border-t border-gray-200">
+                    <div className="h-full">
+                        <div className="bg-white h-full ">
                             <div className="flex flex-col lg:flex-row h-full">
 
                                 <div className="lg:w-80 bg-[#003249] text-white p-8 pt-16 flex flex-col border-r border-gray-700">
@@ -530,7 +534,7 @@ export default function Perfil() {
                                             )}
 
                                             <div className="pt-4 flex justify-end">
-                                                <button
+                                                <Button
                                                     onClick={toggleEdit}
                                                     disabled={loading}
                                                     className={`flex items-center gap-2 px-4 py-3 cursor-pointer rounded-lg font-semibold text-white shadow-lg transition-all hover:scale-105 ${
@@ -543,7 +547,7 @@ export default function Perfil() {
                                                 >
                                                     {loading ? "Salvando..." : isEditing ? "Salvar Alterações" : "Editar Informações"}
                                                     {!loading && (isEditing ? <Save size={20} /> : <Edit2 size={20} />)}
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -552,7 +556,15 @@ export default function Perfil() {
                         </div>
                     </div>
                 </main>
-            </div>
+            </div>            
+            <SuccessModal 
+                open={showSuccessModal}
+                onClose={() => setShowSuccessModal(false)}
+                title="Perfil atualizado!"
+                message={isChangingPassword ? 'Perfil e senha atualizados com sucesso!' : 'Perfil atualizado com sucesso!'}
+                autoCloseDuration={2000}
+                progressMessage="Salvando seu perfil..."
+            />
         </div>
     );
 }

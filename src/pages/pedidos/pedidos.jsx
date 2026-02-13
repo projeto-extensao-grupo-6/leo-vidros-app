@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "../../components/layout/Header";
 import Sidebar from "../../components/layout/Sidebar";
-import Input from "../../components/ui/Input";
 import PedidosList from "./PedidosList";
-import ServicosList from "../servicos/ServicosList";
+import ServicosList from "./ServicosList";
 import FilterDropdown from "../../features/pedidos/components/FilterDropdown";
-import { Package, Wrench, Filter, Search, ChevronDown } from "lucide-react";
+import { Package, Wrench, Filter, Search, ChevronDown, Plus } from "lucide-react";
+import { Button, Input } from "../../components/ui";
 
 export default function Pedidos() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -129,13 +129,13 @@ export default function Pedidos() {
               <div className="w-full bg-white border border-slate-200 rounded-b-lg rounded-tr-lg shadow-sm relative z-0 p-6">
                 {/* Barra de Ferramentas */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-                  <button
-                    className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-md text-white text-sm font-bold shadow-sm hover:opacity-90 transition-all cursor-pointer"
-                    style={{ backgroundColor: "#007EA7" }}
+                  <Button
+                    className="w-full md:w-auto"
+                    startIcon={<Plus size={16} className="lg:w-[18px] lg:h-[18px] shrink-0" />}
                     onClick={handleNovoRegistroClick}
                   >
                     Novo Registro
-                  </button>
+                  </Button>
 
                   <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
                     <div className="w-full md:w-[350px]">
@@ -151,11 +151,11 @@ export default function Pedidos() {
                     </div>
 
                     <div className="relative w-full md:w-auto py-1">
-                      <button
+                      <Button
                         onClick={() =>
                           setIsFilterDropdownOpen(!isFilterDropdownOpen)
                         }
-                        className={`w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 h-10 rounded-md border text-sm font-semibold cursor-pointer transition-colors shadow-sm ${
+                        className={`w-full md:w-auto gap-2 ${
                           hasActiveFilters
                             ? "border-[#007EA7] text-[#007EA7] bg-[#e6f0f5]"
                             : "border-slate-200 text-slate-700 bg-white hover:bg-slate-50"
@@ -163,18 +163,14 @@ export default function Pedidos() {
                         title="Filtrar"
                       >
                         <Filter
-                          size={14}
-                          className={
-                            hasActiveFilters
-                              ? "text-[#007EA7]"
-                              : "text-slate-800"
-                          }
+                          size={16}
+                          
                         />
                         Filtrar
                         <ChevronDown
                           className={`text-slate-400 w-4 h-4 ml-1 transition-transform ${isFilterDropdownOpen ? "rotate-180" : ""}`}
                         />
-                      </button>
+                      </Button>
 
                       <FilterDropdown
                         isOpen={isFilterDropdownOpen}

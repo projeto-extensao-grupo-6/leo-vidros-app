@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Filter, Check } from "lucide-react";
 import { FORMAS_PAGAMENTO_OPTIONS, SERVICO_ETAPAS_OPTIONS } from "../../../core/constants";
+import { Button } from "../../../components/ui"
 
 const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode = "pedidos" }) => {
   
@@ -63,7 +64,7 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
   if (!isOpen) return null;
 
   return (
-    <div className="absolute z-10 top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl/20 border border-gray-200 p-4">
+    <div className="absolute w-100 z-10 top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl/20 border border-gray-200 p-6">
       <div className="flex items-center gap-2 text-sm font-bold text-gray-700 mb-4 border-b pb-3">
         <Filter className="w-4 h-4 mr-2" />
         Filtros
@@ -81,7 +82,7 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
               return (
                 <div
                   key={option}
-                  className="flex items-center justify-between p-2 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between py-2 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                   onClick={() => handleToggleFilter(key, option)}
                 >
                   <span
@@ -108,12 +109,11 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
         >
           Limpar Filtros
         </button>
-        <button
+        <Button
           onClick={handleApply}
-          className="bg-[#007EA7] text-white text-sm font-medium py-1.5 px-4 rounded-md hover:bg-[#006891] transition-colors cursor-pointer"
         >
           Aplicar
-        </button>
+        </Button>
       </div>
     </div>
   );

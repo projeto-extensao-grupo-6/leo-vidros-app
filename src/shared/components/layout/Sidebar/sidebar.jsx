@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home,
@@ -10,7 +10,10 @@ import {
   LogOut,
   ChevronLeft,
   ClipboardList,
+  PencilLine,
 } from "lucide-react";
+import { Avatar } from "../../ui";
+import UserImg from "../../../../assets/User.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../../../../assets/logo/logo-sidebar.png";
 
@@ -18,13 +21,45 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const [userName, setUserName] = useState("Carregando...");
+
+  useEffect(() => {
+    const storedName = sessionStorage.getItem("loggedUserName");
+
+    if (storedName) {
+      setUserName(storedName);
+    } else {
+      setUserName("Usuário Léo Vidros");
+    }
+  }, []);
+
   const menuItems = [
-    { text: "Painel de Controle", icon: <Home size={20} />, path: "/paginaInicial" },
-    { text: "Controle de Estoque", icon: <Package size={20} />, path: "/estoque" },
-    { text: "Pedidos e Serviços", icon: <ClipboardList size={20} />, path: "/pedidos" },
-    { text: "Agendamentos", icon: <Calendar size={20} />, path: "/agendamentos" },
+    {
+      text: "Painel de Controle",
+      icon: <Home size={20} />,
+      path: "/paginaInicial",
+    },
+    {
+      text: "Controle de Estoque",
+      icon: <Package size={20} />,
+      path: "/estoque",
+    },
+    {
+      text: "Pedidos e Serviços",
+      icon: <ClipboardList size={20} />,
+      path: "/pedidos",
+    },
+    {
+      text: "Agendamentos",
+      icon: <Calendar size={20} />,
+      path: "/agendamentos",
+    },
     { text: "Clientes", icon: <Users size={20} />, path: "/clientes" },
-    { text: "Controle de Funcionários", icon: <Briefcase size={20} />, path: "/funcionarios" },
+    {
+      text: "Controle de Funcionários",
+      icon: <Briefcase size={20} />,
+      path: "/funcionarios",
+    },
     { text: "Controle de Acesso", icon: <Lock size={20} />, path: "/acesso" },
   ];
 
@@ -71,7 +106,6 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             className="w-[55%] h-auto object-contain my-5 drop-shadow-sm"
           />
         </div>
-
         {/* Menu principal */}
         <nav className="grow overflow-y-auto w-full">
           <ul className="flex flex-col gap-2 px-6">
@@ -89,9 +123,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     }`}
                   >
                     <span
-                      className={`${
-                        isActive ? "text-white" : "text-gray-600"
-                      }`}
+                      className={`${isActive ? "text-white" : "text-gray-600"}`}
                     >
                       {item.icon}
                     </span>
@@ -102,16 +134,34 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             })}
           </ul>
         </nav>
-
         {/* Botão Sair */}
-        <div className="mt-auto px-6 pb-8">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-3 w-full text-gray-700 hover:bg-[#003d6b]/10 hover:text-[#003d6b] px-3 py-3 rounded-lg font-semibold text-lg transition-all duration-150 cursor-pointer"
+        <div className="flex flex-col px-6">
+          <div
+            onClick={() => navigate("/perfil")}
+            className="flex justify-between flex items-center gap-3 w-full text-left px-1.5 py-3 rounded-lg transition-all duration-150 cursor-pointer hover:bg-[#003d6b]/10 hover:text-[#003d6b] text-gray-700"
           >
-            <LogOut size={26} />
-            <span>Sair</span>
-          </button>
+            <div className="flex">
+              <Avatar
+                src={UserImg}
+                className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 border-2 border-white group-hover:border-gray-300 transition-colors"
+              />
+              <div className="flex flex-col justify-center">
+                <p className="text-base font-bold">{userName}</p>
+                <p className="text-[11px] sm:text-xs text-gray-800">Admin</p>
+              </div>
+            </div>
+            <PencilLine size={20} />
+          </div>
+
+          <div className="mt-auto pb-8">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-3 w-full text-left px-3 py-3 rounded-lg transition-all duration-150 cursor-pointer hover:bg-[#003d6b]/10 hover:text-[#003d6b] text-gray-700"
+            >
+              <LogOut size={26} />
+              <span>Sair</span>
+            </button>
+          </div>
         </div>
       </motion.aside>
     </>

@@ -24,6 +24,14 @@ const CalendarDashboard = () => {
       const response = await apiClient.get("/agendamentos");
       const data = response.data;
 
+      // Validar se data é um array antes de mapear
+      if (!Array.isArray(data)) {
+        console.warn("⚠️ Resposta da API não é um array:", data);
+        setTasks([]);
+        localStorage.setItem("tasks", JSON.stringify([]));
+        return;
+      }
+
       const transformedTasks = data.map((agendamento) => {
         // Usar a data original da API (formato YYYY-MM-DD)
         const dataFormatada = agendamento.dataAgendamento;
@@ -66,6 +74,8 @@ const CalendarDashboard = () => {
       localStorage.setItem("tasks", JSON.stringify(transformedTasks));
     } catch (error) {
       console.error("❌ Erro ao carregar agendamentos:", error);
+      setTasks([]);
+      localStorage.setItem("tasks", JSON.stringify([]));
     }
   };
 
@@ -136,17 +146,17 @@ const CalendarDashboard = () => {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       
       <div className="bg-background h-full">
-        <div className="h-[calc(100vh-80px)] flex">
+        <div className="h-[calc(100vh-80px)] flex flex-col lg:flex-row">
           {/* Left Sidebar */}
           <div
             className={`${
-              sidebarCollapsed ? "w-16" : "w-80"
-            } transition-all duration-300 border-r border-hairline bg-surface flex flex-col`}
+              sidebarCollapsed ? "hidden lg:flex lg:w-16" : "w-full lg:w-80"
+            } transition-all duration-300 border-r border-hairline bg-surface flex flex-col max-h-[50vh] lg:max-h-full`}
           >
-            <div className="p-5 border-b border-hairline">
+            <div className="p-3 lg:p-5 border-b border-hairline">
               <div className="flex items-center justify-between">
                 {!sidebarCollapsed && (
-                  <h2 className="font-semibold text-text-primary">
+                  <h2 className="font-semibold text-text-primary text-sm lg:text-base">
                     Navegação do Calendário
                   </h2>
                 )}
@@ -165,7 +175,7 @@ const CalendarDashboard = () => {
             </div>
 
             {!sidebarCollapsed && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              <div className="flex-1 overflow-y-auto p-2 lg:p-4 space-y-4 lg:space-y-6">
                 <MiniCalendar
                   selectedDate={selectedDate}
                   onDateSelect={handleDateSelect}
@@ -177,11 +187,11 @@ const CalendarDashboard = () => {
           </div>
 
           {/* Main Calendar View */}
-          <div className="flex-1 flex flex-col">
-            <div className="border-b border-hairline bg-surface p-4">
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="border-b border-hairline bg-surface p-2 lg:p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <h1 className="text-2xl font-semibold text-text-primary">
+                <div className="flex items-center space-x-2 lg:space-x-4">
+                  <h1 className="text-lg lg:text-2xl font-semibold text-text-primary">
                     Agenda de Atendimentos
                   </h1>
                 </div>
@@ -202,10 +212,10 @@ const CalendarDashboard = () => {
           {/* Right Panel */}
           <div
             className={`${
-              rightPanelCollapsed ? "w-16" : "w-80"
-            } transition-all duration-300 border-l border-hairline bg-surface flex flex-col`}
+              rightPanelCollapsed ? "hidden lg:flex lg:w-16" : "w-full lg:w-80"
+            } transition-all duration-300 border-l border-hairline bg-surface flex flex-col max-h-[50vh] lg:max-h-full`}
           >
-            <div className="p-5 border-b border-hairline">
+            <div className="p-3 lg:p-5 border-b border-hairline">
               <div className="flex items-center justify-between">
                 <Button
                   variant="ghost"
@@ -219,7 +229,7 @@ const CalendarDashboard = () => {
                   />
                 </Button>
                 {!rightPanelCollapsed && (
-                  <h2 className="font-semibold text-text-primary">
+                  <h2 className="font-semibold text-text-primary text-sm lg:text-base">
                     Próximos Eventos
                   </h2>
                 )}
@@ -227,7 +237,7 @@ const CalendarDashboard = () => {
             </div>
 
             {!rightPanelCollapsed && (
-              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              <div className="flex-1 overflow-y-auto p-2 lg:p-4 space-y-4 lg:space-y-6">
                 <UpcomingEvents events={tasks} />
               </div>
             )}

@@ -82,7 +82,7 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
     <Modal open={open} onClose={() => setOpen(false)} size="sm">
       <ModalHeader>
         <div className="flex items-center gap-1">
-          <Avatar className="bg-[#007EA7]">
+          <Avatar>
             <User size={20} />
           </Avatar>
           <ModalTitle>{modoEdicao ? "Editar Funcionário" : "Novo Funcionário"}</ModalTitle>
@@ -179,10 +179,14 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
       </ModalBody>
 
       <ModalFooter>
+        <Button 
+        variant="outlined"
+        onClick={() => setOpen(false)}>
+          Cancelar
+        </Button>
         <Button onClick={handleSubmit(onSubmit)} variant="primary">
           {modoEdicao ? "Salvar Alterações" : "Salvar Funcionário"}
         </Button>
-        <Button onClick={() => setOpen(false)}>Cancelar</Button>
       </ModalFooter>
     </Modal>
   );

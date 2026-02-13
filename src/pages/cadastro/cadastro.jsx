@@ -7,6 +7,7 @@ import { Stepper, Step, StepLabel } from "../../components/ui/Stepper";
 import { QontoConnector, QontoStepIcon } from "../../components/ui/QontoStepper";
 import Button from "../../components/ui/Button";
 import apiClient from "../../core/api/axios.config";
+import SuccessModal from "../../components/ui/SuccessModal";
 
 function Cadastro() {
   const [step, setStep] = useState(1);
@@ -80,7 +81,6 @@ function Cadastro() {
       setModalOpen(true);
 
       setTimeout(() => {
-        setModalOpen(false);
         navigate("/login");
       }, 3000);
     } catch (error) {
@@ -221,22 +221,13 @@ function Cadastro() {
         </motion.div>
       </div>
 
-      <AnimatePresence>
-        {modalOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setModalOpen(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full text-center" onClick={(e) => e.stopPropagation()}>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h2 className="text-xl font-bold text-[#111827] mb-2">Cadastro realizado com sucesso!</h2>
-              <p className="text-[#6b7280]">Aguarde a aprovação do administrador.</p>
-              <p className="text-sm text-[#9ca3af] mt-4">Redirecionando...</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SuccessModal 
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Cadastro realizado com sucesso!"
+        message="Aguarde a aprovação do administrador."
+        autoCloseDuration={3000}
+      />
     </div>
   );
 }

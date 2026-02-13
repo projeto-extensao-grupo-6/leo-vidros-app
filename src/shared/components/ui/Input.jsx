@@ -155,7 +155,7 @@ const Input = React.forwardRef(({
                     <select
                         className={cn(
                             baseInputClasses,
-                            "pr-8 appearance-none bg-no-repeat bg-right",
+                            "pr-10 appearance-none bg-no-repeat bg-[right_0.75rem_center] m-1",
                             "bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEgMUw2IDZMMTEgMSIgc3Ryb2tlPSIjNkI3MjgwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')]",
                             className
                         )}

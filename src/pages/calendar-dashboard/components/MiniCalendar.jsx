@@ -33,7 +33,7 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
       const isHoliday = fixedHolidays.includes(format(day, 'dd/MM'));
 
       // Removi o 'hover-scale' daqui
-      let dayClasses = "aspect-square p-1 cursor-pointer transition-micro text-xs flex items-center justify-center ";
+      let dayClasses = "aspect-square p-0.5 lg:p-1 cursor-pointer transition-micro text-[10px] lg:text-xs flex items-center justify-center ";
 
       if (!isCurrentMonth) {
         // Dia de outro mês: Adicionei o hover azul claro também
@@ -64,7 +64,7 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
       day = addDays(day, 1);
     }
     rows?.push(
-      <div className="grid grid-cols-7 gap-1" key={day}>
+      <div className="grid grid-cols-7 gap-0.5 lg:gap-1" key={day}>
         {days}
       </div>
     );
@@ -80,19 +80,19 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
   };
 
   return (
-    <div className="flex flex-col gap-3 bg-card border border-hairline rounded-modern p-4">
+    <div className="flex flex-col gap-2 lg:gap-3 bg-card border border-hairline rounded-modern p-2 lg:p-4">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1 lg:mb-2">
         <Button
           variant="ghost"
           size="icon"
           onClick={prevMonth}
-          className='cursor-pointer hover:bg-blue-100'
+          className='cursor-pointer hover:bg-blue-100 h-8 w-8 lg:h-10 lg:w-10'
         >
-          <Icon name="ChevronLeft" size={16} />
+          <Icon name="ChevronLeft" size={16} className="lg:w-5 lg:h-5" />
         </Button>
 
-        <span className="font-medium text-text-primary text-sm capitalize">
+        <span className="font-medium text-text-primary text-xs lg:text-sm capitalize">
           {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
         </span>
 
@@ -100,16 +100,16 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
           variant="ghost"
           size="icon"
           onClick={nextMonth}
-          className='cursor-pointer hover:bg-blue-100'
+          className='cursor-pointer hover:bg-blue-100 h-8 w-8 lg:h-10 lg:w-10'
         >
-          <Icon name="ChevronRight" size={16} />
+          <Icon name="ChevronRight" size={16} className="lg:w-5 lg:h-5" />
         </Button>
       </div>
 
       {/* Days of week */}
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="grid grid-cols-7 gap-0.5 lg:gap-1 mb-1">
         {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']?.map((day) => (
-          <div key={day} className="aspect-square p-1 text-xs font-medium text-text-secondary text-center flex items-center justify-center">
+          <div key={day} className="aspect-square p-0.5 lg:p-1 text-[10px] lg:text-xs font-medium text-text-secondary text-center flex items-center justify-center">
             {day}
           </div>
         ))}

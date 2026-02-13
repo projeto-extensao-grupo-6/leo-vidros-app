@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trash2, AlertTriangle, Pencil } from 'lucide-react';
+import { Trash2, AlertTriangle, Pencil, Package } from 'lucide-react';
 import SkeletonLoader from '../../shared/components/feedback/SkeletonLoader/SkeletonLoader';
 import NovoPedidoProdutoModal from '../../features/pedidos/components/NovoPedidoProdutoModal';
 import EditarPedidoModal from '../../features/pedidos/components/EditarPedidoModal';
 import PedidosService from '../../core/services/pedidosService';
+import { ErrorState, EmptyState } from '../../features/pedidos/components/ListStates';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -72,27 +73,37 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             const result = await PedidosService.buscarPedidosDeProduto();
             
             if (result.success) {
-                // Mapear dados do backend para o formato do frontend
-                const pedidosMapeados = result.data.map(pedido => 
-                    PedidosService.mapearParaFrontend(pedido)
-                );
-                
-                // Ordenar por ID (mais recentes primeiro)
-                const pedidosOrdenados = [...pedidosMapeados].sort((a, b) => {
-                    const idAisNum = /^\d+$/.test(a.id);
-                    const idBisNum = /^\d+$/.test(b.id);
-                    if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
-                    if (a.id < b.id) return 1;
-                    if (a.id > b.id) return -1;
-                    return 0;
-                });
-                
-                setPedidos(pedidosOrdenados);
+                // Verificar se result.data é um array válido
+                if (Array.isArray(result.data) && result.data.length > 0) {
+                    // Mapear dados do backend para o formato do frontend
+                    const pedidosMapeados = result.data.map(pedido => 
+                        PedidosService.mapearParaFrontend(pedido)
+                    );
+                    
+                    // Ordenar por ID (mais recentes primeiro)
+                    const pedidosOrdenados = [...pedidosMapeados].sort((a, b) => {
+                        const idAisNum = /^\d+$/.test(a.id);
+                        const idBisNum = /^\d+$/.test(b.id);
+                        if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
+                        if (a.id < b.id) return 1;
+                        if (a.id > b.id) return -1;
+                        return 0;
+                    });
+                    
+                    setPedidos(pedidosOrdenados);
+                } else {
+                    // Dados vazios ou inválidos, mas não é erro
+                    setPedidos([]);
+                }
             } else {
-                setError(result.error);
-                if (result.status === 204) {
-                    setPedidos([]); // Sem dados, mas não é erro
+                // Tratar status 204 e 404 como "sem dados" ao invés de erro
+                if (result.status === 204 || result.status === 404) {
+                    setPedidos([]);
                     setError(null);
+                } else {
+                    // Outros erros devem ser exibidos
+                    setError(result.error || 'Erro ao carregar pedidos');
+                    setPedidos([]);
                 }
             }
         } catch (error) {
@@ -220,25 +231,20 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                 {loading && <SkeletonLoader count={ITEMS_PER_PAGE} />}
 
                 {!loading && error && (
-                    <div className="text-center py-10 text-red-500 bg-red-50 rounded-lg border border-red-200">
-                        <p className="font-medium">Erro ao carregar pedidos</p>
-                        <p className="text-sm mt-1">{error}</p>
-                        <button 
-                            onClick={fetchData}
-                            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                        >
-                            Tentar Novamente
-                        </button>
-                    </div>
+                    <ErrorState 
+                        error={error} 
+                        onRetry={fetchData} 
+                        entityName="pedidos" 
+                    />
                 )}
 
                 {!loading && !error && pagina.length === 0 && (
-                    <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                        {listaFiltrada.length === 0 && pedidos.length === 0 
-                            ? "Nenhum pedido cadastrado ainda." 
-                            : "Nenhum pedido encontrado com os filtros atuais."
-                        }
-                    </div>
+                    <EmptyState 
+                        hasFilters={listaFiltrada.length === 0 && pedidos.length > 0}
+                        totalItems={pedidos.length}
+                        entityName="pedido de produto"
+                        entityNamePlural="pedidos de produto"
+                    />
                 )}
 
                 {!loading && !error && pagina.map((item) => (
@@ -247,7 +253,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                         <header className="flex items-center justify-between pb-2 border-b border-slate-100">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-md ${item.status === 'Finalizado' ? 'text-gray-400 bg-gray-200' : 'text-slate-400 bg-slate-100'}`}>
-                                    <FaBox />
+                                    <Package />
                                 </div>
                                 <div>
                                     <h3 className={`font-semibold text-sm md:text-base ${item.status === 'Finalizado' ? 'text-gray-600' : 'text-slate-800'}`}>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Filter, Check } from "lucide-react";
+import { Button } from "../../../components/ui"
 
 const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange }) => {
   const filterOptions = {
@@ -28,18 +29,18 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange }) =>
   if (!isOpen) return null;
 
   return (
-    <div className="absolute z-10 top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
-      <div className="flex items-center text-sm font-bold text-gray-700 mb-4 border-b pb-3">
+    <div className="absolute z-10 top-full right-0 mt-2 w-85 bg-white rounded-lg shadow-xl border border-gray-200 p-4">
+      <div className="flex items-center text-sm font-bold text-gray-700 ">
         <Filter className="w-4 h-4 mr-2" />
         Filtros
       </div>
       <br />
       {Object.keys(filterOptions).map((key) => (
         <div key={key} className="mb-4 last:mb-0">
-          <h3 className="text-sm font-semibold text-gray-800 mb-2">
+          <h3 className="text-sm font-semibold text-gray-800 mb-2 pt-3 border-t border-gray-100">
             {filterOptions[key].title}
           </h3>
-          <div className="space-y-1">
+          <div className="py-3 ">
             {filterOptions[key].options.map((option) => {
               const isSelected = (selectedFilters[key] || []).includes(option);
               return (
@@ -66,18 +67,19 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange }) =>
       ))}
 
       <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
-        <button
+        <Button
           onClick={() => onFilterChange({})}
-          className="text-sm font-medium text-gray-600 hover:text-red-600 transition-colors"
+          variant="outlined"
+          size="sm"
         >
           Limpar Filtros
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onClose}
           className="bg-[#007EA7] text-white text-sm font-medium py-1.5 px-4 rounded-md hover:bg-[#006891] transition-colors"
         >
           Aplicar
-        </button>
+        </Button>
       </div>
     </div>
   );

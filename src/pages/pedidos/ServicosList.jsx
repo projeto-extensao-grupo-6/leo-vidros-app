@@ -4,6 +4,7 @@ import SkeletonLoader from "../../shared/components/feedback/SkeletonLoader/Skel
 import NovoPedidoServicoModal from '../../features/pedidos/components/NovoPedidoServicoModal';
 import EditarServicoModal from "../../features/pedidos/components/EditarServicoModal";
 import PedidosService from '../../core/services/pedidosService';
+import { ErrorState, EmptyState } from '../../features/pedidos/components/ListStates';
 
 function StatusPill({ status }) {
     const styles = {
@@ -77,27 +78,37 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
             const result = await PedidosService.buscarPedidosDeServico();
             
             if (result.success) {
-                // Mapear dados do backend para o formato do frontend
-                const servicosMapeados = result.data.map(servico => 
-                    PedidosService.mapearParaFrontend(servico)
-                );
-                
-                // Ordenar por ID (mais recentes primeiro)
-                const servicosOrdenados = [...servicosMapeados].sort((a, b) => {
-                    const idAisNum = /^\d+$/.test(a.id);
-                    const idBisNum = /^\d+$/.test(b.id);
-                    if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
-                    if (a.id < b.id) return 1;
-                    if (a.id > b.id) return -1;
-                    return 0;
-                });
-                
-                setServicos(servicosOrdenados);
+                // Verificar se result.data é um array válido
+                if (Array.isArray(result.data) && result.data.length > 0) {
+                    // Mapear dados do backend para o formato do frontend
+                    const servicosMapeados = result.data.map(servico => 
+                        PedidosService.mapearParaFrontend(servico)
+                    );
+                    
+                    // Ordenar por ID (mais recentes primeiro)
+                    const servicosOrdenados = [...servicosMapeados].sort((a, b) => {
+                        const idAisNum = /^\d+$/.test(a.id);
+                        const idBisNum = /^\d+$/.test(b.id);
+                        if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
+                        if (a.id < b.id) return 1;
+                        if (a.id > b.id) return -1;
+                        return 0;
+                    });
+                    
+                    setServicos(servicosOrdenados);
+                } else {
+                    // Dados vazios ou inválidos, mas não é erro
+                    setServicos([]);
+                }
             } else {
-                setError(result.error);
-                if (result.status === 204) {
-                    setServicos([]); // Sem dados, mas não é erro
+                // Tratar status 204 e 404 como "sem dados" ao invés de erro
+                if (result.status === 204 || result.status === 404) {
+                    setServicos([]);
                     setError(null);
+                } else {
+                    // Outros erros devem ser exibidos
+                    setError(result.error || 'Erro ao carregar serviços');
+                    setServicos([]);
                 }
             }
         } catch (error) {
@@ -212,25 +223,20 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                 {loading && <SkeletonLoader count={ITEMS_PER_PAGE} />}
 
                 {!loading && error && (
-                    <div className="text-center py-10 text-red-500 bg-red-50 rounded-lg border border-red-200">
-                        <p className="font-medium">Erro ao carregar serviços</p>
-                        <p className="text-sm mt-1">{error}</p>
-                        <button 
-                            onClick={fetchData}
-                            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-                        >
-                            Tentar Novamente
-                        </button>
-                    </div>
+                    <ErrorState 
+                        error={error} 
+                        onRetry={fetchData} 
+                        entityName="serviços" 
+                    />
                 )}
 
                 {!loading && !error && pagina.length === 0 && (
-                    <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
-                        {listaFiltrada.length === 0 && servicos.length === 0 
-                            ? "Nenhum serviço cadastrado ainda." 
-                            : "Nenhum serviço encontrado com os filtros atuais."
-                        }
-                    </div>
+                    <EmptyState 
+                        hasFilters={listaFiltrada.length === 0 && servicos.length > 0}
+                        totalItems={servicos.length}
+                        entityName="serviço"
+                        entityNamePlural="serviços"
+                    />
                 )}
 
                 {!loading && !error && pagina.map((item) => (

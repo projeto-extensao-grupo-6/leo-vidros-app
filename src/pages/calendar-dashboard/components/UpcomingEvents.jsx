@@ -89,11 +89,11 @@ const UpcomingEvents = ({ events = [] }) => {
 
   if (!upcomingEvents || upcomingEvents.length === 0) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-3 lg:space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-text-primary">Próximos Eventos</h3>
+          <h3 className="font-semibold text-text-primary text-sm lg:text-base">Próximos Eventos</h3>
         </div>
-        <div className="text-center py-8 text-text-secondary text-sm">
+        <div className="text-center py-6 lg:py-8 text-text-secondary text-xs lg:text-sm">
           Nenhum evento nos próximos 7 dias
         </div>
       </div>
@@ -101,55 +101,55 @@ const UpcomingEvents = ({ events = [] }) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 lg:space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-text-primary">Próximos Eventos</h3>
-        <span className="text-xs text-text-secondary bg-muted px-2 py-1 rounded-modern">
+        <h3 className="font-semibold text-text-primary text-sm lg:text-base">Próximos Eventos</h3>
+        <span className="text-[10px] lg:text-xs text-text-secondary bg-muted px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-modern">
           {upcomingEvents.length}
         </span>
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-2 lg:space-y-3 max-h-80 lg:max-h-96 overflow-y-auto">
         {upcomingEvents?.map((event) => (
           <div
             key={event?.id}
-            className={`bg-card border border-hairline rounded-modern p-3 hover:shadow-soft transition-micro cursor-pointer group border-l-4 ${getPriorityColor(event?.statusAgendamento)}`}
+            className={`bg-card border border-hairline rounded-modern p-2 lg:p-3 hover:shadow-soft transition-micro cursor-pointer group border-l-4 ${getPriorityColor(event?.statusAgendamento)}`}
           >
-            <div className="flex items-start space-x-3">
-              <div className="shrink-0 mt-1">
-                <div className="w-8 h-8 bg-muted rounded-modern flex items-center justify-center">
+            <div className="flex items-start space-x-2 lg:space-x-3">
+              <div className="shrink-0 mt-0.5 lg:mt-1">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-muted rounded-modern flex items-center justify-center">
                   <Icon 
                     name={getEventIcon(event?.tipoAgendamento)} 
-                    size={16} 
-                    className="text-text-secondary" 
+                    size={14} 
+                    className="text-text-secondary lg:w-4 lg:h-4" 
                   />
                 </div>
               </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-medium text-text-primary truncate">
+                  <h4 className="text-xs lg:text-sm font-medium text-text-primary truncate">
                     {event?.title || event?.tipoAgendamento}
                   </h4>
-                  <span className="text-xs text-text-secondary shrink-0 ml-2">
+                  <span className="text-[10px] lg:text-xs text-text-secondary shrink-0 ml-2">
                     {getDateLabel(event?.date)}
                   </span>
                 </div>
                 
-                <div className="flex items-center space-x-3 text-xs text-text-secondary mb-2">
-                  <div className="flex items-center space-x-1">
-                    <Icon name="Clock" size={12} />
+                <div className="flex items-center space-x-2 lg:space-x-3 text-[10px] lg:text-xs text-text-secondary mb-1.5 lg:mb-2">
+                  <div className="flex items-center space-x-0.5 lg:space-x-1">
+                    <Icon name="Clock" size={10} className="lg:w-3 lg:h-3" />
                     <span>{event?.startTime}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <Icon name="Timer" size={12} />
+                  <div className="flex items-center space-x-0.5 lg:space-x-1">
+                    <Icon name="Timer" size={10} className="lg:w-3 lg:h-3" />
                     <span>{calculateDuration(event?.startTime, event?.endTime)}</span>
                   </div>
                 </div>
                 
                 {event?.endereco?.rua && (
-                  <div className="flex items-center space-x-1 text-xs text-text-secondary mb-2">
-                    <Icon name="MapPin" size={12} />
+                  <div className="flex items-center space-x-0.5 lg:space-x-1 text-[10px] lg:text-xs text-text-secondary mb-1.5 lg:mb-2">
+                    <Icon name="MapPin" size={10} className="lg:w-3 lg:h-3" />
                     <span className="truncate">
                       {event?.endereco?.rua}, {event?.endereco?.numero}
                     </span>
@@ -157,8 +157,8 @@ const UpcomingEvents = ({ events = [] }) => {
                 )}
                 
                 {event?.funcionarios?.length > 0 && (
-                  <div className="flex items-center space-x-1 text-xs text-text-secondary">
-                    <Icon name="Users" size={12} />
+                  <div className="flex items-center space-x-0.5 lg:space-x-1 text-[10px] lg:text-xs text-text-secondary">
+                    <Icon name="Users" size={10} className="lg:w-3 lg:h-3" />
                     <span className="truncate">
                       {event?.funcionarios?.slice(0, 2)?.join(', ')}
                       {event?.funcionarios?.length > 2 && ` +${event?.funcionarios?.length - 2}`}
@@ -167,17 +167,17 @@ const UpcomingEvents = ({ events = [] }) => {
                 )}
               </div>
               
-              <button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-muted rounded-modern transition-micro">
-                <Icon name="MoreVertical" size={14} />
+              <button className="opacity-0 group-hover:opacity-100 p-0.5 lg:p-1 hover:bg-muted rounded-modern transition-micro">
+                <Icon name="MoreVertical" size={12} className="lg:w-3.5 lg:h-3.5" />
               </button>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="pt-3 border-t border-hairline">
-        <button className="w-full flex items-center justify-center space-x-2 p-2 text-sm text-primary hover:bg-primary/10 rounded-modern transition-micro">
-          <Icon name="Calendar" size={16} />
+      <div className="pt-2 lg:pt-3 border-t border-hairline">
+        <button className="w-full flex items-center justify-center space-x-1.5 lg:space-x-2 p-1.5 lg:p-2 text-xs lg:text-sm text-primary hover:bg-primary/10 rounded-modern transition-micro">
+          <Icon name="Calendar" size={14} className="lg:w-4 lg:h-4" />
           <span>Ver Calendário Completo</span>
         </button>
       </div>

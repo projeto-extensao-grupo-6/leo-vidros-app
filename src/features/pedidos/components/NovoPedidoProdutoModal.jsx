@@ -712,7 +712,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                             </div>
 
                             {formData.produtos.length === 0 ? (
-                                <div className="flex gap-2 items-center justify-center py-4 bg-gray-50 rounded-md border-2 border-dashed border-gray-300">
+                                <div className="flex flex-col gap-2 items-center justify-center py-4 bg-gray-50 rounded-md border-2 border-dashed border-gray-300">
                                     <Package className="w-8 h-8 mx-auto text-gray-400 mb-3" />
                                     <p className="text-gray-600 font-semibold">Nenhum produto adicionado:</p>
                                     <p className="text-md text-gray-500 mt-1">

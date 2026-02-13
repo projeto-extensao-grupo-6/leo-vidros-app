@@ -257,12 +257,12 @@ export default function Acesso() {
               </div>
 
               <div className="mb-4 border-b border-gray-200">
-                  <nav className="mt-4 flex space-x-6" aria-label="Tabs">
+                  <nav className="pt-4 flex " aria-label="Tabs">
                       {['Pendentes', 'Aprovados', 'Recusados'].map((tab) => (
                       <button
                           key={tab}
                           onClick={() => changeTab(tab)}
-                          className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-lg transition-colors duration-150 ease-in-out focus:outline-none
+                          className={`whitespace-nowrap py-3 px-1 border-b-2 font-small text-md transition-colors duration-150 ease-in-out focus:outline-none
                             ${activeTab === tab
                                 ? 'border-[#007EA7] text-[#007EA7] bg-gray-100 rounded-t-md'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'

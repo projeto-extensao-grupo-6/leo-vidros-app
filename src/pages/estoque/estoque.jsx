@@ -14,11 +14,11 @@ import {
   ArrowRightLeft,
   Plus
 } from "lucide-react";
+import { Button } from "../../components/ui";
 import NovoProdutoModal from "../../features/estoque/components/NovoProdutoModal";
 import SucessoModal from "../../features/estoque/components/SucessoModal";
 import ExportarModal from "../../features/estoque/components/ExportarModal";
 import EstoqueItemRow from "../../features/estoque/components/EstoqueItemRow";
-import CalendarDropdown from "../../features/estoque/components/CalendarDropdown";
 import FilterDropdown from "../../features/estoque/components/FilterDropdown";
 import EntradaSaidaEstoque from "../../features/estoque/components/EntradaSaidaEstoque";
 import InativarProdutoModal from "../../features/estoque/components/InativarProdutoModal";
@@ -457,21 +457,21 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
               {/* Barra de ações */}
               <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
                 <div className="flex gap-2 w-full md:w-auto">
-                  <button
+                  <Button
                     onClick={openNewItemModal}
                     startIcon={<Plus size={18} />}
                     className="bg-[#007EA7] text-white font-semibold py-2 px-5 rounded-md hover:bg-[#006891] transition-colors flex items-center justify-center whitespace-nowrap gap-2 cursor-pointer"
                   >
                     Novo Item
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={openEntradaSaidaModal}
                     disabled={selectedItems.length === 0}
                     className="bg-blue-600 text-white font-medium py-2.5 px-5 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center whitespace-nowrap gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ArrowRightLeft className="w-4 h-4" />
                     Registrar Movimento
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="flex items-center gap-3 w-full justify-end">
@@ -493,7 +493,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
 
                     {/* Filtros avançados */}
                     <div className="relative">
-                      <button
+                      <Button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
                         className={`flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors ${
                           hasActiveFilters
@@ -508,7 +508,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                             isFilterOpen ? "rotate-180" : ""
                           }`}
                         />
-                      </button>
+                      </Button>
                       <FilterDropdown
                         isOpen={isFilterOpen}
                         onClose={() => setIsFilterOpen(false)}
@@ -564,16 +564,16 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                       <p className="mt-2 text-gray-600">Carregando...</p>
                     </div>
                   ) : renderedItems.length === 0 ? (
-                    <div className="text-center p-8 text-gray-500">
+                    <div className="flex flex-col gap-6 text-center items-center p-8 text-gray-500">
                       <Package className="w-12 h-12 mx-auto mb-2 text-gray-300" />
                       <p>Nenhum item encontrado.</p>
                       {busca && (
-                        <button
+                        <Button
                           onClick={() => setBusca("")}
                           className="mt-2 text-[#007EA7] hover:underline"
                         >
                           Limpar busca
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ) : (
@@ -606,20 +606,20 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                     resultados
                   </p>
                   <div className="flex gap-2">
-                    <button
+                    <Button
                       onClick={() => setPagina((p) => Math.max(p - 1, 1))}
                       disabled={pagina === 1}
                       className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Anterior
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setPagina((p) => Math.min(p + 1, paginationData.totalPaginas))}
                       disabled={pagina === paginationData.totalPaginas || paginationData.totalPaginas === 0}
                       className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
                       Próximo
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

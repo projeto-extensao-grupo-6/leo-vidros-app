@@ -195,7 +195,7 @@ useEffect(() => {
   const opcoesPagamento = FORMAS_PAGAMENTO_OPTIONS;
 
   return (
-    <Modal open={open} onClose={handleClose} size="md">
+    <Modal open={open} onClose={handleClose} size="xl">
       <ModalHeader>
         <div className="flex items-center gap-1.5">
           <div className="bg-gray-100 rounded-lg p-1 inline-flex items-center justify-center">
@@ -240,7 +240,7 @@ useEffect(() => {
                     label="Telefone"
                     name="contato"
                     mask="(00) 00000-0000"
-                    placeholder="(11) 91234-5678"
+                    placeholder="(11) 99999-9999"
                     value={clienteData.contato}
                     onChange={handleChange}
                     icon={<Phone size={18} />}
@@ -467,7 +467,7 @@ useEffect(() => {
 
                   <div>
                     <Button
-                      startIcon={<Plus size={18} />}
+                      startIcon={<Plus size={16} className="lg:w-[18px] lg:h-[18px] shrink-0" />}
                       onClick={handleAddServico}
                       variant="outline"
                       size="md"
@@ -482,7 +482,7 @@ useEffect(() => {
           </Stack>
         </ModalBody>
 
-        <ModalFooter className="p-2 justify-between bg-white">
+        <ModalFooter className="p-2 rounded-md justify-between bg-white">
           <Button onClick={handleClose} variant="outline">
             Cancelar
           </Button>

@@ -3,24 +3,7 @@ import { X, Check, Trash2, CheckCircle, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../../core/api/axios.config";
 import { SERVICO_ETAPAS, AGENDAMENTO_STATUS } from "../../../core/constants";
-
-const Button = ({ children, variant = "primary", size = "md", className = "", onClick, disabled, type = "button" }) => {
-  const baseClass = "inline-flex items-center justify-center rounded-md font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]";
-  const variants = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700 border border-transparent shadow-sm hover:shadow-md",
-    "btn-primary": "bg-blue-600 text-white hover:bg-blue-700 border border-transparent shadow-sm hover:shadow-md", 
-    outline: "border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 shadow-sm",
-    ghost: "hover:bg-gray-100 text-gray-500 hover:text-gray-700",
-    success: "bg-green-600 text-white hover:bg-green-700 shadow-sm",
-  };
-  const sizes = { icon: "h-10 w-10 p-2", sm: "h-8 px-3 text-xs", md: "h-10 px-4 py-2 text-sm", lg: "h-12 px-6 text-base" };
-  
-  return (
-    <button type={type} className={`${baseClass} ${variants[variant] || variants.primary} ${sizes[size]} ${className}`} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  );
-};
+import { Button } from "../../../components/ui"
 
 const Input = ({ type = "text", value, onChange, placeholder, error, maxLength, className = "", min }) => (
   <div className={`w-full ${className}`}>
@@ -793,10 +776,10 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 Cancelar
               </Button>
               <Button 
-                type="submit" 
+                type="submit"
+                variant="primary"
                 iconPosition="left" 
                 size="md" 
-                variant="btn-primary" 
                 disabled={loading}
               >
                 {loading ? "Salvando..." : step < 3 ? "Próximo" : "Finalizar Agendamento"}

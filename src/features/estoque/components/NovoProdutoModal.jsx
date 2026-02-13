@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Package, ChevronDown, Plus, X, AlertCircle } from "lucide-react";
 import apiClient from "../../../core/api/axios.config"; 
+import { Button } from "../../../components/ui"
 
 const useProductAPI = () => {
 
@@ -338,7 +339,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
           {/* Etapa 1 - Atributos */}
           {currentStep === 1 && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pb-6">
                 <div>
                   <h3 className="text-base font-semibold text-gray-900 text-left">
                     Atributos do Produto
@@ -348,18 +349,18 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                   </p>
                 </div>
 
-                <button
+                <Button
                   onClick={handleAddAtributo}
                   className="px-4 py-2 bg-[#007EA7] text-white rounded-lg shadow hover:bg-[#006891] transition-colors"
                 >
-                  <Plus className="inline-block w-4 h-4 mr-2" />
+                  <Plus size={16} className="lg:w-[18px] lg:h-[18px] shrink-0" />
                   Adicionar
-                </button>
+                </Button>
               </div>
 
               {formData.atributos.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
-                  <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                <div className="flex flex-col items-center text-center gap-6 py-16 bg-gray-50 rounded-lg border border-gray-200">
+                  <Plus size={24} className="lg:w-[18px] lg:h-[18px] shrink-0" />
                   <p className="text-sm text-gray-600">Clique em "Adicionar" para criar atributos</p>
                 </div>
               ) : (
@@ -519,15 +520,15 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
             )}
 
             {currentStep < steps.length - 1 ? (
-              <button
+              <Button
                 onClick={handleNext}
                 disabled={loading}
                 className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg hover:bg-[#006891] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Próxima Etapa
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 onClick={handleSave}
                 disabled={loading}
                 className="px-6 py-2.5 bg-[#007EA7] text-white rounded-lg hover:bg-[#006891] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -540,7 +541,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                 ) : (
                   <>{isEditing ? "Salvar Alterações" : "Salvar Produto"}</>
                 )}
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -70,7 +70,7 @@ export const Modal = ({
       {/* Modal Content */}
       <div
         className={cn(
-          "relative bg-white rounded-lg shadow-2xl w-full",
+          "relative bg-white rounded-md shadow-2xl w-full",
           "transform transition-all",
           "animate-in fade-in-0 zoom-in-95 duration-200",
           sizeClasses[size],
@@ -116,7 +116,7 @@ export const ModalBody = ({ children, className, ...props }) => (
 export const ModalFooter = ({ children, className, ...props }) => (
   <div
     className={cn(
-      "flex items-center justify-end gap-3 p-6 border-t border-gray-200",
+      "flex items-center justify-end gap-3 p-6",
       className
     )}
     {...props}
