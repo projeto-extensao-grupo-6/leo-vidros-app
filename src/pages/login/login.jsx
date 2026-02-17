@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
@@ -7,6 +6,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Button from "../../shared/components/buttons/button.component";
 import { useNavigate } from "react-router-dom"
+import Api from "../../axios/Api";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -24,35 +24,23 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
-      });
+      const response = await Api.post(
+        "/auth/login",
+        { email, senha },
+        { skipAuthRedirect: true }
+      );
 
-      console.log(response)
+      const data = response.data;
+      const { id, firstLogin, nome, email: userEmail } = data;
 
-      if (!response.ok) throw new Error("Email ou senha inválidos");
-
-      const data = await response.json();
-      const { id, token, firstLogin, nome, email: userEmail } = data;
-      console.log("Login OK:", data);
-
-      // ✅ Salvar em localStorage com a mesma chave usada no dashboard
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userId", id);
-      localStorage.setItem("userFirstLogin", String(firstLogin));
-      localStorage.setItem("loggedUserName", nome);
-      localStorage.setItem("loggedUserEmail", userEmail);
-      localStorage.setItem("nome", nome);
-
-      // Também manter em sessionStorage para compatibilidade
-      sessionStorage.setItem("accessToken", token);
+      sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("userId", id);
+      sessionStorage.setItem("userName", nome);
       sessionStorage.setItem("userFirstLogin", String(firstLogin));
-      sessionStorage.setItem("loggedUserName", nome);
-      sessionStorage.setItem("loggedUserEmail", userEmail);
-      sessionStorage.setItem("nome", nome);
+      sessionStorage.setItem("userEmail", userEmail);
+
+      localStorage.setItem("userName", nome);
+      localStorage.setItem("userFirstLogin", String(firstLogin));
 
       setModalOpen(true);
 
