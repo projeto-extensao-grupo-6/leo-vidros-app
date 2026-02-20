@@ -10,7 +10,7 @@ const useProductAPI = () => {
       const response = await apiClient.post(`/produtos`, {
         nome: produtoData.nome,
         descricao: produtoData.descricao,
-        unidademedida: produtoData.unidadeMedida,
+        unidademedida: produtoData.unidademedida,
         preco: parseFloat(produtoData.preco),
         ativo: produtoData.ativo,
         metrica: {
@@ -48,7 +48,7 @@ const useProductAPI = () => {
 const DEFAULT_FORM_DATA = {
   nome: "",
   descricao: "",
-  unidadeMedida: "Unidade",
+  unidademedida: "Unidade",
   preco: 0,
   ativo: true,
   atributos: [],
@@ -278,15 +278,15 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                   </label>
                   <div className="relative">
                     <select
-                      name="unidadeMedida"
+                      name="unidademedida"
                       className="w-full border border-gray-300 rounded-lg px-4 py-3 text-left appearance-none"
-                      value={formData.unidadeMedida}
+                      value={formData.unidademedida}
                       onChange={handleChange}
                     >
-                      <option>Unidade</option>
-                      <option>m²</option>
-                      <option>Kg</option>
-                      <option>Litro</option>
+                      <option >Unidade</option>
+                      <option value="m²">m²</option>
+                      <option value="Kg">Kg</option>
+                      <option value="Litro">Litro</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                   </div>

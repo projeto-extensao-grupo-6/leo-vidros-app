@@ -89,7 +89,7 @@ export default function Estoque() {
         id: item.produto.id,
         nome: item.produto.nome,
         descricao: item.produto.descricao || "",
-        unidademedida: item.produto.unidademedida || "unidade",
+        unidademedida: item.produto.unidademedida,
         preco: item.produto.preco ?? 0,
         ativo: item.produto.ativo ?? true,
        
@@ -518,13 +518,13 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
                     </div>
 
                     {/* Exportar */}
-                    {/* <button
+                    <Button
                       onClick={openExportModal}
                       className="flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                     >
                       <Download className="w-4 h-4" />
                       Exportar
-                    </button> */}
+                    </Button>
                   </div>
                 </div>
               </div>

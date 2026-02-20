@@ -1,12 +1,61 @@
-import React from "react";
-import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { Download, Loader2 } from "lucide-react";
+import Swal from "sweetalert2";
+import estoqueService from "../../../core/services/estoqueService";
 
 const ExportarModal = ({ isOpen, onClose }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleExportar = () => {
-    console.log("Exportando planilha...");
-    onClose();
+  const handleExportar = async () => {
+    try {
+      setIsExporting(true);
+
+      const result = await estoqueService.exportToExcel();
+
+      if (!result.success) {
+        throw new Error(result.error || "Erro ao exportar planilha");
+      }
+
+      const blob = new Blob([result.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      const dataAtual = new Date().toISOString().split("T")[0];
+      link.download = `estoque_${dataAtual}.xlsx`;
+      
+      document.body.appendChild(link);
+      link.click();
+      
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      await Swal.fire({
+        icon: "success",
+        title: "Exportação concluída!",
+        text: "A planilha foi baixada com sucesso.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Erro ao exportar planilha:", error);
+      
+      await Swal.fire({
+        icon: "error",
+        title: "Erro na exportação",
+        text: error.message || "Não foi possível exportar a planilha. Tente novamente.",
+        confirmButtonColor: "#007EA7",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleModalContentClick = (e) => {
@@ -43,15 +92,27 @@ const ExportarModal = ({ isOpen, onClose }) => {
         <div className="px-5 py-4 border-t border-gray-200 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm"
+            disabled={isExporting}
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={handleExportar}
-            className="px-4 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#006891] transition-colors font-medium text-sm"
+            disabled={isExporting}
+            className="px-4 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#006891] transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
-            Exportar Planilha
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4" />
+                Exportar Planilha
+              </>
+            )}
           </button>
         </div>
       </div>

@@ -1,5 +1,7 @@
 import { BaseService } from '../../core/services/BaseService';
 import { API_ENDPOINTS } from '../../core/api/endpoints';
+import apiClient from '../api/axios.config';
+import axios from 'axios';
 
 /**
  * Service para gerenciamento de estoque
@@ -82,6 +84,33 @@ class EstoqueService extends BaseService {
    */
   async ativar(id) {
     return this.patch(id, { ativo: true });
+  }
+
+  /**
+   * Exporta estoque para Excel via microservice
+   * Fluxo: Frontend → Microservice (GET /api/excel/export/estoque) → Monolith → gera .xlsx → download
+   * @returns {Promise} Promise com blob do arquivo Excel
+   */
+  async exportToExcel() {
+    try {
+      const microserviceUrl = import.meta.env.VITE_MICROSERVICE_EXCEL_URL;
+      const token = sessionStorage.getItem('accessToken');
+      
+      const response = await axios.get(`${microserviceUrl}/excel/export/estoque`, {
+        responseType: 'blob',
+        headers: {
+          'Authorization': token ? `Bearer ${token}` : undefined
+        }
+      });
+      
+      return {
+        success: true,
+        data: response.data,
+        status: response.status
+      };
+    } catch (error) {
+      return this.handleError(error, 'exportar planilha de estoque');
+    }
   }
 }
 
