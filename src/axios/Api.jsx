@@ -1,19 +1,14 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
 
 const Api = axios.create({
   baseURL: BACKEND_URL,
+  withCredentials: true, 
 });
 
 Api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  
-  // Garantir que o Content-Type seja definido para requisições POST/PUT
   if (config.method === 'post' || config.method === 'put') {
     if (!config.headers['Content-Type']) {
       config.headers['Content-Type'] = 'application/json';
@@ -26,7 +21,6 @@ Api.interceptors.request.use((config) => {
 Api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Permite que algumas requisições não redirecionem automaticamente
     const skipRedirect = error.config?.skipAuthRedirect;
     
     if ((error.response?.status === 401 || error.response?.status === 403) && !skipRedirect) {
@@ -42,6 +36,8 @@ Api.interceptors.response.use(
       });
 
       sessionStorage.clear();
+      localStorage.clear();
+      
       setTimeout(() => (window.location.href = "/login"), 2500);
     }
 
