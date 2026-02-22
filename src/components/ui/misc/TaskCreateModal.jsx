@@ -132,33 +132,45 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [selectedFuncionarios, setSelectedFuncionarios] = useState([]);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingFuncionarios, setLoadingFuncionarios] = useState(false);
   const [useExistingAddress, setUseExistingAddress] = useState(true);
   const [savedAddress, setSavedAddress] = useState(null);
   const [clienteInfo, setClienteInfo] = useState(null);
 
-  const fetchFuncionarios = useCallback(async (tipoValue) => {
-    if (!tipoValue) {
+  const fetchFuncionariosDisponiveis = useCallback(async (data, inicio, fim, tipoValue) => {
+    if (!data || !inicio || !fim) {
       setFuncionariosOptions([]);
       return;
     }
+    setLoadingFuncionarios(true);
     try {
-      if (tipoValue === "ORCAMENTO") {
-        try {
-          const response = await Api.get("/funcionarios/1");
-          const data = Array.isArray(response.data) ? response.data : [response.data];
-          setFuncionariosOptions(data.map(f => ({ value: f.id, label: f.nome })));
-        } catch (error) {
-          setFuncionariosOptions([{ value: 1, label: "Leandro (Técnico)" }]);
-        }
-        return;
-      }
-      const response = await Api.get("/funcionarios");
-      setFuncionariosOptions(response.data.map((func) => ({ value: func.id, label: func.nome })));
+      const fmtTime = (t) => {
+        if (!t) return "00:00:00";
+        const parts = t.split(":");
+        return `${(parts[0] || "00").padStart(2, "0")}:${(parts[1] || "00").padStart(2, "0")}:00`;
+      };
+      const response = await Api.get("/funcionarios/disponiveis", {
+        params: { data, inicio: fmtTime(inicio), fim: fmtTime(fim) },
+      });
+      const disponiveis = response.data || [];
+      setFuncionariosOptions(disponiveis.map((func) => ({ value: func.id, label: func.nome })));
     } catch (error) {
-      console.error("Erro ao buscar funcionários:", error);
-      setFuncionariosOptions([]);
+      console.error("Erro ao buscar funcionários disponíveis:", error);
+      try {
+        const response = await Api.get("/funcionarios");
+        setFuncionariosOptions(response.data.map((func) => ({ value: func.id, label: func.nome })));
+      } catch (fallbackError) {
+        setFuncionariosOptions([]);
+      }
+    } finally {
+      setLoadingFuncionarios(false);
     }
-  }, [navigate]);
+  }, []);
+
+  const fetchFuncionarios = useCallback(async (tipoValue) => {
+    // Não busca funcionários sem data/hora — será buscado pelo useEffect quando o usuário preencher
+    setFuncionariosOptions([]);
+  }, []);
 
   const fetchOpcoesPedido = useCallback(async (tipoValue) => {
     if (!tipoValue) { 
@@ -311,11 +323,22 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
     }
   }, [navigate]);
 
+  // Auto-busca funcionários disponíveis quando data, hora início ou hora fim mudam
+  useEffect(() => {
+    const tipoValue = formData?.tipoAgendamento?.value || formData?.tipoAgendamento;
+    if (tipoValue && formData?.eventDate && formData?.startTime && formData?.endTime) {
+      setSelectedFuncionarios([]);
+      fetchFuncionariosDisponiveis(formData.eventDate, formData.startTime, formData.endTime, tipoValue);
+    } else {
+      setFuncionariosOptions([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData?.eventDate, formData?.startTime, formData?.endTime]);
+
   const handleTypeChange = (selectedOption) => {
     const typeValue = selectedOption?.value || selectedOption;
     setFormData((prev) => ({ ...prev, tipoAgendamento: selectedOption, pedido: null }));
     setSelectedFuncionarios([]);
-    fetchFuncionarios(typeValue);
     fetchOpcoesPedido(typeValue);
   };
 
@@ -507,6 +530,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       if (!formData?.eventDate?.trim()) newErrors.eventDate = "* Obrigatória";
       if (!formData?.startTime?.trim()) newErrors.startTime = "* Obrigatório";
       if (!formData?.endTime?.trim()) newErrors.endTime = "* Obrigatório";
+      if (!selectedFuncionarios || selectedFuncionarios.length === 0) newErrors.funcionarios = "* Selecione pelo menos um funcionário";
     }
     if (currentStep === 2) {
       if (!formData?.rua?.trim()) newErrors.rua = "* Rua obrigatória";
@@ -534,14 +558,14 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       const tipoValor = formData.tipoAgendamento?.value || formData.tipoAgendamento;
       
       const funcionariosPayload = await Promise.all(
-        selectedFuncionarios.map(async (id) => {
+        selectedFuncionarios.map(async (funcId) => {
           try {
-            const response = await Api.get(`/funcionarios/${id}`);
+            const response = await Api.get(`/funcionarios/${funcId}`);
             const func = response.data;
-            return { nome: func.nome || "", telefone: func.telefone || "", funcao: func.funcao || "", contrato: func.contrato || "", escala: func.escala || "", status: func.status !== undefined ? func.status : true };
+            return { id: func.id, nome: func.nome || "", telefone: func.telefone || "", funcao: func.funcao || "", contrato: func.contrato || "", escala: func.escala || "", status: func.status !== undefined ? func.status : true };
           } catch (error) {
-            const funcEncontrado = funcionariosOptions.find(f => f.value === id);
-            return { nome: funcEncontrado?.label || "Funcionário", telefone: "", funcao: "", contrato: "", escala: "", status: true };
+            const funcEncontrado = funcionariosOptions.find(f => f.value === funcId);
+            return { id: funcId, nome: funcEncontrado?.label || "Funcionário", telefone: "", funcao: "", contrato: "", escala: "", status: true };
           }
         })
       );
@@ -637,7 +661,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       setTimeout(() => { onClose(); }, 1500);
     } catch (error) {
       console.error("Submit Error:", error);
-      setErrors({ submit: "Erro ao salvar agendamento. Verifique os dados." });
+      const backendMsg = error?.response?.data?.message;
+      setErrors({ submit: backendMsg || "Erro ao salvar agendamento. Verifique os dados." });
     } finally { setLoading(false); }
   };
 
@@ -774,10 +799,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Funcionários responsáveis</label>
-                <MultipleSelectCheckmarks placeholder="Selecione os funcionários" options={funcionariosOptions} value={selectedFuncionarios} onChange={setSelectedFuncionarios} />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="flex flex-col items-center">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Data do evento <span className="text-red-500">*</span></label>
@@ -791,6 +812,21 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                     <Input type="time" value={formData?.endTime} onChange={(e) => handleInputChange("endTime", e?.target?.value)} error={errors?.endTime} className="!w-[100px] text-center [&::-webkit-calendar-picker-indicator]:hidden appearance-none" />
                   </div>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Funcionários disponíveis <span className="text-red-500">*</span></label>
+                {(!formData?.eventDate || !formData?.startTime || !formData?.endTime) ? (
+                  <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3 flex items-center gap-2">
+                    <span>⚠️</span> Preencha a data e o horário acima para ver os funcionários disponíveis.
+                  </p>
+                ) : loadingFuncionarios ? (
+                  <p className="text-sm text-blue-600 animate-pulse p-3">Buscando funcionários disponíveis...</p>
+                ) : funcionariosOptions.length === 0 ? (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">Nenhum funcionário disponível neste horário.</p>
+                ) : (
+                  <MultipleSelectCheckmarks placeholder="Selecione os funcionários" options={funcionariosOptions} value={selectedFuncionarios} onChange={setSelectedFuncionarios} />
+                )}
+                {errors?.funcionarios && <span className="text-xs text-red-500 mt-1 block font-medium">{errors.funcionarios}</span>}
               </div>
             </>
           )}
