@@ -4,9 +4,10 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Button from "../../shared/components/buttons/button.component";
+import Button from "../../components/ui/Button/Button.component";
 import { useNavigate } from "react-router-dom"
-import Api from "../../axios/Api";
+import Api from "../../api/client/Api";
+import { useUser } from "../../context/UserContext.jsx";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -16,6 +17,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useUser();
 
 
   const handleLogin = async (e) => {
@@ -33,14 +35,8 @@ function Login() {
       const data = response.data;
       const { id, firstLogin, nome, email: userEmail } = data;
 
-      sessionStorage.setItem("isAuthenticated", "true");
-      sessionStorage.setItem("userId", id);
-      sessionStorage.setItem("userName", nome);
-      sessionStorage.setItem("userFirstLogin", String(firstLogin));
-      sessionStorage.setItem("userEmail", userEmail);
-
-      localStorage.setItem("userName", nome);
-      localStorage.setItem("userFirstLogin", String(firstLogin));
+      // Popula o UserContext (que persiste no sessionStorage internamente)
+      login({ id, nome, email: userEmail, firstLogin });
 
       setModalOpen(true);
 
@@ -50,7 +46,7 @@ function Login() {
         if (data.firstLogin === true || data.firstLogin === "true") {
           navigate(`/primeiroAcesso/${data.id}`);
         } else {
-          navigate("/paginaInicial");
+          navigate("/pagina-inicial");
         }
       }, 2000);
 
@@ -187,7 +183,7 @@ function Login() {
                 <button
                   type="button"
                   className="text-sm text-[#007EA7] hover:text-[#005f73] transition cursor-pointer"
-                  onClick={() => navigate("/esqueceuSenha")}
+                  onClick={() => navigate("/esqueceu-senha")}
                 >
                   Esqueceu sua senha?
                 </button>
@@ -218,7 +214,7 @@ function Login() {
                 Ainda não tem uma conta?{" "}
                 <button
                   type="button"
-                  onClick={() => (window.location.href = "/cadastro")}
+                  onClick={() => (window.location.href = "/Cadastro")}
                   className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
                 >
                   Cadastre-se

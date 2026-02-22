@@ -41,7 +41,7 @@ import {
   LoadingState,
   ErrorMessage,
 } from "./EventModalComponents";
-import EditarAgendamentoSimples from "../../../shared/components/pedidosServicosComponents/EditarAgendamentoSimples";
+import EditarAgendamentoSimples from "../../pedidos/components/EditarAgendamentoSimples";
 
 // --- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ---
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, isDeleting }) => {
@@ -683,7 +683,7 @@ const CalendarView = ({
                 endereco.rua, endereco.numero, endereco.complemento,
                 endereco.bairro, endereco.cidade, endereco.uf, endereco.cep
               ].filter(Boolean);
-              navigate("/geoLocalizacao", { state: { address: addressParts.join(", ") } });
+              navigate("/geo-localizacao", { state: { address: addressParts.join(", ") } });
             }}
             onEventDeleted={onEventDeleted}
             onEdit={handleEditEvent}

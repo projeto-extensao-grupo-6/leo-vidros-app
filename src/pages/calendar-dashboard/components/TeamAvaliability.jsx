@@ -1,6 +1,6 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
+import Icon from '../../../components/ui/misc/AppIcon';
+import Image from '../../../components/ui/misc/AppImage';
 
 const TeamAvailability = () => {
   const teamMembers = [

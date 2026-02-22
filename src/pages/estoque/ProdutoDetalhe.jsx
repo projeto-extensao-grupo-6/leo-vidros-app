@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Package, TrendingUp, TrendingDown, Edit2, Check, ChevronDown, ChevronUp, Plus, X, Eye } from 'lucide-react';
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
-import MovimentacaoDetalheModal from "../../shared/components/modalEstoque/MovimentacaoDetalheModal";
-import Api from '../../axios/Api.jsx';
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
+import MovimentacaoDetalheModal from "./components/ModalEstoque/MovimentacaoDetalheModal";
+import Api from '../../api/client/Api';
+import { formatCurrency } from '../../utils/formatters';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -67,7 +68,7 @@ export default function ProductDetailPage() {
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
         alert('Erro ao carregar produto');
-        navigate('/estoque');
+        navigate('/Estoque');
       } finally {
         setLoading(false);
       }
@@ -242,14 +243,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  const formatCurrency = (value) => {
-    if (typeof value !== 'number') value = 0;
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
   const EditableField = ({ field, value, type = 'text', prefix = '', suffix = '', isProductField = false, isMetric = false }) => {
     const isEditing = editing[field];
 
@@ -291,7 +284,7 @@ export default function ProductDetailPage() {
   };
 
   const handleBack = () => {
-    navigate('/estoque');
+    navigate('/Estoque');
   };
 
   // Funções para controlar o modal de detalhes da movimentação
@@ -347,7 +340,7 @@ export default function ProductDetailPage() {
     ? 'from-yellow-500 to-yellow-600 border-yellow-700' 
     : 'from-green-500 to-green-600 border-green-700';
 
-  const totalValue = estoque.quantidadeTotal * produto.preco;
+  const totalValue = (estoque?.quantidadeTotal ?? 0) * (produto?.preco ?? 0);
 
   return (
     <div className="flex bg-gray-50 min-h-screen">
@@ -356,8 +349,8 @@ export default function ProductDetailPage() {
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <div className="pt-20 lg:pt-20" />
 
-        <main className="flex-1 p-4 md:p-8">
-          <div className="max-w-[1800px] mx-auto">
+        <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10">
+          <div className="w-full max-w-[1380px]">
             {/* Botão Voltar */}
             <div className="flex items-center justify-between mb-6 cursor-pointer">
               <button 
@@ -705,7 +698,7 @@ export default function ProductDetailPage() {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-center">
                               <button
                                 onClick={() => handleOpenMovimentacaoModal(movimento)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                                className="inline-flex items-center gap-1/5 px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
                               >
                                 <Eye className="w-3 h-3" />
                                 Ver Detalhe

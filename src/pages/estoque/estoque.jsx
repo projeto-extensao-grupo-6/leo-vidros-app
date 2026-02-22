@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import Api from "../../axios/Api";
+import { usePagination } from '../../hooks/usePagination';
+import Api from "../../api/client/Api";
 import { useLocation, useNavigate } from "react-router-dom";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import {
   Package,
   Search,
@@ -12,14 +13,15 @@ import {
   ChevronDown,
   ArrowRightLeft,
 } from "lucide-react";
-import NovoProdutoModal from "../../shared/components/modalEstoque/NovoProdutoModal";
-import SucessoModal from "../../shared/components/modalEstoque/SucessoModal";
-import ExportarModal from "../../shared/components/modalEstoque/ExportarModal";
-import EstoqueItemRow from "../../shared/components/modalEstoque/EstoqueItemRow";
-import CalendarDropdown from "../../shared/components/estoque/CalendarDropdown";
-import FilterDropdown from "../../shared/components/estoque/FilterDropdown";
-import EntradaSaidaEstoque from "../../shared/components/modalEstoque/EntradaSaidaEstoque";
-import InativarProdutoModal from "../../shared/components/modalEstoque/InativarProdutoModal";
+import NovoProdutoModal from "./components/ModalEstoque/NovoProdutoModal";
+import SucessoModal from "./components/ModalEstoque/SucessoModal";
+import ExportarModal from "./components/ModalEstoque/ExportarModal";
+import EstoqueItemRow from "./components/ModalEstoque/EstoqueItemRow";
+import CalendarDropdown from "./components/EstoqueList/CalendarDropdown";
+import FilterDropdown from "./components/EstoqueList/FilterDropdown";
+import EntradaSaidaEstoque from "./components/ModalEstoque/EntradaSaidaEstoque";
+import InativarProdutoModal from "./components/ModalEstoque/InativarProdutoModal";
+import { formatCurrency, parseCurrency } from "../../utils/formatters";
 
 const ITENS_POR_PAGINA = 6;
 
@@ -42,7 +44,6 @@ export default function Estoque() {
   const [selectedFilterDate, setSelectedFilterDate] = useState(null);
   const [activeFilters, setActiveFilters] = useState({});
  
-  const [pagina, setPagina] = useState(1);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [expandedItemId, setExpandedItemId] = useState(null);
@@ -57,18 +58,6 @@ export default function Estoque() {
   
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => !prev);
-  }, []);
-
-  const formatCurrency = useCallback((value) => {
-    if (typeof value !== "number") value = 0;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  }, []);
-
-  const parseCurrency = useCallback((value) => {
-    return parseFloat(String(value).replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
   }, []);
 
   const toYYYYMMDD = useCallback((date) => {
@@ -147,7 +136,7 @@ export default function Estoque() {
     }
 
     if (selectedFilterDate) {
-      console.log("Filtro de data selecionado:", selectedFilterDate);
+      // filtro de data disponível para implementação futura
     }
 
     const situacaoFilters = activeFilters.situacao || [];
@@ -185,20 +174,23 @@ export default function Estoque() {
   }, [estoque, busca, selectedFilterDate, activeFilters]);
 
   
-  const paginationData = useMemo(() => {
-    const totalPaginas = Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA);
-    const paginaAtual = Math.min(pagina, totalPaginas) || 1;
-    const startIndex = (paginaAtual - 1) * ITENS_POR_PAGINA;
-    const endIndex = startIndex + ITENS_POR_PAGINA;
-    
-    return {
-      items: filteredEstoque.slice(startIndex, endIndex),
-      totalPaginas,
-      startIndex,
-      endIndex: Math.min(endIndex, filteredEstoque.length),
-      total: filteredEstoque.length
-    };
-  }, [filteredEstoque, pagina]);
+  const {
+    page: pagina,
+    setPage: setPagina,
+    paginated: paginaItems,
+    totalPages: totalPaginasHook,
+    startIndex,
+    endIndex,
+    total,
+  } = usePagination(filteredEstoque, ITENS_POR_PAGINA);
+
+  const paginationData = {
+    items: paginaItems,
+    totalPaginas: totalPaginasHook,
+    startIndex,
+    endIndex,
+    total,
+  };
   
   useEffect(() => {
     if (focusItemId && filteredEstoque.length > 0 && focusItemId !== expandedItemId) {
@@ -264,27 +256,24 @@ const handleSaveItem = useCallback(async (itemData) => {
 
 // Novo callback para lidar com o sucesso do modal de produto
 const handleProductSuccess = useCallback(async (savedProduct) => {
-  console.log("Produto salvo com sucesso:", savedProduct);
-  
   // Recarregar o estoque para mostrar o novo produto
   await fetchEstoque();
-  
+
   // Fechar modal e mostrar sucesso
   setIsNovoItemModalOpen(false);
   setIsSuccessModalOpen(true);
-  
+
   setTimeout(() => {
     setIsSuccessModalOpen(false);
   }, 3000);
 }, [fetchEstoque]);
 
   const handleViewDetails = useCallback((estoqueId) => {
-    console.log("🔍 Navegando para estoque ID:", estoqueId);
     if (!estoqueId) {
       console.error("Erro: ID do estoque é undefined!");
       return;
     }
-    navigate(`/estoque/${estoqueId}`);
+    navigate(`/Estoque/${estoqueId}`);
   }, [navigate]);
 
   const handleSaveMovement = useCallback(async (itemIds, movementData) => {
@@ -448,11 +437,11 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
       
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="pt-20 lg:pt-80px" />
+        <div className="pt-20" />
 
-        <main className="flex-1 item-center p-4 md:p-8">
+        <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10 gap-6">
           {/* Cabeçalho */}
-          <div className="text-center mb-8 px-2 w-full max-w-[1600px]">
+          <div className="text-center w-full max-w-[1380px] mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2 flex items-center justify-center gap-2">
               Controle de Estoque
             </h1>
@@ -461,7 +450,7 @@ const handleProductSuccess = useCallback(async (savedProduct) => {
             </p>
           </div>
 
-          <div className="flex max-w-[1800px] mx-auto pt-10 flex-col gap-6">
+          <div className="w-full max-w-[1380px] mx-auto flex flex-col gap-6">
             
             {/* Tabela de Estoque */}
             <div className="flex flex-col gap-6 bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">

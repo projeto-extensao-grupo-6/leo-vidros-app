@@ -43,12 +43,6 @@ export const useAgendamentoNotifications = (agendamentos = []) => {
 
       // Notificar se falta 5 minutos ou menos, ou se já começou (mas não passou mais de 30 minutos)
       if (minutesUntilStart <= 5 && minutesUntilStart >= -30) {
-        console.log('🔔 Notificação de agendamento:', {
-          id: agendamento.id,
-          minutesUntilStart,
-          time: `${startHours}:${String(startMinutes).padStart(2, '0')}`
-        });
-
         setCurrentNotification(agendamento);
         setNotifiedAgendamentos(prev => new Set([...prev, agendamento.id]));
         

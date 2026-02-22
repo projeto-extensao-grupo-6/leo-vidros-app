@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { getEventDate } from "../utils/eventHelpers";
-import Api from "../../../axios/Api";
+import Api from "../../../api/client/Api";
 
 export const useEventDetails = (initialEvent) => {
   const [details, setDetails] = useState(initialEvent || null);
@@ -15,8 +15,8 @@ export const useEventDetails = (initialEvent) => {
       setLoading(true);
       setError(null);
       try {
-        console.log("🔍 Buscando detalhes do agendamento ID:", initialEvent.id);
-        const response = await Api.get(`/agendamentos/${initialEvent.id}`);
+
+        const response = await Api.get(`/Agendamentos/${initialEvent.id}`);
         const apiData = response.data;
         
         // Mesclar dados da API com dados processados do initialEvent
@@ -50,21 +50,16 @@ export const useDeleteAgendamento = (onSuccess) => {
   const [deleting, setDeleting] = useState(false);
 
   const deleteAgendamento = async (id) => {
-    console.log("🗑️ Tentando excluir Agendamento ID:", id);
-
     if (!id) {
         console.error("❌ Erro: ID inválido ou undefined fornecido para exclusão.");
         alert("Erro interno: ID do agendamento não encontrado.");
         return false;
     }
-    
+
     setDeleting(true);
     try {
-      // Tenta deletar no endpoint de agendamentos
-      const response = await Api.delete(`/agendamentos/${id}`);
-      
-      console.log("✅ Sucesso na exclusão. Status:", response.status);
-      
+      const response = await Api.delete(`/Agendamentos/${id}`);
+
       if (onSuccess) {
           onSuccess(id);
       }

@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useModal } from '../../hooks/useModal';
+import { usePagination } from '../../hooks/usePagination';
 import { FaBox, FaTrash, FaExclamationTriangle } from 'react-icons/fa';
 import { BiSolidPencil } from "react-icons/bi";
-import SkeletonLoader from '../../shared/components/skeleton/SkeletonLoader';
-import NovoPedidoProdutoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoProdutoModal';
-import EditarPedidoModal from '../../shared/components/pedidosServicosComponents/EditarPedidoModal';
-import PedidosService from '../../services/pedidosService';
+import SkeletonLoader from '../../components/feedback/Skeleton/SkeletonLoader';
+import NovoPedidoProdutoModal from './components/NovoPedidoProdutoModal';
+import EditarPedidoModal from './components/EditarPedidoModal';
+import PedidosService from '../../api/services/pedidosService';
+import { usePedidosProduto, useDeletarPedido } from '../../hooks/queries/usePedidos';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -28,20 +32,6 @@ function StatusBadge({ status }) {
     return <span className={styles[status] || styles.Ativo}>{status}</span>;
 }
 
-const formatCurrency = (value) => {
-    if (typeof value !== "number") value = 0;
-    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-};
-
-const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    try {
-        return new Date(dateString + 'T00:00:00').toLocaleDateString("pt-BR");
-    } catch (e) {
-        return 'Data inválida';
-    }
-}
-
 const formatPedidoId = (id) => {
     if (!id) return '';
     const idString = String(id);
@@ -52,75 +42,30 @@ const formatPedidoId = (id) => {
 }
 
 export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoRegistroHandled, statusFilter, paymentFilter }) {
-    const [pedidos, setPedidos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [page, setPage] = useState(1);
-    const [modal, setModal] = useState({ confirm: false, view: false, form: false, novo: false, editar: false });
+    // ─── TanStack Query ────────────────────────────────────────────
+    const {
+        data: pedidos = [],
+        isLoading: loading,
+        isError,
+        error: queryError,
+        refetch,
+    } = usePedidosProduto();
+
+    const deletarMutation = useDeletarPedido();
+
+    const { modal, open: openModal, closeAll: fecharTodos } = useModal(['confirm', 'view', 'form', 'novo', 'editar']);
     const [mode, setMode] = useState("new");
     const [current, setCurrent] = useState(null);
     const [targetId, setTargetId] = useState(null);
     const [form, setForm] = useState(NOVO_FORM_PEDIDO());
     const [errors, setErrors] = useState({});
 
-    const fetchData = async () => {
-        setLoading(true);
-        setError(null);
-        
-        try {
-            const result = await PedidosService.buscarPedidosDeProduto();
-            
-            if (result.success) {
-            
-                const pedidosMapeados = result.data.map(pedido => 
-                    PedidosService.mapearParaFrontend(pedido)
-                );
-                
-            
-                const pedidosOrdenados = [...pedidosMapeados].sort((a, b) => {
-                    const idAisNum = /^\d+$/.test(a.id);
-                    const idBisNum = /^\d+$/.test(b.id);
-                    if (idAisNum && idBisNum) return parseInt(b.id, 10) - parseInt(a.id, 10);
-                    if (a.id < b.id) return 1;
-                    if (a.id > b.id) return -1;
-                    return 0;
-                });
-                
-                setPedidos(pedidosOrdenados);
-            } else {
-                setError(result.error);
-                if (result.status === 204) {
-                    setPedidos([]); 
-                    setError(null);
-                }
-            }
-        } catch (error) {
-            console.error('Erro inesperado ao buscar pedidos de produto:', error);
-            setError('Erro inesperado ao carregar pedidos de produto');
-            setPedidos([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
     useEffect(() => {
         if (triggerNovoRegistro) {
-            setModal((m) => ({ ...m, novo: true }));
+            openModal('novo');
             onNovoRegistroHandled();
         }
     }, [triggerNovoRegistro, onNovoRegistroHandled]);
-
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, []);
 
 
     const listaFiltrada = useMemo(() => {
@@ -131,69 +76,40 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         });
     }, [busca, pedidos, statusFilter, paymentFilter]);
 
-    const totalPages = Math.max(1, Math.ceil(listaFiltrada.length / ITEMS_PER_PAGE));
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const pagina = useMemo(() => listaFiltrada.slice(start, end), [listaFiltrada, start, end]);
-
-    useEffect(() => {
-        if (page > totalPages && totalPages > 0) setPage(totalPages);
-        else if (page === 0 && totalPages > 0) setPage(1);
-    }, [totalPages, page, listaFiltrada]);
-
-    const proxima = () => page < totalPages && setPage((p) => p + 1);
-    const anterior = () => page > 1 && setPage((p) => p - 1);
-
-    const fecharTodos = () => setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
+    const {
+        page,
+        setPage,
+        paginated: pagina,
+        totalPages,
+        next: proxima,
+        prev: anterior,
+    } = usePagination(listaFiltrada, ITEMS_PER_PAGE);
 
     const abrirEditar = (item) => {
         setCurrent(item);
-        setModal((m) => ({ ...m, editar: true }));
+        openModal('editar');
     };
 
     const abrirConfirmarExclusao = (id) => {
         setTargetId(id);
-        setModal((m) => ({ ...m, confirm: true }));
+        openModal('confirm');
     };
 
     const confirmarExclusao = async () => {
         if (!targetId) return;
-        
-        try {
-            const result = await PedidosService.deletarPedido(targetId);
-            
-            if (result.success) {
-               
-                setPedidos(pedidos.filter(p => p.id !== targetId));
-                fecharTodos();
-                
-                
-                console.log('Pedido excluído com sucesso');
-            } else {
-                console.error('Erro ao excluir pedido:', result.error);
-                alert(`Erro ao excluir pedido: ${result.error}`);
-            }
-        } catch (error) {
-            console.error('Erro inesperado ao excluir pedido:', error);
-            alert('Erro inesperado ao excluir pedido. Tente novamente.');
-        }
+        deletarMutation.mutate(targetId, {
+            onSuccess: () => fecharTodos(),
+            onError: (err) => alert(`Erro ao excluir pedido: ${err.message}`),
+        });
     };
 
-    const handleNovoPedidoSuccess = async (novoPedido) => {
-        
-        await fetchData();
+    const handleNovoPedidoSuccess = () => {
+        // TanStack Query invalida o cache automaticamente via onSuccess do hook
         setPage(1);
-        console.log('Pedido criado com sucesso');
     };
 
-    const handleEditarPedidoSuccess = async () => {
-        try {
-            // Recarregar os dados do servidor após edição bem-sucedida
-            await fetchData();
-            console.log('Pedido atualizado com sucesso');
-        } catch (error) {
-            console.error('Erro inesperado ao recarregar pedidos:', error);
-        }
+    const handleEditarPedidoSuccess = () => {
+        // TanStack Query invalida o cache automaticamente via onSuccess do hook
     };
 
     return (
@@ -201,12 +117,12 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             <div className="flex flex-col gap-4 w-full py-4">
                 {loading && <SkeletonLoader count={ITEMS_PER_PAGE} />}
 
-                {!loading && error && (
+                {!loading && isError && (
                     <div className="text-center py-10 text-red-500 bg-red-50 rounded-lg border border-red-200">
                         <p className="font-medium">Erro ao carregar pedidos</p>
-                        <p className="text-sm mt-1">{error}</p>
+                        <p className="text-sm mt-1">{queryError?.message}</p>
                         <button 
-                            onClick={fetchData}
+                            onClick={() => refetch()}
                             className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
                         >
                             Tentar Novamente
@@ -214,7 +130,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                     </div>
                 )}
 
-                {!loading && !error && pagina.length === 0 && (
+                {!loading && !isError && pagina.length === 0 && (
                     <div className="text-center py-10 text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                         {listaFiltrada.length === 0 && pedidos.length === 0 
                             ? "Nenhum pedido cadastrado ainda." 
@@ -223,7 +139,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                     </div>
                 )}
 
-                {!loading && !error && pagina.map((item) => (
+                {!loading && !isError && pagina.map((item) => (
                     <article key={item.id} className={`flex flex-col gap-4 rounded-lg border p-5 w-full shadow-sm transition-all hover:shadow-md ${item.status === 'Finalizado' ? "bg-gray-50 border-gray-200 opacity-60" : "bg-white border-slate-200"}`}>
                         {/* HEADER DO CARD */}
                         <header className="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -303,7 +219,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
             </div>
 
             {/* Paginação */}
-            {!loading && !error && listaFiltrada.length > 0 && (
+            {!loading && !isError && listaFiltrada.length > 0 && (
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
                     <div className="text-sm text-slate-500">
                         Mostrando <span className="font-medium text-slate-800">{start + 1}</span> a <span className="font-medium text-slate-800">{Math.min(end, listaFiltrada.length)}</span> de {listaFiltrada.length}

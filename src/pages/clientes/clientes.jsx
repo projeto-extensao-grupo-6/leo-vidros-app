@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import {
   Search,
   Download,
@@ -9,32 +9,10 @@ import {
   Eye,
   UserPlus,
 } from "lucide-react";
-import ClienteFormModal from "../../shared/components/clienteComponents/ClienteFormModal";
-import ClienteDetailsModal from "../../shared/components/clienteComponents/ClienteDetailsModal";
-import Api from "../../axios/Api";
-
-const formatCurrency = (value) => {
-  if (value == null || isNaN(value)) return "R$ 0,00";
-  return `R$ ${parseFloat(value).toFixed(2).replace(".", ",")}`;
-};
-
-const formatPhone = (phoneStr) => {
-  if (!phoneStr) return "N/A";
-  const cleaned = phoneStr.replace(/\D/g, "");
-  if (cleaned.length === 11) {
-    return `(${cleaned.substring(0, 2)}) ${cleaned.substring(
-      2,
-      7
-    )}-${cleaned.substring(7, 11)}`;
-  }
-  if (cleaned.length === 10) {
-    return `(${cleaned.substring(0, 2)}) ${cleaned.substring(
-      2,
-      6
-    )}-${cleaned.substring(6, 10)}`;
-  }
-  return phoneStr;
-};
+import ClienteFormModal from "./components/ClienteFormModal";
+import ClienteDetailsModal from "./components/ClienteDetailsModal";
+import Api from "../../api/client/Api";
+import { formatCurrency, formatPhone } from "../../utils/formatters";
 
 const getPrimaryAddress = (cliente) => {
   if (!cliente.enderecos || !Array.isArray(cliente.enderecos) || cliente.enderecos.length === 0) {
@@ -257,11 +235,11 @@ export default function Clientes() {
       
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="pt-20 lg:pt-80px" />
+        <div className="pt-20" />
 
-        <main className="flex-1 item-center p-4 md:p-8">
+        <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10 gap-6">
           {/* Cabeçalho */}
-          <div className="text-center mb-8 px-2 w-full max-w-[1600px]">
+          <div className="text-center w-full max-w-[1380px] mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2 flex items-center justify-center gap-2">
               Clientes
             </h1>
@@ -270,7 +248,7 @@ export default function Clientes() {
             </p>
           </div>
 
-          <div className="flex max-w-[1800px] mx-auto pt-10 flex-col gap-6">
+          <div className="w-full max-w-[1380px] mx-auto flex flex-col gap-6">
             {/* Tabela de Clientes */}
             <div className="flex flex-col gap-6 bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
               {/* Barra de ações */}

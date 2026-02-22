@@ -1,7 +1,7 @@
 import React from 'react';
 import { format, addDays, isToday, isTomorrow, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import Icon from '../../../shared/components/AppIcon';
+import Icon from '../../../components/ui/misc/AppIcon';
 
 const UpcomingEvents = ({ events = [] }) => {
   // Filtrar e ordenar eventos futuros (próximos 7 dias)

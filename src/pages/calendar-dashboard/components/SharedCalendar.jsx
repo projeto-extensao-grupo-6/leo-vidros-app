@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Icon from '../../../shared/components/AppIcon';
+import Icon from '../../../components/ui/misc/AppIcon';
 
 
 const SharedCalendarList = ({ onCalendarToggle }) => {

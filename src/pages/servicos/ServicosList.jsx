@@ -1,10 +1,13 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { useModal } from '../../hooks/useModal';
+import { usePagination } from '../../hooks/usePagination';
 import { FaWrench, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { BiSolidPencil } from "react-icons/bi";
-import SkeletonLoader from "../../shared/components/skeleton/SkeletonLoader";
-import NovoPedidoServicoModal from '../../shared/components/pedidosServicosComponents/NovoPedidoServicoModal';
-import EditarServicoModal from "../../shared/components/pedidosServicosComponents/EditarServicoModal";
-import PedidosService from '../../services/pedidosService';
+import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
+import NovoPedidoServicoModal from '../pedidos/components/NovoPedidoServicoModal';
+import EditarServicoModal from "../pedidos/components/EditarServicoModal";
+import PedidosService from '../../api/services/pedidosService';
+import { formatDate } from '../../utils/formatters';
 
 function StatusPill({ status }) {
     const styles = {
@@ -61,8 +64,7 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [page, setPage] = useState(1);
-    const [modal, setModal] = useState({ confirm: false, view: false, form: false, novo: false, editar: false });
+    const { modal, open: openModal, closeAll } = useModal(['confirm', 'view', 'form', 'novo', 'editar']);
     const [mode, setMode] = useState("new");
     const [current, setCurrent] = useState(null);
     const [targetId, setTargetId] = useState(null);
@@ -125,27 +127,10 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
 
     useEffect(() => {
         if (triggerNovoRegistro) {
-            setModal((m) => ({ ...m, novo: true }));
+            openModal('novo');
             onNovoRegistroHandled();
         }
     }, [triggerNovoRegistro, onNovoRegistroHandled]);
-
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.key === "Escape") setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
-        };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, []);
-
-    const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        try {
-            return new Date(dateString + 'T00:00:00').toLocaleDateString("pt-BR");
-        } catch (e) {
-            return 'Data inválida';
-        }
-    }
 
     // Lógica de Filtragem usando o serviço
     const listaFiltrada = useMemo(() => {
@@ -156,32 +141,28 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         });
     }, [busca, servicos, statusFilter, etapaFilter]);
 
-    const totalPages = Math.max(1, Math.ceil(listaFiltrada.length / ITEMS_PER_PAGE));
-    const start = (page - 1) * ITEMS_PER_PAGE;
-    const end = start + ITEMS_PER_PAGE;
-    const pagina = useMemo(() => listaFiltrada.slice(start, end), [listaFiltrada, start, end]);
-
-    useEffect(() => {
-        if (page > totalPages && totalPages > 0) setPage(totalPages);
-        else if (page === 0 && totalPages > 0) setPage(1);
-    }, [totalPages, page, listaFiltrada]);
-
-    const proxima = () => page < totalPages && setPage((p) => p + 1);
-    const anterior = () => page > 1 && setPage((p) => p - 1);
+    const {
+        page,
+        setPage,
+        paginated: pagina,
+        totalPages,
+        next: proxima,
+        prev: anterior,
+    } = usePagination(listaFiltrada, ITEMS_PER_PAGE);
 
     const fecharTodos = () => {
-        setModal({ confirm: false, view: false, form: false, novo: false, editar: false });
-        setCurrent(null); // Limpa o current ao fechar
+        closeAll();
+        setCurrent(null);
     };
 
     const abrirEditar = (item) => {
         setCurrent(item);
-        setModal((m) => ({ ...m, editar: true }));
+        openModal('editar');
     };
 
     const abrirConfirmarExclusao = (id) => {
         setTargetId(id);
-        setModal((m) => ({ ...m, confirm: true }));
+        openModal('confirm');
     };
 
     const confirmarExclusao = async () => {
@@ -194,7 +175,6 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                 // Remove o serviço da lista local
                 setServicos(servicos.filter(s => s.id !== targetId));
                 fecharTodos();
-                console.log('Serviço excluído com sucesso');
             } else {
                 console.error('Erro ao excluir serviço:', result.error);
                 alert(`Erro ao excluir serviço: ${result.error}`);
@@ -209,19 +189,14 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
         // O modal já salvou o serviço na API, apenas recarregar a lista
         await fetchData();
         setPage(1);
-        console.log('Serviço criado com sucesso');
     };
 
     const handleEditarServicoSuccess = async (servicoAtualizado) => {
-        console.log('📥 Serviço atualizado recebido:', servicoAtualizado);
-        
         // Atualiza o objeto current IMEDIATAMENTE com os dados recebidos
         setCurrent(servicoAtualizado);
-        
+
         // Recarrega a lista completa do backend
         await fetchData();
-        
-        console.log('✅ Serviço e lista atualizados com sucesso');
     };
 
     return (

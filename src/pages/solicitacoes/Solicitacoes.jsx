@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import { Search, Check, X, CheckCheck, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import ModalConfirmacao from "../../shared/components/modalAceiteOrRecusa/ModalAceiteOrRecusa";
-import Api from "../../axios/Api";
+import ModalConfirmacao from "../pedidos/components/ModalAceiteOrRecusa/ModalAceiteOrRecusa";
+import Api from "../../api/client/Api";
+import { StatusSolicitacao, StatusSolicitacaoMap } from "../../types/enums";
 
 const ITENS_POR_PAGINA = 10;
 
@@ -29,13 +30,7 @@ export default function Acesso() {
   async function fetchSolicitacoes() {
     setLoading(true);
     try {
-      const statusMap = {
-        'Pendentes': 'PENDENTE',
-        'Aprovados': 'ACEITO',
-        'Recusados': 'RECUSADO'
-      };
-  
-      const statusAtual = statusMap[activeTab];
+      const statusAtual = StatusSolicitacaoMap[activeTab];
       let url;
   
       if (busca.trim()) {
@@ -60,23 +55,18 @@ export default function Acesso() {
     const promises = ids.map(async (id) => {
       try {
         if (novoStatus === 'Aprovado') {
-          // Para aprovar, usa PUT com o status
-          console.log(`Enviando PUT para /solicitacoes/aceitar/${id} com body:`, { status: 'ACEITO' });
-          const response = await Api.put(`/solicitacoes/aceitar/${id}`, 
-            { status: 'ACEITO' },
+          const response = await Api.put(`/solicitacoes/aceitar/${id}`,
+            { status: StatusSolicitacao.ACEITO },
             {
               headers: {
                 'Content-Type': 'application/json'
               }
             }
           );
-          console.log('Resposta do aceitar:', response);
           return response.data;
         } else {
           // Para recusar, usa DELETE
-          console.log(`Enviando DELETE para /solicitacoes/recusar/${id}`);
           const response = await Api.delete(`/solicitacoes/recusar/${id}`);
-          console.log('Resposta do recusar:', response);
           return response.data;
         }
       } catch (error) {
@@ -165,13 +155,7 @@ export default function Acesso() {
   }
 
   const filteredSolicitacoes = useMemo(() => {
-    const statusMap = {
-      'Pendentes': 'PENDENTE',
-      'Aprovados': 'ACEITO',
-      'Recusados': 'RECUSADO'
-    };
-    
-    const statusAtual = statusMap[activeTab];
+    const statusAtual = StatusSolicitacaoMap[activeTab];
     let items = solicitacoes.filter(
       s => s.status?.nome?.toUpperCase() === statusAtual.toUpperCase()
     );
@@ -215,8 +199,8 @@ export default function Acesso() {
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <div className="h-[80px]" />
 
-        <main className="flex-1 p-8">
-          <div className="flex flex-col gap-10 max-w-[1800px] mx-auto">
+        <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10 gap-6">
+          <div className="w-full max-w-[1380px] flex flex-col gap-8">
 
             <div className="mb-10 text-center">
               <h1 className="text-3xl font-bold text-gray-800">Controle de acesso</h1>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import { Search, Edit, Trash2 } from "lucide-react";
 
-import FuncionarioForm from "../../shared/components/modalFuncionarios/FuncionarioForm";
-import DeleteFuncionario from "../../shared/components/modalFuncionarios/DeleteFuncionario";
-import Api from "../../axios/Api";
+import FuncionarioForm from "./components/ModalFuncionarios/FuncionarioForm";
+import DeleteFuncionario from "./components/ModalFuncionarios/DeleteFuncionario";
+import Api from "../../api/client/Api";
 
 export default function Funcionarios() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -126,11 +126,11 @@ export default function Funcionarios() {
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
-        <div className="pt-20 lg:pt-80px" />
+        <div className="pt-20" />
 
-        <main className="flex flex-col gap-10 flex-1 p-4 md:p-8">
+        <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10 gap-6">
           {/* Cabeçalho */}
-          <div className="text-center mb-8 px-2">
+          <div className="text-center w-full max-w-[1380px] mx-auto">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-gray-800 mb-2">
               Controle de Funcionários
             </h1>
@@ -139,7 +139,7 @@ export default function Funcionarios() {
             </p>
           </div>
 
-          <div className="max-w-[1800px] mx-auto">
+          <div className="w-full max-w-[1380px] mx-auto">
             <div className="flex flex-col gap-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4 md:p-6">
               {/* Barra de ações */}
               <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
