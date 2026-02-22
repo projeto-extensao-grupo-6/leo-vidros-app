@@ -10,17 +10,11 @@ import {
   getQtdServicosHoje,
 } from '../../api/services/dashboardService';
 
-/**
- * Extrai o campo `.data` de respostas do BaseService e lança em caso de erro.
- * Permite ao TanStack Query distinguir sucesso de falha corretamente.
- */
 const unwrap = (field, fallback) => async (fetcher) => {
   const res = await fetcher();
   if (!res.success) throw new Error(res.error ?? 'Erro ao carregar dados');
   return field ? (res.data?.[field] ?? fallback) : (res.data ?? fallback);
 };
-
-// ─── Hooks individuais ────────────────────────────────────────────────────────
 
 export function useQtdAgendamentosHoje(options = {}) {
   return useQuery({
@@ -91,10 +85,6 @@ export function useQtdServicosHoje(options = {}) {
   });
 }
 
-/**
- * Hook agregado — carrega todos os KPIs do dashboard em paralelo.
- * Retorna um único objeto com todos os valores e um `isLoading` combinado.
- */
 export function useDashboardKpis() {
   const qtdAgendamentosHoje = useQtdAgendamentosHoje();
   const qtdAgendamentosFuturos = useQtdAgendamentosFuturos();

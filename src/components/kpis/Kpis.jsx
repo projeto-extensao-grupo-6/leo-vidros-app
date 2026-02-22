@@ -1,10 +1,5 @@
 import React from "react";
 
-/**
- * Grid de cartões de KPI do dashboard.
- *
- * @param {{ stats: Array<{ title: string, value: string|number, icon?: React.ComponentType, caption?: string }> }} props
- */
 export default function Kpis({ stats = [] }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 w-full">

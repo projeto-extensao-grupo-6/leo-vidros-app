@@ -2,8 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../api/queryKeys';
 import { agendamentosService } from '../../api/services/agendamentosService';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const unwrapList = async (promise) => {
   const res = await promise;
   if (!res.success) throw new Error(res.error ?? 'Erro ao carregar agendamentos');
@@ -16,11 +14,6 @@ const unwrapOne = async (promise) => {
   return res.data ?? null;
 };
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
-
-/**
- * Lista todos os agendamentos.
- */
 export function useAgendamentos(options = {}) {
   return useQuery({
     queryKey: queryKeys.agendamentos.list(),
@@ -29,9 +22,6 @@ export function useAgendamentos(options = {}) {
   });
 }
 
-/**
- * Detalhes de um agendamento por ID.
- */
 export function useAgendamento(id, options = {}) {
   return useQuery({
     queryKey: queryKeys.agendamentos.detail(id),
@@ -41,11 +31,6 @@ export function useAgendamento(id, options = {}) {
   });
 }
 
-// ─── Mutations ────────────────────────────────────────────────────────────────
-
-/**
- * Cria um novo agendamento e invalida o cache da listagem.
- */
 export function useCriarAgendamento(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -58,9 +43,6 @@ export function useCriarAgendamento(options = {}) {
   });
 }
 
-/**
- * Atualiza um agendamento e invalida o cache da listagem e do item.
- */
 export function useAtualizarAgendamento(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -74,9 +56,6 @@ export function useAtualizarAgendamento(options = {}) {
   });
 }
 
-/**
- * Remove um agendamento e invalida o cache.
- */
 export function useDeletarAgendamento(options = {}) {
   const qc = useQueryClient();
   return useMutation({

@@ -1,9 +1,3 @@
-/**
- * Dropdown de seleção único ou múltiplo no estilo Shadcn/ui.
- * Suporta busca, limpeza e é compatível com React Hook Form via `React.forwardRef`.
- *
- * @param {{ options: Array<{label: string, value: any}>, value: any, onChange: (val: any) => void, multiple?: boolean, searchable?: boolean, clearable?: boolean, placeholder?: string, disabled?: boolean, label?: string, error?: string }} props
- */
 import React, { useState } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../../utils/cn";
@@ -34,10 +28,8 @@ const Select = React.forwardRef(({
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Generate unique ID if not provided
     const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
 
-    // Filter options based on search
     const filteredOptions = searchable && searchTerm
         ? options?.filter(option =>
             option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
@@ -45,7 +37,6 @@ const Select = React.forwardRef(({
         )
         : options;
 
-    // Get selected option(s) for display
     const getSelectedDisplay = () => {
         if (!value) return placeholder;
 
@@ -162,7 +153,7 @@ const Select = React.forwardRef(({
                 <select
                     name={name}
                     value={value || ''}
-                    onChange={() => { }} // Controlled by our custom logic
+                    onChange={() => { }} 
                     className="sr-only"
                     tabIndex={-1}
                     multiple={multiple}

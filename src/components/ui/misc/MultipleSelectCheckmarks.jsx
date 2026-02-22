@@ -1,9 +1,3 @@
-/**
- * Dropdown de seleção múltipla com suporte a busca, seleção de todos e limite de exibição.
- * Compatível com React Hook Form via `React.forwardRef`.
- *
- * @param {{ options: Array<{label: string, value: any}>, value: any[], onChange: (vals: any[]) => void, searchable?: boolean, clearable?: boolean, showSelectAll?: boolean, maxDisplayItems?: number, placeholder?: string, disabled?: boolean, label?: string, error?: string }} props
- */
 import React, { useState } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../../utils/cn";
@@ -35,10 +29,8 @@ const MultipleSelectCheckmarks = React.forwardRef(({
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Generate unique ID if not provided
     const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
 
-    // Filter options based on search
     const filteredOptions = searchable && searchTerm
         ? options?.filter(option =>
             option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
@@ -46,7 +38,6 @@ const MultipleSelectCheckmarks = React.forwardRef(({
         )
         : options;
 
-    // Get selected option(s) for display
     const getSelectedDisplay = () => {
         const selectedOptions = options?.filter(opt => value?.includes(opt?.value));
         
@@ -85,14 +76,12 @@ const MultipleSelectCheckmarks = React.forwardRef(({
             availableOptions?.some(opt => opt?.value === v)
         );
         
-        // If all filtered options are selected, deselect them
         if (currentFilteredSelected?.length === availableOptions?.length) {
             const updatedValue = value?.filter(v => 
                 !allValues?.includes(v)
             );
             onChange?.(updatedValue);
         } else {
-            // Select all filtered options
             const updatedValue = [...new Set([...value, ...allValues])];
             onChange?.(updatedValue);
         }

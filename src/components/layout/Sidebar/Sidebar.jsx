@@ -14,12 +14,6 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../../../assets/logo/logo-sidebar.png";
 
-/**
- * Sidebar de navegação lateral com animação de entrada/saída (Framer Motion).
- * Exibe um overlay escurecido ao abrir e fecha ao clicar fora ou no botão de fechar.
- *
- * @param {{ sidebarOpen: boolean, setSidebarOpen: (open: boolean) => void }} props
- */
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const location = useLocation();
   const navigate = useNavigate();

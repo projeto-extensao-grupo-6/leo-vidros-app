@@ -1,6 +1,5 @@
 @import url(/src/styles/css/colors.css);
 
-/* ---------- Linha base do conector ---------- */
 .qonto-connector-line {
   border-top-width: 3px;
   border-radius: 1px;
@@ -10,7 +9,6 @@
   overflow: hidden;
 }
 
-/* ---------- Barra animada ---------- */
 .qonto-connector-line::after {
   content: "";
   position: absolute;
@@ -18,18 +16,16 @@
   left: 0;
   height: 100%;
   width: 0%;
-  background-color: var(--button-color); /* sua cor principal */
+  background-color: var(--button-color);
   transition: width 0.6s ease-in-out;
 }
 
-/* ---------- Quando ativo ou completo, anima preenchimento ---------- */
 .qonto-connector-line-active::after,
 .qonto-connector-line-completed::after {
   width: 100%;
   background-color: var(--button-color);
 }
 
-/* ---------- Step icon ---------- */
 .qonto-step-icon {
   color: #eaeaf0;
   display: flex;

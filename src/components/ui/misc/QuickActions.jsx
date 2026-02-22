@@ -1,7 +1,3 @@
-/**
- * Botão de ações rápidas flutuante (FAB) com menu expansível.
- * Permite criar tarefas rápidas e navegar para áreas principais da aplicação.
- */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../Button/Button.component';

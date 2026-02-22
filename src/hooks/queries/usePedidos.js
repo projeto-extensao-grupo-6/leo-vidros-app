@@ -2,8 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../../api/queryKeys';
 import PedidosService from '../../api/services/pedidosService';
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-
 const sortById = (lista) =>
   [...lista].sort((a, b) => {
     const aNum = /^\d+$/.test(String(a.id));
@@ -12,11 +10,7 @@ const sortById = (lista) =>
     return String(b.id) < String(a.id) ? -1 : 1;
   });
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
 
-/**
- * Lista todos os pedidos de produto (já mapeados para o formato frontend).
- */
 export function usePedidosProduto(options = {}) {
   return useQuery({
     queryKey: queryKeys.pedidos.produtos(),
@@ -30,9 +24,6 @@ export function usePedidosProduto(options = {}) {
   });
 }
 
-/**
- * Lista todos os pedidos de serviço (já mapeados para o formato frontend).
- */
 export function usePedidosServico(options = {}) {
   return useQuery({
     queryKey: queryKeys.pedidos.servicos(),
@@ -46,9 +37,6 @@ export function usePedidosServico(options = {}) {
   });
 }
 
-/**
- * Detalhe de um pedido por ID.
- */
 export function usePedido(id, options = {}) {
   return useQuery({
     queryKey: queryKeys.pedidos.detail(id),
@@ -62,11 +50,6 @@ export function usePedido(id, options = {}) {
   });
 }
 
-// ─── Mutations ────────────────────────────────────────────────────────────────
-
-/**
- * Cria um novo pedido e invalida o cache.
- */
 export function useCriarPedido(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -78,9 +61,6 @@ export function useCriarPedido(options = {}) {
   });
 }
 
-/**
- * Atualiza um pedido e invalida o cache do item e da listagem.
- */
 export function useAtualizarPedido(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -93,9 +73,6 @@ export function useAtualizarPedido(options = {}) {
   });
 }
 
-/**
- * Remove um pedido e invalida o cache.
- */
 export function useDeletarPedido(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -108,9 +85,6 @@ export function useDeletarPedido(options = {}) {
   });
 }
 
-/**
- * Atualiza um serviço e invalida o cache.
- */
 export function useAtualizarServico(options = {}) {
   const qc = useQueryClient();
   return useMutation({
@@ -123,9 +97,6 @@ export function useAtualizarServico(options = {}) {
   });
 }
 
-/**
- * Remove um serviço e invalida o cache.
- */
 export function useDeletarServico(options = {}) {
   const qc = useQueryClient();
   return useMutation({

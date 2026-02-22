@@ -1,10 +1,6 @@
 import React from "react";
 import "./inputText.component.css";
 
-/**
- * Componente de input de texto padronizado.
- * Suporta label, ícone, mensagem de erro, disabled e todas as props nativas do <input>.
- */
 const InputText = React.forwardRef(function InputText(
   {
     id,

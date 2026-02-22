@@ -1,10 +1,5 @@
 import React from "react";
 
-/**
- * Boundary de erros React que captura exceções em qualquer componente filho.
- * Exibe uma tela de fallback amigável no lugar da árvore que falhou,
- * evitando que erros não tratados derrubem toda a aplicação.
- */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

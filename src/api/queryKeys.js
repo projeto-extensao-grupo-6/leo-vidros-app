@@ -1,19 +1,4 @@
-/**
- * Fábrica centralizada de Query Keys para o TanStack Query.
- *
- * Padrão de chaves hierárquicas:
- *   ['dominio']                  → coleção inteira (ex: invalidar tudo de pedidos)
- *   ['dominio', 'lista']         → listagem paginada/filtrada
- *   ['dominio', 'detalhe', id]   → entidade individual
- *   ['dominio', 'subrecurso']    → sub-recurso específico
- *
- * Uso:
- *   queryKeys.pedidos.all()          → ['pedidos']
- *   queryKeys.pedidos.list()         → ['pedidos', 'lista']
- *   queryKeys.pedidos.detail(42)     → ['pedidos', 'detalhe', 42]
- */
 export const queryKeys = {
-  // ─── Dashboard ─────────────────────────────────────────────────────────────
   dashboard: {
     all: () => ['dashboard'],
     qtdAgendamentosHoje: () => ['dashboard', 'qtdAgendamentosHoje'],
@@ -25,14 +10,12 @@ export const queryKeys = {
     qtdServicosHoje: () => ['dashboard', 'qtdServicosHoje'],
   },
 
-  // ─── Agendamentos ──────────────────────────────────────────────────────────
   agendamentos: {
     all: () => ['agendamentos'],
     list: () => ['agendamentos', 'lista'],
     detail: (id) => ['agendamentos', 'detalhe', id],
   },
 
-  // ─── Pedidos ───────────────────────────────────────────────────────────────
   pedidos: {
     all: () => ['pedidos'],
     list: () => ['pedidos', 'lista'],
@@ -42,7 +25,6 @@ export const queryKeys = {
     byEtapa: (etapa) => ['pedidos', 'etapa', etapa],
   },
 
-  // ─── Serviços ──────────────────────────────────────────────────────────────
   servicos: {
     all: () => ['servicos'],
     list: () => ['servicos', 'lista'],

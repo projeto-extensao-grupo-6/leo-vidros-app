@@ -1,9 +1,3 @@
-/**
- * Card de notificação de um agendamento com ações rápidas.
- * Exibe o tempo restante para o início e botões para reagendar, cancelar ou iniciar.
- *
- * @param {{ agendamento: object, onReagendar: (ag: object) => Promise<void>, onCancelar: (ag: object) => Promise<void>, onIniciar: (ag: object) => Promise<void>, onClose: () => void }} props
- */
 import React, { useState } from "react";
 import { Calendar, Clock, X, RefreshCw, XCircle, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

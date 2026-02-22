@@ -1,23 +1,16 @@
-/**
- * Configuração centralizada das rotas da aplicação.
- *
- * Rotas públicas  → acessíveis sem autenticação (login, cadastro, esqueceu-senha).
- * Rotas privadas → envolvidas por <ProtectedRoute>, que redireciona para /Login
- *                  quando o usuário não está autenticado.
- */
 import { createBrowserRouter } from 'react-router-dom';
 import ProtectedRoute from '../contexts/ProtectedRoute.jsx';
-import Login from '../pages/login/Login.jsx';
-import Cadastro from '../pages/cadastro/Cadastro.jsx';
+import Login from '../pages/login/login.jsx';
+import Cadastro from '../pages/cadastro/cadastro.jsx';
 import PaginaInicial from '../pages/pagina-inicial/PaginaInicial.jsx';
-import Funcionarios from '../pages/funcionarios/Funcionarios.jsx';
-import Clientes from '../pages/clientes/Clientes.jsx';
-import Estoque from '../pages/estoque/Estoque.jsx';
+import Funcionarios from '../pages/funcionarios/funcionarios.jsx';
+import Clientes from '../pages/clientes/clientes.jsx';
+import Estoque from '../pages/estoque/estoque.jsx';
 import ProdutoDetalhe from '../pages/estoque/ProdutoDetalhe.jsx';
-import Pedidos from '../pages/pedidos/Pedidos.jsx';
+import Pedidos from '../pages/pedidos/pedidos.jsx';
 import Solicitacoes from '../pages/solicitacoes/Solicitacoes.jsx';
 import CalendarDashboard from '../pages/calendar-dashboard/index.jsx';
-import Perfil from '../pages/perfil/Perfil.jsx';
+import Perfil from '../pages/perfil/perfil.jsx';
 import MapContainer from '../pages/geo-localizacao/MapContainer.jsx';
 import NovaSenha from '../pages/nova-senha/NovaSenha.jsx';
 import EsqueceuSenha from '../pages/esqueceu-senha/EsqueceuSenha.jsx';

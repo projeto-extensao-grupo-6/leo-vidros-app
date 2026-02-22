@@ -1,23 +1,8 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import DefaultAvatar from '../assets/Avatar.jpg';
 
-/**
- * UserContext — fonte única de verdade para os dados do utilizador autenticado.
- *
- * Substitui o anti-pattern de ler sessionStorage diretamente + window.addEventListener
- * no Header e dispersar window.dispatchEvent / window.updateHeaderUserInfo pelo Perfil.
- *
- * Expõe:
- *   user       → { id, name, email, photo, isAuthenticated }
- *   login(data)    → popula o estado após autenticação
- *   logout()       → limpa estado e sessionStorage
- *   updatePhoto(b64) → persiste foto no localStorage e atualiza o estado
- *   clearPhoto()    → remove foto do localStorage e reseta para o avatar padrão
- */
-
 const UserContext = createContext(null);
 
-/** Lê o estado inicial a partir do storage (suporte a refresh de página) */
 function readInitialState() {
   const id    = sessionStorage.getItem('userId')    ?? localStorage.getItem('userId')    ?? null;
   const name  = sessionStorage.getItem('userName')  ?? localStorage.getItem('userName')  ?? '';
@@ -31,9 +16,7 @@ function readInitialState() {
 export function UserProvider({ children }) {
   const [user, setUser] = useState(readInitialState);
 
-  /** Chamado após login bem-sucedido */
   const login = useCallback(({ id, nome, email, firstLogin }) => {
-    // Mantém o storage para compatibilidade com ProtectedRoute que ainda lê sessionStorage
     sessionStorage.setItem('isAuthenticated', 'true');
     sessionStorage.setItem('userId', String(id));
     sessionStorage.setItem('userName', nome);
@@ -46,13 +29,11 @@ export function UserProvider({ children }) {
     setUser({ id: String(id), name: nome, email, isAuthenticated: true, photo });
   }, []);
 
-  /** Chamado ao fazer logout */
   const logout = useCallback(() => {
     sessionStorage.clear();
     setUser({ id: null, name: '', email: '', isAuthenticated: false, photo: null });
   }, []);
 
-  /** Atualiza a foto do utilizador (base64 ou URL) */
   const updatePhoto = useCallback((base64) => {
     setUser(prev => {
       if (prev.id) {
@@ -62,7 +43,6 @@ export function UserProvider({ children }) {
     });
   }, []);
 
-  /** Remove a foto e volta ao avatar padrão */
   const clearPhoto = useCallback(() => {
     setUser(prev => {
       if (prev.id) {
@@ -72,7 +52,6 @@ export function UserProvider({ children }) {
     });
   }, []);
 
-  /** Atualiza campos do utilizador (name, email, etc.) */
   const updateUser = useCallback((fields) => {
     setUser(prev => {
       const updated = { ...prev, ...fields };
@@ -94,11 +73,6 @@ export function UserProvider({ children }) {
   );
 }
 
-/**
- * Hook de conveniência — lança erro se usado fora do UserProvider.
- *
- * @returns {{ user, login, logout, updatePhoto, clearPhoto, DefaultAvatar }}
- */
 export function useUser() {
   const ctx = useContext(UserContext);
   if (!ctx) {

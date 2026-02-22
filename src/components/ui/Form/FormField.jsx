@@ -1,28 +1,5 @@
 import React from 'react';
 
-/**
- * Componente de campo de formulário integrado com React Hook Form.
- *
- * Recebe `register` ou pode ser usado como wrapper simples com `error`.
- * A prop `registration` aceita o retorno de `register('fieldName')`.
- *
- * @example
- * // Uso básico com RHF
- * <FormField
- *   id="nome"
- *   label="Nome"
- *   required
- *   registration={register('nome')}
- *   error={errors.nome}
- *   placeholder="Ex: João Silva"
- * />
- *
- * @example
- * // Uso com campo customizado (Controller)
- * <FormField id="cep" label="CEP" error={errors.cep}>
- *   <Controller ... render={...} />
- * </FormField>
- */
 export default function FormField({
   id,
   label,

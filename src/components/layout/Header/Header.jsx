@@ -24,12 +24,6 @@ import Logo from "../../../assets/logo/logo.png";
 import DefaultAvatar from '../../../assets/Avatar.jpg';
 import { useUser } from '../../../context/UserContext.jsx';
 
-/**
- * Barra de navegação superior fixa da aplicação.
- * Exibe o logo, botão de toggle da sidebar e o menu suspenso do perfil do usuário.
- *
- * @param {{ toggleSidebar: () => void, sidebarOpen: boolean }} props
- */
 export default function Header({ toggleSidebar, sidebarOpen }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);

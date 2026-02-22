@@ -1,7 +1,3 @@
-/**
- * Cabeçalho da área do calendário com navegação, notificações e perfil do usuário.
- * Utilizado exclusivamente pelo módulo de agenda (calendar-dashboard).
- */
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from './AppIcon';

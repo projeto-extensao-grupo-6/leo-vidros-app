@@ -4,12 +4,6 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 
-/**
- * Modal informativo exibido após o cadastro do usuário,
- * informando que o acesso depende de aprovação do administrador.
- *
- * @param {{ open: boolean, onClose: () => void }} props
- */
 export default function ApprovalPendingModal({ open, onClose }) {
 
   return (

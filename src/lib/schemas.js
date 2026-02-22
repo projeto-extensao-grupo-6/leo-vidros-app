@@ -1,15 +1,4 @@
-/**
- * Schemas Zod centralizados para validação de formulários.
- *
- * Todos os schemas exportam:
- *   - O schema Zod  (para usar com zodResolver no RHF ou safeParse standalone)
- *   - O tipo TypeScript inferido (comentado por ser projeto JS — útil como referência)
- *
- * Padrão de mensagens em PT-BR para exibição direta no formulário.
- */
 import { z } from 'zod';
-
-// ─── Primitivos reutilizáveis ─────────────────────────────────────────────────
 
 const cpfRaw = z
   .string()
@@ -34,8 +23,6 @@ const ufField = z
   .optional()
   .default('');
 
-// ─── Endereço ─────────────────────────────────────────────────────────────────
-
 export const enderecoSchema = z.object({
   cep: cepRaw,
   rua: z.string().min(1, 'Rua é obrigatória'),
@@ -47,7 +34,6 @@ export const enderecoSchema = z.object({
   pais: z.string().optional().default('Brasil'),
 });
 
-/** Schema flexível para endereço em edição (todos os campos opcionais) */
 export const enderecoOpcionalSchema = z.object({
   cep: cepRaw,
   rua: z.string().optional().default(''),
@@ -58,8 +44,6 @@ export const enderecoOpcionalSchema = z.object({
   uf: ufField,
   pais: z.string().optional().default('Brasil'),
 });
-
-// ─── Cliente ──────────────────────────────────────────────────────────────────
 
 export const clienteSchema = z.object({
   nome: z
@@ -75,7 +59,6 @@ export const clienteSchema = z.object({
     .optional()
     .default(''),
   status: z.enum(['Ativo', 'Inativo']).default('Inativo'),
-  // campos de endereço no mesmo nível (desnormalizado no form)
   cep: cepRaw,
   rua: z.string().optional().default(''),
   numero: z.union([z.string(), z.number()]).optional().default(''),
@@ -85,10 +68,6 @@ export const clienteSchema = z.object({
   uf: ufField,
 });
 
-/**
- * Schema do payload enviado ao backend após transformação do clienteSchema.
- * Usado com `.transform()` no handleSubmit do ClienteFormModal.
- */
 export const clientePayloadSchema = clienteSchema.transform((data) => ({
   nome: data.nome,
   cpf: data.cpf || undefined,
@@ -109,9 +88,6 @@ export const clientePayloadSchema = clienteSchema.transform((data) => ({
   ],
 }));
 
-// ─── Pedido de Produto — validação por etapa ──────────────────────────────────
-
-/** Etapa 0 — seleção de cliente */
 export const pedidoProdutoEtapa0Schema = z
   .object({
     tipoCliente: z.enum(['existente', 'novo', 'nenhum']),
@@ -143,21 +119,16 @@ const itemProdutoSchema = z.object({
   subtotal: z.number({ coerce: true }).optional().default(0),
 });
 
-/** Etapa 1 — lista de produtos */
 export const pedidoProdutoEtapa1Schema = z.object({
   produtos: z
     .array(itemProdutoSchema)
     .min(1, 'Adicione pelo menos um produto'),
 });
 
-/** Etapa 2 — pagamento */
 export const pedidoProdutoEtapa2Schema = z.object({
   formaPagamento: z.string().min(1, 'Selecione uma forma de pagamento'),
 });
 
-// ─── Pedido de Serviço — validação por etapa ─────────────────────────────────
-
-/** Etapa 0 — seleção de cliente (igual à de produto) */
 export const pedidoServicoEtapa0Schema = z
   .object({
     tipoCliente: z.enum(['existente', 'novo', 'nenhum']),
@@ -182,7 +153,6 @@ export const pedidoServicoEtapa0Schema = z
     }
   });
 
-/** Etapa 1 — endereço do serviço */
 export const pedidoServicoEtapa1Schema = z.object({
   endereco: z.object({
     rua: z.string().min(1, 'Endereço é obrigatório'),
@@ -202,20 +172,11 @@ const itemServicoSchema = z.object({
   observacoes: z.string().optional().default(''),
 });
 
-/** Etapa 2 — lista de serviços */
 export const pedidoServicoEtapa2Schema = z.object({
   servicos: z
     .array(itemServicoSchema)
     .min(1, 'Adicione pelo menos um serviço'),
 });
 
-// ─── Helper: formata erros Zod em string única para exibir no setError ────────
-
-/**
- * Extrai a primeira mensagem de erro de um ZodError.
- * Útil para exibição em campo `error` de estado existente.
- * @param {import('zod').ZodError} zodError
- * @returns {string}
- */
 export const zodFirstError = (zodError) =>
   zodError.errors[0]?.message ?? 'Dados inválidos';

@@ -5,11 +5,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-/**
- * Modal genérico de sucesso com ícone de confirmação.
- *
- * @param {{ open: boolean, onClose: () => void, title?: string, message: string }} props
- */
 export default function SuccessModal({ open, onClose, title = "Sucesso!", message }) {
   return (
     <Modal

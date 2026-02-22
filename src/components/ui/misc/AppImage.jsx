@@ -1,11 +1,5 @@
 import React from 'react';
 
-/**
- * Wrapper de imagem com fallback automático para '/assets/images/no_image.png'
- * em caso de erro de carregamento.
- *
- * @param {{ src: string, alt?: string, className?: string }} props
- */
 function Image({
   src,
   alt = "Image Name",

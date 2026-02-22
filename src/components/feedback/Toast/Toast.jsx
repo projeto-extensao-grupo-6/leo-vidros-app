@@ -1,12 +1,6 @@
 import React, { useEffect } from 'react';
 import { CheckCircle, X, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
-/**
- * Notificação toast posicionada no canto superior direito da tela.
- *
- * @param {{ type?: 'success'|'error'|'warning'|'info', message: string, onClose: () => void, duration?: number }} props
- * @param {number} [props.duration=3000] - Milissegundos até o fechamento automático; use 0 para desabilitar.
- */
 const Toast = ({ type = 'success', message, onClose, duration = 3000 }) => {
     useEffect(() => {
         if (duration > 0) {

@@ -3,10 +3,6 @@ import Backdrop from '@mui/material/Backdrop';
 import CircularProgress from '@mui/material/CircularProgress';
 import Button from '@mui/material/Button';
 
-/**
- * Backdrop de carregamento com spinner centralizado.
- * O estado `open` deve ser controlado externamente pelo componente pai.
- */
 export default function SimpleBackdrop() {
   const [open] = React.useState(false);
   return (

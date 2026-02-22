@@ -1,7 +1,3 @@
-/**
- * Ponto de entrada da aplicação.
- * Monta o componente raiz <App> no elemento #root do HTML.
- */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';

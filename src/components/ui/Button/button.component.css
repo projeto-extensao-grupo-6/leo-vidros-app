@@ -9,7 +9,6 @@
   font-family: "Inter", sans-serif;
 }
 
-/* Tamanhos */
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -25,7 +24,6 @@
   font-size: 1.1rem;
 }
 
-/* Variantes usando suas variáveis de cor */
 .btn-primary {
   background: var(--primary-color);
   color: var(--neutral-color-0);

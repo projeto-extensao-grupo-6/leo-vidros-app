@@ -4,19 +4,6 @@ import StepConnector from "@mui/material/StepConnector";
 import Check from "@mui/icons-material/Check";
 import "./QontoStepper.css";
 
-/**
- * Componentes customizados de Stepper no estilo Qonto para o MUI Stepper.
- *
- * `QontoConnector`  → conector estilizado entre os passos.
- * `QontoStepIcon`   → ícone do passo: círculo vazio (pendente), marcador ativo ou checkmark (concluído).
- *
- * Uso:
- *   <Stepper connector={<QontoConnector />}>
- *     <Step><StepLabel StepIconComponent={QontoStepIcon}>...</StepLabel></Step>
- *   </Stepper>
- */
-
-// ─── Conector ────────────────────────────────────────────────────────
 export const QontoConnector = (props) => (
   <StepConnector
     {...props}
@@ -28,7 +15,6 @@ export const QontoConnector = (props) => (
   />
 );
 
-// ─── Ícone do passo ────────────────────────────────────────────────────
 export function QontoStepIcon(props) {
   const { active, completed, className } = props;
 

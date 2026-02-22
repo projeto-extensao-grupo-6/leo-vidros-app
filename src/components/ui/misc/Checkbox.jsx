@@ -1,9 +1,3 @@
-/**
- * Checkbox customizado com suporte a estado indeterminado, label e mensagem de erro.
- * Compatível com React Hook Form via `React.forwardRef`.
- *
- * @param {{ id?: string, checked?: boolean, indeterminate?: boolean, disabled?: boolean, label?: string, description?: string, error?: string, size?: 'sm'|'default'|'lg' }} props
- */
 import React from "react";
 import { Check, Minus } from "lucide-react";
 import { cn } from "../../../utils/cn";

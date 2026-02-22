@@ -3,7 +3,7 @@ import TaskCreateModal from "../../components/ui/misc/TaskCreateModal";
 import AgendamentoNotification from "../../components/ui/misc/AgendamentoNotification";
 import MiniCalendar from "./components/MiniCalendar";
 import SharedCalendarList from "./components/SharedCalendar";
-import CalendarView from "./components/calendarView";
+import CalendarView from "./components/CalendarView";
 import UpcomingEvents from "./components/UpcomingEvents";
 import Icon from "../../components/ui/misc/AppIcon";
 import Button from "../../components/ui/Button/Button.component";

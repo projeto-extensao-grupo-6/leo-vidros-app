@@ -1,12 +1,5 @@
 import React from "react";
 
-/**
- * Listagem de linhas esqueleto (loading placeholder) com animação pulse.
- * Exibe um layout aproximado dos cartões de lista enquanto os dados são carregados.
- *
- * @param {{ count?: number }} props
- * @param {number} [props.count=5] - Quantidade de linhas esqueleto a exibir
- */
 export default function SkeletonLoader({ count = 5 }) {
   return (
     <>

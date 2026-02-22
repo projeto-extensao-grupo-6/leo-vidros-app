@@ -1,12 +1,3 @@
-/**
- * Enums globais de tipos e status da aplicação.
- * Centralizado em src/types/ para evitar strings espalhadas no código.
- */
-
-// ──────────────────────────────────────────────────────────────────────────────
-// AGENDAMENTOS
-// ──────────────────────────────────────────────────────────────────────────────
-
 export const TipoAgendamento = Object.freeze({
   ORCAMENTO: 'ORCAMENTO',
   SERVICO: 'SERVICO',
@@ -18,10 +9,6 @@ export const StatusAgendamento = Object.freeze({
   CANCELADO: 'CANCELADO',
   CONCLUIDO: 'CONCLUIDO',
 });
-
-// ──────────────────────────────────────────────────────────────────────────────
-// PEDIDOS
-// ──────────────────────────────────────────────────────────────────────────────
 
 export const TipoPedido = Object.freeze({
   PRODUTO: 'PRODUTO',
@@ -35,26 +22,17 @@ export const StatusPedido = Object.freeze({
   CANCELADO: 'CANCELADO',
 });
 
-// ──────────────────────────────────────────────────────────────────────────────
-// SOLICITAÇÕES / ACESSO
-// ──────────────────────────────────────────────────────────────────────────────
-
 export const StatusSolicitacao = Object.freeze({
   PENDENTE: 'PENDENTE',
   ACEITO: 'ACEITO',
   RECUSADO: 'RECUSADO',
 });
 
-// Mapa de labels de aba → valor de status de API
 export const StatusSolicitacaoMap = Object.freeze({
   Pendentes: StatusSolicitacao.PENDENTE,
   Aprovados: StatusSolicitacao.ACEITO,
   Recusados: StatusSolicitacao.RECUSADO,
 });
-
-// ──────────────────────────────────────────────────────────────────────────────
-// ESTOQUE
-// ──────────────────────────────────────────────────────────────────────────────
 
 export const TipoMovimentacao = Object.freeze({
   ENTRADA: 'ENTRADA',
