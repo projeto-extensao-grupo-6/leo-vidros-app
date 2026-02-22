@@ -5,10 +5,11 @@ import { Trash2, Plus, ArrowLeft, Package, AlertCircle, CheckCircle, Download } 
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 
-const gerarNumeroOrcamento = () => {
+// Gera o número do orçamento no formato ORC-ANO-P{id}
+const gerarNumeroOrcamento = (pedidoId) => {
   const ano = new Date().getFullYear();
-  const seq = String(Math.floor(Math.random() * 9999) + 1).padStart(4, "0");
-  return `ORC-${ano}-${seq}`;
+  if (!pedidoId) return "";
+  return `ORC-${ano}-P${pedidoId}`;
 };
 
 const calcularSubtotalItem = (quantidade, preco_unitario, desconto) => {
@@ -38,6 +39,7 @@ const criarItemVazio = (ordem = 1) => ({
   ordem,
 });
 
+// Status disponíveis para o orçamento
 const STATUS_OPTIONS = [
   { value: "RASCUNHO", label: "Rascunho", color: "#64748b" },
   { value: "ENVIADO", label: "Enviado", color: "#3b82f6" },
@@ -46,10 +48,6 @@ const STATUS_OPTIONS = [
   { value: "RECUSADO", label: "Recusado", color: "#ef4444" },
   { value: "EXPIRADO", label: "Expirado", color: "#6b7280" },
 ];
-
-// ─────────────────────────────────────────
-// CLASSES TAILWIND — consome as vars de colors.css
-// ─────────────────────────────────────────
 
 const tw = {
   // Estrutura de cards
@@ -62,7 +60,7 @@ const tw = {
   label: "text-[11px] font-semibold text-gray-700 mb-1 block uppercase tracking-[0.05em]",
   errorText: "text-[11px] text-red-500 mt-1.5",
 
-  // Inputs e selects (focus usa var(--button-color) de colors.css)
+  // Inputs e selects
   input: [
     "w-full px-4 py-3 rounded-lg",
     "border-[1.5px] border-slate-200",
@@ -77,12 +75,13 @@ const tw = {
     "outline-none cursor-pointer font-[inherit]",
   ].join(" "),
 
-  // Botões padronizados com --button-color do projeto
+  // Botões
   btnPrimary: "px-5 py-2 rounded-md text-white font-semibold text-sm cursor-pointer transition-opacity shadow-sm bg-[var(--button-color)] hover:opacity-90",
   btnOutline: "px-5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 font-semibold text-sm cursor-pointer hover:bg-slate-50 transition-colors",
   btnSecondary: "px-5 py-2 rounded-md border border-[#007EA7] bg-white text-[#007EA7] font-semibold text-sm cursor-pointer hover:bg-violet-50 transition-colors",
 };
 
+// Campo de formulário com label e mensagem de erro
 const Field = ({ label, required, error, children }) => (
   <div className={tw.fieldGroup}>
     <label className={tw.label}>
@@ -102,8 +101,11 @@ const OrcamentoHeader = () => (
   </div>
 );
 
+// Seção de informações gerais — número e cliente preenchidos automaticamente pelo pedido
 const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos = [] }) => {
   const statusAtual = STATUS_OPTIONS.find(s => s.value === dados.status_id) || STATUS_OPTIONS[0];
+  // Nome do cliente vem direto do pedido selecionado
+  const clienteNome = dados.cliente_nome;
 
   return (
     <div className={tw.card}>
@@ -119,22 +121,19 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
             <input
               className={`${tw.input} ${tw.inputReadOnly}`}
               value={dados.numero_orcamento}
+              placeholder="Selecione um pedido"
               readOnly
             />
           </Field>
 
           {/* Cliente */}
           <Field label="Cliente" required error={errors.cliente_id}>
-            <select
-              className={`${tw.select} ${errors.cliente_id ? "border-red-400" : ""}`}
-              value={dados.cliente_id}
-              onChange={e => onChange("cliente_id", e.target.value)}
-            >
-              <option value="">Selecione o cliente</option>
-              {clientes.map(c => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
+            <input
+              className={`${tw.input} ${tw.inputReadOnly}`}
+              value={clienteNome}
+              placeholder="Selecione um pedido"
+              readOnly
+            />
           </Field>
 
           {/* Pedido */}
@@ -219,7 +218,8 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
   );
 };
 
-const OrcamentoItemRow = ({ item, index, onChange, onRemove, errors, produtos = [] }) => {
+// Item individual do orçamento — selecionar produto preenche descrição e preço automaticamente
+const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, errors, produtos = [] }) => {
   const subtotal = calcularSubtotalItem(item.quantidade, item.preco_unitario, item.desconto);
   const errItem = errors[item.id] || {};
 
@@ -250,7 +250,7 @@ const OrcamentoItemRow = ({ item, index, onChange, onRemove, errors, produtos = 
         {/* Linha 1: Produto + Descrição */}
         <div className="grid gap-6 mb-7" style={{ gridTemplateColumns: "1fr 2fr" }}>
           <Field label="Produto (opcional)">
-            <select className={tw.select} value={item.produto_id} onChange={e => handleChange("produto_id", e.target.value)}>
+            <select className={tw.select} value={item.produto_id} onChange={e => onProductSelect(item.id, e.target.value)}>
               <option value="">Sem produto vinculado</option>
               {produtos.map(p => (<option key={p.id} value={p.id}>{p.nome}</option>))}
             </select>
@@ -268,7 +268,7 @@ const OrcamentoItemRow = ({ item, index, onChange, onRemove, errors, produtos = 
         {/* Linha 2: Qtd + Preço + Desconto + Subtotal */}
         <div className="grid grid-cols-4 gap-6 mb-7">
           <Field label="Quantidade">
-            <input type="number" min="0" step="0.01" className={tw.input} placeholder="0" value={item.quantidade} onChange={e => handleChange("quantidade", e.target.value)} />
+            <input type="number" min="0" step="1" className={tw.input} placeholder="0" value={item.quantidade} onChange={e => handleChange("quantidade", e.target.value)} />
           </Field>
           <Field label="Preço Unitário (R$)">
             <input type="number" min="0" step="0.01" className={tw.input} placeholder="0,00" value={item.preco_unitario} onChange={e => handleChange("preco_unitario", e.target.value)} />
@@ -292,7 +292,8 @@ const OrcamentoItemRow = ({ item, index, onChange, onRemove, errors, produtos = 
   );
 };
 
-const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, errors, produtos = [] }) => (
+// Lista de itens do orçamento
+const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, onProductSelect, errors, produtos = [] }) => (
   <div className={tw.card}>
     <div className={`${tw.cardHeader} justify-between`}>
       <div className="flex items-center gap-2.5">
@@ -325,6 +326,7 @@ const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, errors, produtos = [
             item={item}
             index={index}
             onChange={onChange}
+            onProductSelect={onProductSelect}
             onRemove={onRemove}
             errors={errors}
             produtos={produtos}
@@ -335,6 +337,7 @@ const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, errors, produtos = [
   </div>
 );
 
+// Painel lateral com resumo financeiro (sticky)
 const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoChange }) => (
   <div className={`${tw.card} sticky top-24`}>
     <div className={tw.cardHeader}>
@@ -365,7 +368,7 @@ const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoC
 
       <div className="h-px bg-slate-200" />
 
-      {/* Total Final — usa --button-color do colors.css */}
+      {/* Total Final */}
       <div className="flex flex-col gap-2">
         <span className={tw.label}>Total Final</span>
         <div className="px-5 py-3 rounded-lg text-xl font-extrabold text-white text-right tracking-tight shadow-md bg-[var(--button-color)]">
@@ -391,6 +394,7 @@ const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoC
   </div>
 );
 
+// Toast de feedback (sucesso/erro)
 const Toast = ({ message, type, onClose }) => {
   if (!message) return null;
   const map = {
@@ -407,14 +411,18 @@ const Toast = ({ message, type, onClose }) => {
   );
 };
 
+// ── Página principal ──
 export default function OrcamentoPage() {
   const navigate = useNavigate();
   const { pedidoId } = useParams();
+  // Layout
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Dados do formulário
   const [dadosGerais, setDadosGerais] = useState({
-    numero_orcamento: gerarNumeroOrcamento(),
+    numero_orcamento: gerarNumeroOrcamento(pedidoId || ""),
     cliente_id: "",
+    cliente_nome: "",
     pedido_id: pedidoId || "",
     status_id: "RASCUNHO",
     data_orcamento: new Date().toISOString().split("T")[0],
@@ -424,6 +432,7 @@ export default function OrcamentoPage() {
     observacoes: "",
   });
 
+  // Itens, desconto e UI
   const [itens, setItens] = useState([criarItemVazio(1)]);
   const [descontoGeral, setDescontoGeral] = useState("");
   const [errors, setErrors] = useState({});
@@ -431,11 +440,12 @@ export default function OrcamentoPage() {
   const [toast, setToast] = useState(null);
   const [lastSaved, setLastSaved] = useState(null);
 
-  // ── Dados reais da API ──
+  // Dados da API
   const [clientes, setClientes] = useState([]);
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
 
+  // Carrega clientes, pedidos e produtos ao montar
   useEffect(() => {
     Api.get("/clientes")
       .then(res => setClientes(Array.isArray(res.data) ? res.data : []))
@@ -446,6 +456,8 @@ export default function OrcamentoPage() {
         const lista = Array.isArray(res.data) ? res.data : [];
         setPedidos(lista.map(p => ({
           id: p.id,
+          clienteId: p.cliente?.id || "",
+          clienteNome: p.cliente?.nome || "",
           produtosDesc: p.servico?.nome || p.produtos?.map(i => i.nomeProduto).join(", ") || "",
         })));
       })
@@ -454,30 +466,56 @@ export default function OrcamentoPage() {
     Api.get("/estoques")
       .then(res => {
         const lista = Array.isArray(res.data) ? res.data : [];
-        setProdutos(lista.map(e => ({ id: e.produto?.id, nome: e.produto?.nome })).filter(p => p.id && p.nome));
+        setProdutos(lista.map(e => ({ id: e.produto?.id, nome: e.produto?.nome, preco: e.produto?.preco ?? "" })).filter(p => p.id && p.nome));
       })
       .catch(() => setProdutos([]));
   }, []);
 
-  // ── Cálculos com useMemo ──
+  // Cálculos derivados
   const subtotalGeral = useMemo(() => calcularSubtotalGeral(itens), [itens]);
   const totalFinal = useMemo(() => calcularTotalFinal(subtotalGeral, descontoGeral), [subtotalGeral, descontoGeral]);
 
-  // ── Handlers ──
-  const handleDadosChange = useCallback((field, value) => {
-    setDadosGerais(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors(prev => { const e = { ...prev }; delete e[field]; return e; });
-  }, [errors]);
+  // Quando os pedidos carregam, sincroniza cliente se já há pedido selecionado
+  useEffect(() => {
+    if (!pedidos.length || !dadosGerais.pedido_id) return;
+    const pedido = pedidos.find(p => String(p.id) === String(dadosGerais.pedido_id));
+    if (pedido) {
+      setDadosGerais(prev => ({
+        ...prev,
+        cliente_id: String(pedido.clienteId || ""),
+        cliente_nome: pedido.clienteNome || "",
+        numero_orcamento: gerarNumeroOrcamento(pedido.id),
+      }));
+    }
+  }, [pedidos]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Ao trocar o pedido, atualiza número do orçamento e cliente automaticamente
+  const handleDadosChange = useCallback((field, value) => {
+    setDadosGerais(prev => {
+      const updates = { ...prev, [field]: value };
+      if (field === "pedido_id") {
+        updates.numero_orcamento = gerarNumeroOrcamento(value);
+        const pedido = pedidos.find(p => String(p.id) === String(value));
+        if (pedido?.clienteId) updates.cliente_id = String(pedido.clienteId);
+        updates.cliente_nome = pedido?.clienteNome || "";
+      }
+      return updates;
+    });
+    if (errors[field]) setErrors(prev => { const e = { ...prev }; delete e[field]; return e; });
+  }, [errors, pedidos]);
+
+  // Adiciona item vazio
   const handleAddItem = useCallback(() => {
     setItens(prev => [...prev, criarItemVazio(prev.length + 1)]);
   }, []);
 
+  // Remove item e reordena
   const handleRemoveItem = useCallback((id) => {
     setItens(prev => prev.filter(item => item.id !== id).map((item, i) => ({ ...item, ordem: i + 1 })));
     setItemErrors(prev => { const e = { ...prev }; delete e[id]; return e; });
   }, []);
 
+  // Atualiza campo de um item e limpa o erro do campo
   const handleItemChange = useCallback((id, field, value) => {
     setItens(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
     if (itemErrors[id]?.[field]) {
@@ -489,6 +527,22 @@ export default function OrcamentoPage() {
     }
   }, [itemErrors]);
 
+  // Ao selecionar produto, preenche descrição e preço automaticamente
+  const handleItemProductSelect = useCallback((id, produtoId) => {
+    const produto = produtos.find(p => String(p.id) === String(produtoId));
+    setItens(prev => prev.map(item =>
+      item.id === id
+        ? {
+            ...item,
+            produto_id: produtoId,
+            descricao: produto ? produto.nome : item.descricao,
+            preco_unitario: produto ? String(produto.preco) : item.preco_unitario,
+          }
+        : item
+    ));
+  }, [produtos]);
+
+  // Valida campos obrigatórios e retorna true se tudo ok
   const validar = useCallback(() => {
     const newErrors = {};
     if (!dadosGerais.cliente_id) newErrors.cliente_id = "Cliente é obrigatório";
@@ -507,12 +561,14 @@ export default function OrcamentoPage() {
     return Object.keys(newErrors).length === 0 && Object.keys(newItemErrors).length === 0;
   }, [dadosGerais, itens]);
 
+  // Salva rascunho localmente
   const handleSaveDraft = useCallback(() => {
     setLastSaved(new Date());
     setToast({ message: "Rascunho salvo com sucesso!", type: "success" });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
+  // Valida, monta payload e gera a planilha
   const handleSaveAndDownload = useCallback(() => {
     if (!validar()) {
       setToast({ message: "Corrija os campos obrigatórios antes de gerar a planilha.", type: "error" });
@@ -539,7 +595,7 @@ export default function OrcamentoPage() {
         @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
       `}</style>
 
-      <div className="flex flex-col items-center gap-10 bg-gray-50 min-h-screen">
+      <div className="flex flex-col items-center gap-10 bg-[#f7f9fa] min-h-screen">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <div className="flex-1 flex flex-col w-full items-center">
@@ -568,7 +624,7 @@ export default function OrcamentoPage() {
               {/* Coluna Principal */}
               <div className="flex flex-col gap-8">
                 <OrcamentoInformacoes dados={dadosGerais} onChange={handleDadosChange} errors={errors} clientes={clientes} pedidos={pedidos} />
-                <OrcamentoItens itens={itens} onAdd={handleAddItem} onRemove={handleRemoveItem} onChange={handleItemChange} errors={itemErrors} produtos={produtos} />
+                <OrcamentoItens itens={itens} onAdd={handleAddItem} onRemove={handleRemoveItem} onChange={handleItemChange} onProductSelect={handleItemProductSelect} errors={itemErrors} produtos={produtos} />
               </div>
 
               {/* Sidebar: Resumo */}
