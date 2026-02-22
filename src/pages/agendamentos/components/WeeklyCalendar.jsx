@@ -3,50 +3,8 @@ import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "../../../utils/cn";
 import { Clock } from "lucide-react";
+import { normalizeStatus, statusColors, tipoColors } from "../../../utils/agendamentoStatus";
 
-// Remove acentos para comparação segura com backend
-const normalizeStatus = (s) =>
-  (s || "PENDENTE").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-
-const statusColors = {
-  PENDENTE: {
-    bg: "bg-yellow-100",
-    border: "border-l-yellow-500",
-    text: "text-yellow-700",
-    dot: "bg-yellow-500",
-  },
-  CONFIRMADO: {
-    bg: "bg-green-100",
-    border: "border-l-green-500",
-    text: "text-green-700",
-    dot: "bg-green-500",
-  },
-  CONCLUIDO: {
-    bg: "bg-blue-100",
-    border: "border-l-blue-500",
-    text: "text-blue-700",
-    dot: "bg-blue-500",
-  },
-  CANCELADO: {
-    bg: "bg-red-100",
-    border: "border-l-red-500",
-    text: "text-red-700",
-    dot: "bg-red-500",
-  },
-  "EM ANDAMENTO": {
-    bg: "bg-purple-100",
-    border: "border-l-purple-500",
-    text: "text-purple-700",
-    dot: "bg-purple-500",
-  },
-};
-
-const tipoColors = {
-  SERVICO: "#3B82F6",
-  ORCAMENTO: "#FBBF24",
-};
-
-// Horários de funcionamento (07h às 19h, em intervalos de 30min)
 const timeSlots = Array.from({ length: 25 }, (_, i) => {
   const hour = Math.floor(i / 2) + 7;
   const minutes = i % 2 === 0 ? "00" : "30";
@@ -59,13 +17,11 @@ export default function WeeklyCalendar({
   onAgendamentoClick,
   onSlotClick,
 }) {
-  // Calcula os dias da semana
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentDate]);
 
-  // Agrupa agendamentos por dia e hora
   const appointmentGrid = useMemo(() => {
     const grid = {};
 
@@ -82,12 +38,10 @@ export default function WeeklyCalendar({
       const time = apt.inicioAgendamento?.substring(0, 5);
 
       if (grid[dateKey] && time) {
-        // Encontra o slot mais próximo
         const matchingSlot = timeSlots.find((slot) => slot === time);
         if (matchingSlot && grid[dateKey][matchingSlot]) {
           grid[dateKey][matchingSlot].push(apt);
         } else {
-          // Caso o horário não bata exato, coloca no slot mais próximo (distância em minutos)
           const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
           const tMin = toMin(time);
           const closestSlot = timeSlots.reduce((prev, curr) =>
@@ -107,7 +61,6 @@ export default function WeeklyCalendar({
 
   const today = new Date();
 
-  // ====== Linha indicadora do horário atual ======
   const [currentTime, setCurrentTime] = useState(new Date());
   const scrollRef = useRef(null);
 
@@ -118,31 +71,30 @@ export default function WeeklyCalendar({
     return () => clearInterval(timer);
   }, []);
 
-  // Scroll automático para a linha do horário atual no primeiro render
   useEffect(() => {
     if (scrollRef.current) {
-      const h = currentTime.getHours();
-      const m = currentTime.getMinutes();
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
       if (h >= 7 && h < 19) {
         const pos = ((h - 7) * 60 + m) * (80 / 30);
         scrollRef.current.scrollTop = Math.max(0, pos - 200);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const nowHours = currentTime.getHours();
   const nowMinutes = currentTime.getMinutes();
-  // Visível entre 07:00 e 19:30 (inclui margem para não sumir exatamente às 19:00)
+
   const isWithinWorkHours = nowHours >= 7 && nowHours <= 19;
-  // Cada slot de 30min = 80px, então 1 minuto = 80/30 ≈ 2.667px
+
   const SLOT_HEIGHT = 80;
   const PX_PER_MIN = SLOT_HEIGHT / 30;
   const timeLineTop = isWithinWorkHours
     ? ((nowHours - 7) * 60 + nowMinutes) * PX_PER_MIN
     : -1;
 
-  // Mostra o horário atual ao lado do indicador
+
   const currentTimeLabel = `${String(nowHours).padStart(2, "0")}:${String(nowMinutes).padStart(2, "0")}`;
 
   const getStatusName = (apt) => {

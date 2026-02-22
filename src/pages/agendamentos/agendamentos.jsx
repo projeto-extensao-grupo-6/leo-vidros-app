@@ -51,27 +51,8 @@ import { useAgendamentos } from "../../hooks/queries/useAgendamentos";
 import { useAgendamentoNotifications } from "../calendar-dashboard/hooks/useAgendamentoNotifications";
 import agendamentosService from "../../api/services/agendamentosService";
 
-// ====== Normaliza status (remove acentos para comparação segura com backend) ======
-const normalizeStatus = (s) =>
-  (s || "PENDENTE").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+import { normalizeStatus, statusConfig, getStatusConfig, tipoConfig } from "../../utils/agendamentoStatus";
 
-// ====== Configuração de Status ======
-const statusConfig = {
-  PENDENTE: { label: "Pendente", color: "bg-yellow-100 text-yellow-700", dot: "bg-yellow-500" },
-  CONFIRMADO: { label: "Confirmado", color: "bg-green-100 text-green-700", dot: "bg-green-500" },
-  CONCLUIDO: { label: "Concluído", color: "bg-blue-100 text-blue-700", dot: "bg-blue-500" },
-  CANCELADO: { label: "Cancelado", color: "bg-red-100 text-red-700", dot: "bg-red-500" },
-  "EM ANDAMENTO": { label: "Em Andamento", color: "bg-purple-100 text-purple-700", dot: "bg-purple-500" },
-};
-
-const getStatusConfig = (status) => statusConfig[normalizeStatus(status)] || statusConfig.PENDENTE;
-
-const tipoConfig = {
-  SERVICO: { label: "Serviço", color: "bg-blue-100 text-blue-700", dotColor: "#3B82F6" },
-  ORCAMENTO: { label: "Orçamento", color: "bg-amber-100 text-amber-700", dotColor: "#FBBF24" },
-};
-
-// ====== Badge de Status ======
 function StatusBadge({ status }) {
   const config = getStatusConfig(status);
   return (
@@ -82,7 +63,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// ====== Badge de Tipo ======
 function TipoBadge({ tipo }) {
   const config = tipoConfig[tipo] || tipoConfig.SERVICO;
   return (
@@ -92,7 +72,6 @@ function TipoBadge({ tipo }) {
   );
 }
 
-// ====== Stat Card ======
 function StatCard({ icon: IconComp, iconColor, value, label }) {
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
@@ -107,7 +86,6 @@ function StatCard({ icon: IconComp, iconColor, value, label }) {
   );
 }
 
-// ====== Dropdown de Ações ======
 function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView, onLocation }) {
   const [open, setOpen] = useState(false);
 
@@ -177,7 +155,6 @@ function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView
   );
 }
 
-// ====== Modal de Confirmação de Exclusão ======
 function DeleteConfirmModal({ isOpen, onClose, onConfirm, isDeleting }) {
   if (!isOpen) return null;
   return (
@@ -186,7 +163,7 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, isDeleting }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
         onClick={onClose}
       >
         <motion.div
@@ -233,28 +210,23 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, isDeleting }) {
   );
 }
 
-// ====== Componente Principal ======
 export default function Agendamentos() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // Data / navegação
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [viewMode, setViewMode] = useState("calendar");
 
-  // Modais
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [modalInitialData, setModalInitialData] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [detailTarget, setDetailTarget] = useState(null);
 
-  // Dados
   const { data: agendamentos = [], isLoading, refetch } = useAgendamentos();
 
-  // Notificações de agendamento próximo
   const transformedForNotifications = useMemo(() =>
     agendamentos.map((a) => ({
       ...a,
@@ -266,7 +238,6 @@ export default function Agendamentos() {
   );
   const { currentNotification, dismissNotification } = useAgendamentoNotifications(transformedForNotifications);
 
-  // ====== Cálculos derivados ======
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
@@ -306,7 +277,6 @@ export default function Agendamentos() {
     };
   }, [agendamentos]);
 
-  // ====== Navegação ======
   const navigate = useNavigate();
 
   const handleLocation = useCallback((apt) => {
@@ -316,7 +286,6 @@ export default function Agendamentos() {
     navigate('/geo-localizacao', { state: { address } });
   }, [navigate]);
 
-  // ====== Handlers ======
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const handlePrevWeek = () => setCurrentWeek(subWeeks(currentWeek, 1));
@@ -444,7 +413,6 @@ export default function Agendamentos() {
     }
   }, [dismissNotification, refetch]);
 
-  // ====== Helpers de formato ======
   const getServicoNome = (apt) => {
     if (apt.servico?.nome) return apt.servico.nome;
     if (apt.servico?.codigo) return apt.servico.codigo;

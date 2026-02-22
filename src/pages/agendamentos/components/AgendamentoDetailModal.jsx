@@ -14,22 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
-
-const normalizeStatus = (s) =>
-  (s || "PENDENTE").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-
-const statusConfig = {
-  PENDENTE: { label: "Pendente", color: "bg-yellow-100 text-yellow-700", dot: "bg-yellow-500" },
-  CONFIRMADO: { label: "Confirmado", color: "bg-green-100 text-green-700", dot: "bg-green-500" },
-  CONCLUIDO: { label: "Concluído", color: "bg-blue-100 text-blue-700", dot: "bg-blue-500" },
-  CANCELADO: { label: "Cancelado", color: "bg-red-100 text-red-700", dot: "bg-red-500" },
-  "EM ANDAMENTO": { label: "Em Andamento", color: "bg-purple-100 text-purple-700", dot: "bg-purple-500" },
-};
-
-const tipoConfig = {
-  SERVICO: { label: "Serviço", color: "bg-blue-100 text-blue-700", dotColor: "#3B82F6" },
-  ORCAMENTO: { label: "Orçamento", color: "bg-amber-100 text-amber-700", dotColor: "#FBBF24" },
-};
+import { normalizeStatus, statusConfig, tipoConfig } from "../../../utils/agendamentoStatus";
 
 export default function AgendamentoDetailModal({ agendamento, isOpen, onClose, onEdit, onLocation }) {
   if (!isOpen || !agendamento) return null;
@@ -62,7 +47,7 @@ export default function AgendamentoDetailModal({ agendamento, isOpen, onClose, o
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
         onClick={onClose}
       >
         <motion.div
