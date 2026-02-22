@@ -1,8 +1,10 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useModal } from '../../hooks/useModal';
 import { usePagination } from '../../hooks/usePagination';
+import { useNavigate } from 'react-router-dom';
 import { FaWrench, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { BiSolidPencil } from "react-icons/bi";
+import { FileText } from 'lucide-react';
 import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
 import NovoPedidoServicoModal from '../pedidos/components/NovoPedidoServicoModal';
 import EditarServicoModal from "../pedidos/components/EditarServicoModal";
@@ -60,6 +62,7 @@ const NOVO_FORM = () => ({
 });
 
 export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRegistroHandled, statusFilter, etapaFilter }) {
+    const navigate = useNavigate();
     const [servicos, setServicos] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -247,6 +250,9 @@ export default function ServicosList({ busca = "", triggerNovoRegistro, onNovoRe
                                 <div className="hidden md:block h-4 w-px bg-slate-200 mx-1"></div>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-slate-100 hover:text-blue-600 transition-colors" title="Editar" onClick={() => abrirEditar(item)}>
                                     <BiSolidPencil size={18} />
+                                </button>
+                                <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-emerald-50 hover:text-emerald-600 transition-colors" title="Novo Orçamento" onClick={() => navigate(`/Pedidos/${item.id}/orcamento`)}>
+                                    <FileText size={17} />
                                 </button>
                                 <button type="button" className="p-1.5 rounded-md text-slate-500 cursor-pointer hover:bg-rose-50 hover:text-rose-600 transition-colors" title="Excluir" onClick={() => abrirConfirmarExclusao(item.id)}>
                                     <FaTrash size={16} />
