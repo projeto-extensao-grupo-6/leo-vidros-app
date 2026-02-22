@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
-import { Search, Edit, Trash2 } from "lucide-react";
+import { Search, Edit, Trash2, CalendarDays } from "lucide-react";
 
 import FuncionarioForm from "./components/ModalFuncionarios/FuncionarioForm";
 import DeleteFuncionario from "./components/ModalFuncionarios/DeleteFuncionario";
+import AgendaFuncionario from "./components/ModalFuncionarios/AgendaFuncionario";
 import Api from "../../api/client/Api";
 
 export default function Funcionarios() {
@@ -22,6 +23,9 @@ export default function Funcionarios() {
 
   const [openDelete, setOpenDelete] = useState(false);
   const [funcionarioParaDeletar, setFuncionarioParaDeletar] = useState(null);
+
+  const [openAgenda, setOpenAgenda] = useState(false);
+  const [funcionarioAgenda, setFuncionarioAgenda] = useState(null);
 
   const [selecionados, setSelecionados] = useState([]);
 
@@ -65,6 +69,11 @@ export default function Funcionarios() {
   const abrirModalDeletar = (funcionario) => {
     setFuncionarioParaDeletar(funcionario);
     setOpenDelete(true);
+  };
+
+  const abrirAgenda = (funcionario) => {
+    setFuncionarioAgenda(funcionario);
+    setOpenAgenda(true);
   };
 
   const atualizarFuncionarios = async (novoFunc) => {
@@ -240,6 +249,16 @@ export default function Funcionarios() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  abrirAgenda(f);
+                                }}
+                                className="p-1.5 text-gray-600 hover:text-[#007EA7] hover:bg-gray-100 rounded transition-colors cursor-pointer"
+                                title="Ver Agenda"
+                              >
+                                <CalendarDays className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   abrirModalEditar(f);
                                 }}
                                 className="p-1.5 text-gray-600 hover:text-[#007EA7] hover:bg-gray-100 rounded transition-colors cursor-pointer"
@@ -308,6 +327,12 @@ export default function Funcionarios() {
         setOpen={setOpenDelete}
         funcionario={funcionarioParaDeletar}
         deletarFuncionario={deletarFuncionario}
+      />
+
+      <AgendaFuncionario
+        open={openAgenda}
+        setOpen={setOpenAgenda}
+        funcionario={funcionarioAgenda}
       />
     </div>
   );

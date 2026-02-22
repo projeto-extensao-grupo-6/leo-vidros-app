@@ -429,7 +429,7 @@ const NovoPedidoServicoModal = ({ isOpen, onClose, onSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-start z-9999 px-10 py-20 overflow-y-auto" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-start z-[9999] px-10 py-20 overflow-y-auto" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[10000vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex items-center px-8 py-4 border-b border-gray-200">
