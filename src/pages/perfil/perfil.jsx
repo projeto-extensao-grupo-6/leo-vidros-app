@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Api from '../../axios/Api';
-import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, CheckCircle, X } from 'lucide-react';
-import Sidebar from '../../shared/components/sidebar/sidebar';
-import Header from '../../shared/components/header/header';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Api from '../../api/client/Api';
+import { User, MapPin, Lock, Save, Edit2, Camera, Eye, EyeOff, AlertCircle, CheckCircle, X, Loader2 } from 'lucide-react';
+import { cepMask } from '../../utils/masks.js';
+import Sidebar from '../../components/layout/Sidebar/Sidebar';
+import Header from '../../components/layout/Header/Header';
 import DefaultAvatar from '../../assets/Avatar.jpg';
+import { useUser } from '../../context/UserContext.jsx';
 
 // Componente InputField (mantido inalterado)
 const InputField = ({ label, name, value, onChange, type = "text", disabled = false, className = "", showPasswordToggle = false, onTogglePassword, showPassword }) => (
@@ -56,6 +58,8 @@ export default function Perfil() {
 
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: '', text: '' });
+    const [cepLoading, setCepLoading] = useState(false);
+    const [cepError, setCepError] = useState('');
 
     const [formData, setFormData] = useState({
         nome: "",
@@ -77,7 +81,8 @@ export default function Perfil() {
     });
     
     // NOVOS ESTADOS E REFS PARA FOTO DE PERFIL
-    const [userPhoto, setUserPhoto] = useState(DefaultAvatar); // Inicializa com a imagem padrão
+    const { user, updatePhoto, clearPhoto, updateUser } = useUser();
+    const userPhoto = user.photo ?? DefaultAvatar;
     const fileInputRef = useRef(null); // Referência para o input de arquivo
 
     const getUserId = () => {
@@ -122,18 +127,10 @@ export default function Perfil() {
 
         reader.onloadend = () => {
             const base64Url = reader.result;
-            // Define a userPhoto como a URL base64 do arquivo
-            localStorage.setItem(`leoVidros_userPhoto_${userId}`, base64Url);
-            setUserPhoto(base64Url); 
+            // Persiste no localStorage E atualiza Header via UserContext
+            updatePhoto(base64Url);
             setMessage({ type: 'success', text: 'Foto de perfil atualizada!' });
             setLoading(false);
-            
-            // Atualizar header automaticamente
-            if (typeof window.updateHeaderUserInfo === 'function') {
-                console.log('🔄 Perfil: Atualizando foto no header');
-                window.updateHeaderUserInfo();
-            }
-            window.dispatchEvent(new Event('userDataUpdated'));
         };
 
         reader.onerror = () => {
@@ -152,18 +149,9 @@ export default function Perfil() {
             return;
         }
 
-        // Remove do localStorage
-        localStorage.removeItem(`leoVidros_userPhoto_${userId}`);
-        // Volta para a foto padrão
-        setUserPhoto(DefaultAvatar);
+        // Remove do localStorage E atualiza Header via UserContext
+        clearPhoto();
         setMessage({ type: 'success', text: 'Foto de perfil removida com sucesso!' });
-        
-        // Atualizar header automaticamente
-        if (typeof window.updateHeaderUserInfo === 'function') {
-            console.log('🔄 Perfil: Removendo foto do header');
-            window.updateHeaderUserInfo();
-        }
-        window.dispatchEvent(new Event('userDataUpdated'));
     };
 
     useEffect(() => {
@@ -174,25 +162,16 @@ export default function Perfil() {
             return;
         }
 
-        const localPhoto = localStorage.getItem(`leoVidros_userPhoto_${userId}`);
-         if (localPhoto) {
-            setUserPhoto(localPhoto);
-        }
-
         setLoading(true);
         Api.get(`/usuarios/${userId}`)
             .then(response => {
                 const userData = response.data.usuario || response.data.data || response.data;
                 const endereco = userData.endereco || {};
 
-                if (!localPhoto) {
-                    if (userData.fotoUrl) {
-                        setUserPhoto(userData.fotoUrl);
-                    } else {
-                        setUserPhoto(DefaultAvatar);
-                    }
+                // Só aplica a foto da API se não houver foto local salva pelo utilizador
+                if (!user.photo && userData.fotoUrl) {
+                    updatePhoto(userData.fotoUrl);
                 }
-                // *****************************************
 
                 setFormData({
                     nome: userData.nome || "",
@@ -228,8 +207,41 @@ export default function Perfil() {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'cep') {
+            const masked = cepMask(value);
+            setFormData(prev => ({ ...prev, cep: masked }));
+            const digits = masked.replace(/\D/g, '');
+            if (digits.length === 8) fetchCep(digits);
+            else setCepError('');
+            return;
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
+
+    const fetchCep = useCallback(async (digits) => {
+        setCepLoading(true);
+        setCepError('');
+        try {
+            const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+            const data = await res.json();
+            if (data.erro) {
+                setCepError('CEP não encontrado.');
+                return;
+            }
+            setFormData(prev => ({
+                ...prev,
+                rua: data.logradouro || prev.rua,
+                bairro: data.bairro || prev.bairro,
+                cidade: data.localidade || prev.cidade,
+                estado: data.uf || prev.estado,
+                pais: 'Brasil',
+            }));
+        } catch {
+            setCepError('Erro ao buscar CEP. Verifique sua conexão.');
+        } finally {
+            setCepLoading(false);
+        }
+    }, []);
 
     const validatePasswordChange = () => {
         if (!formData.senhaAtual) {
@@ -291,24 +303,8 @@ export default function Perfil() {
 
         Api.put(`/usuarios/${userId}`, usuarioRequest)
             .then(response => {
-                console.log('Salvo com sucesso!', response.data);
-                
-                // Atualizar nome no storage
-                sessionStorage.setItem('loggedUserName', formData.nome);
-                localStorage.setItem('loggedUserName', formData.nome);
-                sessionStorage.setItem('loggedUserEmail', formData.email);
-                localStorage.setItem('loggedUserEmail', formData.email);
-                
-                console.log('✅ Perfil: Dados salvos no storage', { nome: formData.nome, email: formData.email });
-                
-                // Disparar evento customizado para atualizar o header
-                window.dispatchEvent(new Event('userDataUpdated'));
-                
-                // Chamar função global diretamente como backup
-                if (typeof window.updateHeaderUserInfo === 'function') {
-                    console.log('🔄 Perfil: Chamando atualização direta do header');
-                    window.updateHeaderUserInfo();
-                }
+                // Atualiza nome/email no UserContext (propaga ao Header automaticamente)
+                updateUser({ name: formData.nome, email: formData.email });
                 
                 setMessage({ 
                     type: 'success', 
@@ -324,7 +320,7 @@ export default function Perfil() {
                 const endereco = userData.endereco || {};
                 
                 if (userData.fotoUrl) {
-                    setUserPhoto(userData.fotoUrl);
+                    updatePhoto(userData.fotoUrl);
                 }
 
                 setFormData({
@@ -359,6 +355,7 @@ export default function Perfil() {
         } else {
             setIsEditing(true);
             setMessage({ type: '', text: '' });
+            setCepError('');
         }
     };
 
@@ -627,14 +624,38 @@ export default function Perfil() {
                                                         className="lg:col-span-4 text-start"
                                                     />
 
-                                                    <InputField
-                                                        label="CEP"
-                                                        name="cep"
-                                                        value={formData.cep}
-                                                        onChange={handleInputChange}
-                                                        disabled={!isEditing}
-                                                        className="lg:col-span-2 text-start"
-                                                    />
+                                                    {/* Campo CEP com ViaCEP */}
+                                                    <div className="lg:col-span-2 text-start flex flex-col">
+                                                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                                            CEP
+                                                        </label>
+                                                        <div className="relative">
+                                                            <input
+                                                                type="text"
+                                                                name="cep"
+                                                                value={formData.cep}
+                                                                onChange={handleInputChange}
+                                                                disabled={!isEditing}
+                                                                maxLength={9}
+                                                                placeholder="00000-000"
+                                                                className={`w-full border rounded-lg px-4 py-3 text-gray-800 text-base transition-all duration-200 outline-none pr-10 ${
+                                                                    !isEditing
+                                                                        ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed'
+                                                                        : cepError
+                                                                            ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-100'
+                                                                            : 'bg-white border-gray-300 focus:border-[#003d6b] focus:ring-2 focus:ring-blue-100'
+                                                                }`}
+                                                            />
+                                                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                                {!isEditing && <Lock className="h-4 w-4 text-gray-400" />}
+                                                                {isEditing && cepLoading && <Loader2 className="h-4 w-4 text-[#003d6b] animate-spin" />}
+                                                                {isEditing && !cepLoading && cepError && <AlertCircle className="h-4 w-4 text-red-500" />}
+                                                            </div>
+                                                        </div>
+                                                        {cepError && (
+                                                            <p className="mt-1 text-xs text-red-500">{cepError}</p>
+                                                        )}
+                                                    </div>
 
                                                     <InputField
                                                         label="Bairro"

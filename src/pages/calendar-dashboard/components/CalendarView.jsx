@@ -41,7 +41,7 @@ import {
   LoadingState,
   ErrorMessage,
 } from "./EventModalComponents";
-import EditarAgendamentoSimples from "../../../shared/components/pedidosServicosComponents/EditarAgendamentoSimples";
+import EditarAgendamentoSimples from "../../pedidos/components/EditarAgendamentoSimples";
 
 // --- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ---
 const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, isDeleting }) => {
@@ -226,10 +226,6 @@ const EventDetailsModal = ({ initialEvent, onClose, onGeoLocationClick, onEventD
     </>
   );
 };
-
-// --- MonthView, WeekView, DayView, calculateEventLayout e calculateEventStyle omitidos para brevidade (são os mesmos do código anterior) ---
-// Certifique-se de manter os componentes auxiliares que já estavam no arquivo!
-// Vou colocar apenas o CalendarView atualizado abaixo com a função handleEditEvent corrigida.
 
 const calculateEventStyle = (startTime, endTime, startHour = 7, pixelsPerHour = 70) => {
   const [startH, startM] = startTime.split(':').map(Number);
@@ -683,7 +679,7 @@ const CalendarView = ({
                 endereco.rua, endereco.numero, endereco.complemento,
                 endereco.bairro, endereco.cidade, endereco.uf, endereco.cep
               ].filter(Boolean);
-              navigate("/geoLocalizacao", { state: { address: addressParts.join(", ") } });
+              navigate("/geo-localizacao", { state: { address: addressParts.join(", ") } });
             }}
             onEventDeleted={onEventDeleted}
             onEdit={handleEditEvent}

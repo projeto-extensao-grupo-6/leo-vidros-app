@@ -8,9 +8,9 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import { QontoConnector, QontoStepIcon } from "../../shared/components/steppers/QontoStepper.jsx";
-import Button from "../../shared/components/buttons/button.component";
-import Api from "../../axios/Api";
+import { QontoConnector, QontoStepIcon } from "../../components/stepper/QontoStepper.jsx";
+import Button from "../../components/ui/Button/Button.component";
+import Api from "../../api/client/Api";
 
 function Cadastro() {
   const [step, setStep] = useState(1);
@@ -77,15 +77,13 @@ function Cadastro() {
         email,
       };
 
-      const response = await Api.post("/solicitacoes", dadosCadastro);
-
-      console.log("Cadastro OK:", response.data);
+      await Api.post("/solicitacoes", dadosCadastro);
 
       setModalOpen(true);
 
       setTimeout(() => {
         setModalOpen(false);
-        navigate("/login");
+        navigate("/Login");
       }, 3000);
     } catch (error) {
       console.error("Erro no cadastro:", error);
@@ -233,7 +231,7 @@ function Cadastro() {
                   Já possui uma conta?{" "}
                   <button
                     type="button"
-                    onClick={() => (window.location.href = "/login")}
+                    onClick={() => (window.location.href = "/Login")}
                     className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
                   >
                     Login

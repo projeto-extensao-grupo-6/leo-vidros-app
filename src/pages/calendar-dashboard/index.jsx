@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import TaskCreateModal from "../../shared/components/Ui/TaskCreateModal";
-import AgendamentoNotification from "../../shared/components/Ui/AgendamentoNotification";
+import TaskCreateModal from "../../components/ui/misc/TaskCreateModal";
+import AgendamentoNotification from "../../components/ui/misc/AgendamentoNotification";
 import MiniCalendar from "./components/MiniCalendar";
 import SharedCalendarList from "./components/SharedCalendar";
 import CalendarView from "./components/CalendarView";
 import UpcomingEvents from "./components/UpcomingEvents";
-import Icon from "../../shared/components/AppIcon";
-import Button from "../../shared/components/buttons/button.component";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
-import Api from "../../axios/Api";
+import Icon from "../../components/ui/misc/AppIcon";
+import Button from "../../components/ui/Button/Button.component";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
+import Api from "../../api/client/Api";
 import { useAgendamentoNotifications } from "./hooks/useAgendamentoNotifications";
-import EditarAgendamentoSimples from "../../shared/components/pedidosServicosComponents/EditarAgendamentoSimples";
-import agendamentosService from "../../services/agendamentosService";
+import EditarAgendamentoSimples from "../pedidos/components/EditarAgendamentoSimples";
+import agendamentosService from "../../api/services/agendamentosService";
 
 const CalendarDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -131,7 +131,6 @@ const CalendarDashboard = () => {
       backgroundColor: taskData.backgroundColor || "#3B82F6", 
       color: taskData.backgroundColor, 
     };
-    console.log("Nova tarefa criada:", newTask); 
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
     localStorage.setItem("tasks", JSON.stringify(updatedTasks));
@@ -142,7 +141,7 @@ const CalendarDashboard = () => {
   };
 
   const handleCalendarToggle = (calendarId) => {
-    console.log("Toggle calendário:", calendarId);
+    // callback de toggle de calendário (implementação futura)
   };
 
   // Handlers para notificações de agendamento
@@ -160,7 +159,8 @@ const CalendarDashboard = () => {
       
       if (!confirmar) return;
 
-      await agendamentosService.delete(agendamento.id);
+      const deleteResult = await agendamentosService.delete(agendamento.id);
+      if (!deleteResult.success) throw new Error(deleteResult.error || 'Erro ao cancelar agendamento');
       dismissNotification();
       fetchAgendamentos();
       
@@ -185,7 +185,8 @@ const CalendarDashboard = () => {
         observacao: agendamento.observacao || ""
       };
 
-      await agendamentosService.update(agendamento.id, agendamentoData);
+      const updateResult = await agendamentosService.update(agendamento.id, agendamentoData);
+      if (!updateResult.success) throw new Error(updateResult.error || 'Erro ao atualizar agendamento');
       dismissNotification();
       fetchAgendamentos();
       

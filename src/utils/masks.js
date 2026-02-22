@@ -1,4 +1,3 @@
-// Máscara para CPF: 000.000.000-00
 export const cpfMask = (value) => {
     if (!value) return "";
     return value
@@ -9,7 +8,6 @@ export const cpfMask = (value) => {
         .replace(/(-\d{2})\d+?$/, "$1");
 };
 
-// Máscara para telefone: (00) 00000-0000 ou (00) 0000-0000
 export const phoneMask = (value) => {
     if (!value) return "";
     value = value.replace(/\D/g, "");
@@ -27,7 +25,6 @@ export const phoneMask = (value) => {
         .replace(/(-\d{4})\d+?$/, "$1");
 };
 
-// Máscara para CEP: 00000-000
 export const cepMask = (value) => {
     if (!value) return "";
     return value
@@ -36,13 +33,11 @@ export const cepMask = (value) => {
         .replace(/(-\d{3})\d+?$/, "$1");
 };
 
-// Validação para permitir apenas letras e espaços
 export const onlyLetters = (value) => {
     if (!value) return "";
     return value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
 };
 
-// Validação de CPF
 export const isValidCPF = (cpf) => {
     cpf = cpf.replace(/\D/g, "");
     
@@ -68,7 +63,6 @@ export const isValidCPF = (cpf) => {
     return true;
 };
 
-// Remover máscara para envio à API
 export const removeMask = (value) => {
     if (!value) return "";
     return value.replace(/\D/g, "");

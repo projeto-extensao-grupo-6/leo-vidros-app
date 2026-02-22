@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import Header from "../../shared/components/header/header";
-import Sidebar from "../../shared/components/sidebar/sidebar";
+import Header from "../../components/layout/Header/Header";
+import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import PedidosList from "./PedidosList";
 import ServicosList from "../servicos/ServicosList";
-import FilterDropdown from "../../shared/components/pedidosServicosComponents/FilterDropdown";
+import FilterDropdown from "./components/FilterDropdown";
 import { FaBoxOpen, FaWrench, FaFilter, FaSearch } from "react-icons/fa";
 import { ChevronDown } from "lucide-react";
 
@@ -118,7 +118,7 @@ export default function Pedidos() {
                                     <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
                                         <div className="relative w-full md:w-[350px]">
                                             <input
-                                                placeholder="Busque Por.."
+                                                placeholder="Busque por..."
                                                 value={busca}
                                                 onChange={(e) => setBusca(e.target.value)}
                                                 className="w-full h-10 pl-10 pr-4 rounded-md border border-slate-200 bg-slate-50 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#007EA7] focus:bg-white transition-all"
