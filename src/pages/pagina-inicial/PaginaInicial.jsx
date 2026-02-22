@@ -117,7 +117,7 @@ export default function PaginaInicial() {
   ], [qtdItensCriticos, qtdAgendamentosHoje, taxaOcupacaoServicos, qtdAgendamentosFuturos]);
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-[Inter]">
+    <div className="flex min-h-screen font-[Inter]" style={{ backgroundColor: '#f7f9fa' }}>
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <div className="flex-1 flex flex-col">

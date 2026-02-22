@@ -300,7 +300,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex bg-gray-50 min-h-screen items-center justify-center">
+      <div className="flex bg-[#f7f9fa] min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#007EA7] mx-auto mb-4"></div>
           <p className="text-gray-600">Carregando...</p>
@@ -311,7 +311,7 @@ export default function ProductDetailPage() {
 
   if (!estoque || !estoque.produto) {
     return (
-      <div className="flex bg-gray-50 min-h-screen items-center justify-center">
+      <div className="flex bg-[#f7f9fa] min-h-screen items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Produto não encontrado</p>
           <button 
@@ -343,7 +343,7 @@ export default function ProductDetailPage() {
   const totalValue = (estoque?.quantidadeTotal ?? 0) * (produto?.preco ?? 0);
 
   return (
-    <div className="flex bg-gray-50 min-h-screen">
+    <div className="flex bg-[#f7f9fa] min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />

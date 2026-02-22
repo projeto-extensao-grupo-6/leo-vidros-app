@@ -15,6 +15,7 @@ import Perfil from '../pages/perfil/perfil.jsx';
 import MapContainer from '../pages/geo-localizacao/MapContainer.jsx';
 import NovaSenha from '../pages/nova-senha/NovaSenha.jsx';
 import EsqueceuSenha from '../pages/esqueceu-senha/EsqueceuSenha.jsx';
+import OrcamentoERP from '../pages/orcamento/Orcamento.jsx';
 
 export const appRouter = createBrowserRouter([
   { path: '/', element: <Login /> },
@@ -26,6 +27,7 @@ export const appRouter = createBrowserRouter([
   { path: '/Estoque', element: <ProtectedRoute><Estoque /></ProtectedRoute> },
   { path: '/Estoque/:id', element: <ProtectedRoute><ProdutoDetalhe /></ProtectedRoute> },
   { path: '/Pedidos', element: <ProtectedRoute><Pedidos /></ProtectedRoute> },
+  { path: '/Pedidos/:pedidoId/orcamento', element: <ProtectedRoute><OrcamentoERP /></ProtectedRoute> },
   { path: '/acesso', element: <ProtectedRoute><Solicitacoes /></ProtectedRoute> },
   { path: '/Agendamentos', element: <ProtectedRoute><Agendamentos /></ProtectedRoute> },
   { path: '/Agenda', element: <ProtectedRoute><CalendarDashboard /></ProtectedRoute> },

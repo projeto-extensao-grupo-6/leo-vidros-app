@@ -58,7 +58,7 @@ export default function Pedidos() {
     const inactiveTabClass = "bg-slate-100 text-slate-500 border-transparent hover:bg-slate-200";
 
     return (
-        <div className="flex flex-col items-center bg-gray-50 min-h-screen">
+        <div className="flex flex-col items-center min-h-screen" style={{ backgroundColor: '#f7f9fa' }}>
             <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
             <div className="flex-1 flex flex-col w-full items-center"> 

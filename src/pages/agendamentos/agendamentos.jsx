@@ -433,7 +433,6 @@ export default function Agendamentos() {
 
   const getStatusNome = (apt) => apt.statusAgendamento?.nome || "PENDENTE";
 
-  // ====== Render ======
   if (isLoading) {
     return (
       <div className="flex bg-gray-100 min-h-screen">
@@ -450,6 +449,7 @@ export default function Agendamentos() {
   }
 
   return (
+
     <div className="flex bg-gray-100 min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
