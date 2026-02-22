@@ -377,7 +377,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
 
     return (
         <div
-            className="fixed inset-0 bg-black/50 flex justify-center items-start z-9999 px-10 py-20 overflow-y-auto"
+            className="fixed inset-0 bg-black/50 flex justify-center items-start z-[9999] px-10 py-20 overflow-y-auto"
             onClick={onClose}
         >
             <div

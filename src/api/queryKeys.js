@@ -31,4 +31,11 @@ export const queryKeys = {
     detail: (id) => ['servicos', 'detalhe', id],
     byEtapa: (etapa) => ['servicos', 'etapa', etapa],
   },
+  funcionarios: {
+    all: () => ['funcionarios'],
+    list: () => ['funcionarios', 'lista'],
+    detail: (id) => ['funcionarios', 'detalhe', id],
+    agenda: (id, dataInicio, dataFim) => ['funcionarios', 'agenda', id, dataInicio, dataFim],
+    disponiveis: (data, inicio, fim) => ['funcionarios', 'disponiveis', data, inicio, fim],
+  },
 };

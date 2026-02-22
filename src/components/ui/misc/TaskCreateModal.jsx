@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { X, Check, Trash2, CheckCircle, Package } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import Api from "../../../api/client/Api";
 import { cepMask } from "../../../utils/masks";
 
@@ -100,7 +99,6 @@ const categoryOptions = [
 
 
 const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     id: null,
     tipoAgendamento: "",
@@ -132,33 +130,40 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   const [loadingOptions, setLoadingOptions] = useState(false);
   const [selectedFuncionarios, setSelectedFuncionarios] = useState([]);
   const [loadingCep, setLoadingCep] = useState(false);
+  const [loadingFuncionarios, setLoadingFuncionarios] = useState(false);
   const [useExistingAddress, setUseExistingAddress] = useState(true);
   const [savedAddress, setSavedAddress] = useState(null);
   const [clienteInfo, setClienteInfo] = useState(null);
 
-  const fetchFuncionarios = useCallback(async (tipoValue) => {
-    if (!tipoValue) {
+  const fetchFuncionariosDisponiveis = useCallback(async (data, inicio, fim, tipoValue) => {
+    if (!data || !inicio || !fim) {
       setFuncionariosOptions([]);
       return;
     }
+    setLoadingFuncionarios(true);
     try {
-      if (tipoValue === "ORCAMENTO") {
-        try {
-          const response = await Api.get("/funcionarios/1");
-          const data = Array.isArray(response.data) ? response.data : [response.data];
-          setFuncionariosOptions(data.map(f => ({ value: f.id, label: f.nome })));
-        } catch (error) {
-          setFuncionariosOptions([{ value: 1, label: "Leandro (Técnico)" }]);
-        }
-        return;
-      }
-      const response = await Api.get("/funcionarios");
-      setFuncionariosOptions(response.data.map((func) => ({ value: func.id, label: func.nome })));
+      const fmtTime = (t) => {
+        if (!t) return "00:00:00";
+        const parts = t.split(":");
+        return `${(parts[0] || "00").padStart(2, "0")}:${(parts[1] || "00").padStart(2, "0")}:00`;
+      };
+      const response = await Api.get("/funcionarios/disponiveis", {
+        params: { data, inicio: fmtTime(inicio), fim: fmtTime(fim) },
+      });
+      const disponiveis = response.data || [];
+      setFuncionariosOptions(disponiveis.map((func) => ({ value: func.id, label: func.nome })));
     } catch (error) {
-      console.error("Erro ao buscar funcionários:", error);
-      setFuncionariosOptions([]);
+      console.error("Erro ao buscar funcionários disponíveis:", error);
+      try {
+        const response = await Api.get("/funcionarios");
+        setFuncionariosOptions(response.data.map((func) => ({ value: func.id, label: func.nome })));
+      } catch (fallbackError) {
+        setFuncionariosOptions([]);
+      }
+    } finally {
+      setLoadingFuncionarios(false);
     }
-  }, [navigate]);
+  }, []);
 
   const fetchOpcoesPedido = useCallback(async (tipoValue) => {
     if (!tipoValue) { 
@@ -176,7 +181,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       } catch (error) {
         console.warn('⚠️ Endpoint /Pedidos/servicos não disponível, tentando alternativa...');
         
-        // Se falhar, tenta buscar todos os pedidos e filtra os de serviço
         try {
           const responseAll = await Api.get("/pedidos");
           const todosPedidos = responseAll.data || [];
@@ -185,17 +189,13 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           console.error('❌ Erro ao buscar pedidos:', error2);
         }
       }
-      
-      // Filtra pedidos baseado no tipo de agendamento e na etapa atual
       const availableOrders = allOrders.filter(order => {
-          // Precisa ter serviço
           if (!order.servico) {
               return false;
           }
           
           const etapaNome = order.servico.etapa?.nome || order.etapa?.nome || 'PENDENTE';
           
-          // Verifica se já tem agendamento ativo desse tipo
           const agendamentos = order.servico.agendamentos || [];
           const hasActiveAppointment = agendamentos.some(ag => 
               ag.tipoAgendamento === tipoValue && 
@@ -207,31 +207,25 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               return false;
           }
           
-          // Define quais etapas são válidas para cada tipo
           let etapaValida = false;
           
           if (tipoValue === "ORCAMENTO") {
-              // Para orçamento: aceita PENDENTE, sem agendamento prévio, ou que teve agendamento cancelado
-              // Basicamente qualquer pedido que NÃO tenha um orçamento ativo
               const etapasAceitasOrcamento = [
                   "PENDENTE", 
                   "AGUARDANDO ORÇAMENTO",
-                  "AGUARDANDO ORCAMENTO" // sem acento
+                  "AGUARDANDO ORCAMENTO" 
               ];
               
               etapaValida = etapasAceitasOrcamento.some(e => 
                   etapaNome.toUpperCase().includes(e.toUpperCase()) || 
                   e.toUpperCase().includes(etapaNome.toUpperCase())
               );
-              
-              // Se a etapa não está na lista mas não tem agendamento ativo de orçamento,
-              // pode ser um pedido novo, então aceita também
+            
               if (!etapaValida && agendamentos.length === 0) {
                   etapaValida = true;
               }
               
           } else if (tipoValue === "SERVICO") {
-              // Para serviço: só aceita se o orçamento já foi aprovado
               const etapasAceitasServico = [
                   "ORÇAMENTO APROVADO", 
                   "ORCAMENTO APROVADO",
@@ -254,12 +248,9 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           return true;
       });
       
-      // Mapeia para o formato do Select
       const options = availableOrders.map((dto) => {
-          // Garante que temos um ID válido
           const pedidoId = dto.id || dto.pedidoId || dto.idPedido;
           
-          // Monta uma label descritiva baseada nos dados disponíveis - apenas nome/descrição
           let label = '';
           
           if (dto.descricao) {
@@ -281,9 +272,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               label: label, 
               originalData: dto 
           };
-      }).filter(opt => opt.value); // Remove opções sem ID válido
+      }).filter(opt => opt.value); 
       
-      // Garante que o pedido atual (se estiver editando) apareça na lista
       if (initialData?.pedido?.value) {
          const exists = options.find(o => String(o.value) === String(initialData.pedido.value));
          if (!exists) {
@@ -309,13 +299,22 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       console.error("Erro ao buscar produtos:", error);
       setProdutosOptions([]);
     }
-  }, [navigate]);
+  }, []);
+
+  useEffect(() => {
+    const tipoValue = formData?.tipoAgendamento?.value || formData?.tipoAgendamento;
+    if (tipoValue && formData?.eventDate && formData?.startTime && formData?.endTime) {
+      setSelectedFuncionarios([]);
+      fetchFuncionariosDisponiveis(formData.eventDate, formData.startTime, formData.endTime, tipoValue);
+    } else {
+      setFuncionariosOptions([]);
+    }
+  }, [formData?.eventDate, formData?.startTime, formData?.endTime, fetchFuncionariosDisponiveis]);
 
   const handleTypeChange = (selectedOption) => {
     const typeValue = selectedOption?.value || selectedOption;
     setFormData((prev) => ({ ...prev, tipoAgendamento: selectedOption, pedido: null }));
     setSelectedFuncionarios([]);
-    fetchFuncionarios(typeValue);
     fetchOpcoesPedido(typeValue);
   };
 
@@ -323,7 +322,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       if (selectedPedidoOption?.originalData) {
           const data = selectedPedidoOption.originalData;
           
-          // Extrai informações do cliente
           const cliente = data.cliente || data.servico?.cliente;
           if (cliente) {
               setClienteInfo({
@@ -336,9 +334,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           } else {
               setClienteInfo(null);
           }
-          
-          // Busca o endereço em múltiplas fontes possíveis
-          // Se vier como array (enderecos), pega o primeiro
+
           const end = data.endereco || 
                       data.cliente?.endereco || 
                       (data.cliente?.enderecos && data.cliente.enderecos.length > 0 ? data.cliente.enderecos[0] : null) ||
@@ -347,8 +343,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                       data.servico?.endereco;
           
           if (end) {
-              setSavedAddress(end); // Salva o endereço original
-              setUseExistingAddress(true); // Por padrão, usa o endereço existente
+              setSavedAddress(end); 
+              setUseExistingAddress(true); 
               setFormData(prev => ({
                   ...prev,
                   pedido: selectedPedidoOption,
@@ -379,7 +375,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
 
   const handleToggleAddressMode = () => {
     if (useExistingAddress && savedAddress) {
-      // Mudar para novo endereço - limpa os campos
       setUseExistingAddress(false);
       setFormData(prev => ({
         ...prev,
@@ -393,7 +388,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
         complemento: ""
       }));
     } else if (savedAddress) {
-      // Voltar para o endereço existente
       setUseExistingAddress(true);
       setFormData(prev => ({
         ...prev,
@@ -485,7 +479,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
 
       if (initialData?.tipoAgendamento) {
         const typeValue = initialData.tipoAgendamento.value || initialData.tipoAgendamento;
-        fetchFuncionarios(typeValue);
+        setFuncionariosOptions([]);
         fetchOpcoesPedido(typeValue);
 
         if (initialData.pedido) {
@@ -497,7 +491,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           fetchProdutos();
       }
     }
-  }, [isOpen, initialData, fetchFuncionarios, fetchOpcoesPedido, fetchProdutos]);
+  }, [isOpen, initialData, fetchOpcoesPedido, fetchProdutos]);
 
   const validateStep = (currentStep) => {
     const newErrors = {};
@@ -507,6 +501,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       if (!formData?.eventDate?.trim()) newErrors.eventDate = "* Obrigatória";
       if (!formData?.startTime?.trim()) newErrors.startTime = "* Obrigatório";
       if (!formData?.endTime?.trim()) newErrors.endTime = "* Obrigatório";
+      if (!selectedFuncionarios || selectedFuncionarios.length === 0) newErrors.funcionarios = "* Selecione pelo menos um funcionário";
     }
     if (currentStep === 2) {
       if (!formData?.rua?.trim()) newErrors.rua = "* Rua obrigatória";
@@ -533,18 +528,10 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       };
       const tipoValor = formData.tipoAgendamento?.value || formData.tipoAgendamento;
       
-      const funcionariosPayload = await Promise.all(
-        selectedFuncionarios.map(async (id) => {
-          try {
-            const response = await Api.get(`/funcionarios/${id}`);
-            const func = response.data;
-            return { nome: func.nome || "", telefone: func.telefone || "", funcao: func.funcao || "", contrato: func.contrato || "", escala: func.escala || "", status: func.status !== undefined ? func.status : true };
-          } catch (error) {
-            const funcEncontrado = funcionariosOptions.find(f => f.value === id);
-            return { nome: funcEncontrado?.label || "Funcionário", telefone: "", funcao: "", contrato: "", escala: "", status: true };
-          }
-        })
-      );
+      const funcionariosPayload = selectedFuncionarios.map((funcId) => {
+        const funcEncontrado = funcionariosOptions.find(f => f.value === funcId);
+        return { id: funcId, nome: funcEncontrado?.label || "", telefone: "", funcao: "", contrato: "", escala: "", status: true };
+      });
       
       const pedidoCompleto = formData.pedido?.originalData || null;
       // Mantém a etapa do pedido como está ou default, o backend irá atualizar automaticamente ao criar o agendamento
@@ -590,10 +577,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           result = await Api.post("/agendamentos", payload);
       }
       
-      // Atualiza a etapa do pedido após criar/editar o agendamento
       if (pedidoCompleto?.id && pedidoCompleto?.servico?.id) {
           try {
-              // Define a nova etapa baseada no tipo de agendamento
               let novaEtapa = '';
               if (tipoValor === 'ORCAMENTO') {
                   novaEtapa = 'AGUARDANDO ORÇAMENTO';
@@ -602,7 +587,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               }
               
               if (novaEtapa) {
-                  // Atualiza o serviço com a nova etapa
                   const servicoAtualizado = {
                       ...pedidoCompleto.servico,
                       etapa: {
@@ -611,7 +595,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                       }
                   };
                   
-                  // Atualiza o pedido completo
                   await Api.put(`/pedidos/${pedidoCompleto.id}`, {
                       pedido: {
                           valorTotal: pedidoCompleto.valorTotal || 0,
@@ -628,7 +611,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               }
           } catch (error) {
               console.error('⚠️ Erro ao atualizar etapa do pedido:', error);
-              // Não bloqueia o fluxo se falhar a atualização da etapa
           }
       }
       
@@ -637,7 +619,8 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       setTimeout(() => { onClose(); }, 1500);
     } catch (error) {
       console.error("Submit Error:", error);
-      setErrors({ submit: "Erro ao salvar agendamento. Verifique os dados." });
+      const backendMsg = error?.response?.data?.message;
+      setErrors({ submit: backendMsg || "Erro ao salvar agendamento. Verifique os dados." });
     } finally { setLoading(false); }
   };
 
@@ -648,13 +631,11 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
     const tipoValue = formData?.tipoAgendamento?.value || formData?.tipoAgendamento;
     const isOrcamento = tipoValue === "ORCAMENTO";
     
-    // Se estiver no step 2 e for orçamento, já finaliza
     if (step === 2 && isOrcamento) {
       await submitToBackend();
       return;
     }
     
-    // Se for prestação de serviço, continua para step 3 (produtos)
     if (step === 2) { 
       setLoading(true); 
       await fetchProdutos(); 
@@ -673,7 +654,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
 
   if (isSuccess) {
     return (
-      <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-9999 backdrop-blur-sm" onClick={onClose}>
+      <div className="fixed inset-0 bg-black/60 bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm" onClick={onClose}>
         <div className="bg-white border border-gray-200 rounded-xl p-10 m-3 w-full max-w-md shadow-2xl flex flex-col items-center justify-center text-center transform transition-all scale-100" onClick={(e) => e?.stopPropagation()}>
           <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-bounce"><CheckCircle className="w-12 h-12 text-green-600" /></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Agendamento {formData.id ? "Atualizado" : "Criado"}!</h2>
@@ -685,7 +666,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-9999 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-[9999] backdrop-blur-sm p-4" onClick={onClose}>
       <div className="flex flex-col gap-3 bg-white border border-gray-200 rounded-xl p-5 w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden" onClick={(e) => e?.stopPropagation()}>
         <div className="flex flex-row items-center justify-between border-b border-gray-100 pb-4">
           <h2 className="text-lg font-bold text-gray-900">{formData.id ? "Editar Agendamento" : "Novo Agendamento"}</h2>
@@ -774,10 +755,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Funcionários responsáveis</label>
-                <MultipleSelectCheckmarks placeholder="Selecione os funcionários" options={funcionariosOptions} value={selectedFuncionarios} onChange={setSelectedFuncionarios} />
-              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="flex flex-col items-center">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Data do evento <span className="text-red-500">*</span></label>
@@ -791,6 +768,21 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                     <Input type="time" value={formData?.endTime} onChange={(e) => handleInputChange("endTime", e?.target?.value)} error={errors?.endTime} className="!w-[100px] text-center [&::-webkit-calendar-picker-indicator]:hidden appearance-none" />
                   </div>
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Funcionários disponíveis <span className="text-red-500">*</span></label>
+                {(!formData?.eventDate || !formData?.startTime || !formData?.endTime) ? (
+                  <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-md p-3 flex items-center gap-2">
+                    <span>⚠️</span> Preencha a data e o horário acima para ver os funcionários disponíveis.
+                  </p>
+                ) : loadingFuncionarios ? (
+                  <p className="text-sm text-blue-600 animate-pulse p-3">Buscando funcionários disponíveis...</p>
+                ) : funcionariosOptions.length === 0 ? (
+                  <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">Nenhum funcionário disponível neste horário.</p>
+                ) : (
+                  <MultipleSelectCheckmarks placeholder="Selecione os funcionários" options={funcionariosOptions} value={selectedFuncionarios} onChange={setSelectedFuncionarios} />
+                )}
+                {errors?.funcionarios && <span className="text-xs text-red-500 mt-1 block font-medium">{errors.funcionarios}</span>}
               </div>
             </>
           )}
