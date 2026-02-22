@@ -9,6 +9,7 @@ import Estoque from '../pages/estoque/estoque.jsx';
 import ProdutoDetalhe from '../pages/estoque/ProdutoDetalhe.jsx';
 import Pedidos from '../pages/pedidos/pedidos.jsx';
 import Solicitacoes from '../pages/solicitacoes/Solicitacoes.jsx';
+import Agendamentos from '../pages/agendamentos/agendamentos.jsx';
 import CalendarDashboard from '../pages/calendar-dashboard/index.jsx';
 import Perfil from '../pages/perfil/perfil.jsx';
 import MapContainer from '../pages/geo-localizacao/MapContainer.jsx';
@@ -26,7 +27,8 @@ export const appRouter = createBrowserRouter([
   { path: '/Estoque/:id', element: <ProtectedRoute><ProdutoDetalhe /></ProtectedRoute> },
   { path: '/Pedidos', element: <ProtectedRoute><Pedidos /></ProtectedRoute> },
   { path: '/acesso', element: <ProtectedRoute><Solicitacoes /></ProtectedRoute> },
-  { path: '/Agendamentos', element: <ProtectedRoute><CalendarDashboard /></ProtectedRoute> },
+  { path: '/Agendamentos', element: <ProtectedRoute><Agendamentos /></ProtectedRoute> },
+  { path: '/Agenda', element: <ProtectedRoute><CalendarDashboard /></ProtectedRoute> },
   { path: '/primeiroAcesso/:idUsuario', element: <ProtectedRoute><NovaSenha /></ProtectedRoute> },
   { path: '/Perfil', element: <ProtectedRoute><Perfil /></ProtectedRoute> },
   { path: '/geo-localizacao', element: <ProtectedRoute><MapContainer /></ProtectedRoute> },
