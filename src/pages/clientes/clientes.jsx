@@ -13,6 +13,7 @@ import ClientesService from '../../api/services/clientesService';
 import ClienteFormModal from "./components/ClienteFormModal";
 import ClienteDetailsModal from "./components/ClienteDetailsModal";
 import ClienteImportModal from "./components/ClienteImportModal";
+import { Divider } from "@mui/material";
 import Api from "../../api/client/Api";
 import { formatCurrency, formatPhone } from "../../utils/formatters";
 
