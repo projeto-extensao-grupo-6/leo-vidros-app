@@ -19,6 +19,14 @@ export const parseCurrency = (value) => {
 export const formatPhone = (value) => {
   if (!value) return '';
   const digits = String(value).replace(/\D/g, '');
+  
+  if (digits.length === 8) {
+    return digits.replace(/(\d{4})(\d{4})/, '$1-$2');
+  }
+  
+  if (digits.length === 9 && digits.startsWith('9')) {
+    return digits.replace(/(\d{5})(\d{4})/, '$1-$2');
+  }
 
   if (digits.length <= 10) {
     return digits
@@ -26,6 +34,7 @@ export const formatPhone = (value) => {
       .replace(/(\d{4})(\d)/, '$1-$2')
       .replace(/(-\d{4})\d+?$/, '$1');
   }
+  
   return digits
     .replace(/(\d{2})(\d)/, '($1) $2')
     .replace(/(\d{5})(\d)/, '$1-$2')

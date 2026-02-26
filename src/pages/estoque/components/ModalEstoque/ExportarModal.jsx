@@ -1,12 +1,47 @@
-import React from "react";
-import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { Download, Loader2 } from "lucide-react";
+import { EtlApi } from "../../../../api/client/Api"; // Ajuste o caminho conforme a sua estrutura de pastas
+import Swal from "sweetalert2";
 
 const ExportarModal = ({ isOpen, onClose }) => {
+  const [isExporting, setIsExporting] = useState(false);
+
   if (!isOpen) return null;
 
-  const handleExportar = () => {
-    // TODO: implementar exportação para planilha
-    onClose();
+  const handleExportar = async () => {
+    try {
+      setIsExporting(true);
+
+      const response = await EtlApi.get('/excel/export/estoque', {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'relatorio_estoque.xlsx');
+      
+      document.body.appendChild(link);
+
+      link.click();
+      
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+
+      onClose();
+
+    } catch (error) {
+      console.error("Erro ao exportar planilha:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Não foi possível exportar o estoque. Tente novamente mais tarde.',
+        confirmButtonColor: '#007EA7'
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleModalContentClick = (e) => {
@@ -16,7 +51,7 @@ const ExportarModal = ({ isOpen, onClose }) => {
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
+      onClick={!isExporting ? onClose : undefined}
     >
       <div
         className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto"
@@ -43,15 +78,24 @@ const ExportarModal = ({ isOpen, onClose }) => {
         <div className="px-5 py-4 border-t border-gray-200 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm"
+            disabled={isExporting}
+            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancelar
           </button>
           <button
             onClick={handleExportar}
-            className="px-4 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#006891] transition-colors font-medium text-sm"
+            disabled={isExporting}
+            className="px-4 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#006891] transition-colors font-medium text-sm flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Exportar Planilha
+            {isExporting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Exportando...
+              </>
+            ) : (
+              "Exportar Planilha"
+            )}
           </button>
         </div>
       </div>

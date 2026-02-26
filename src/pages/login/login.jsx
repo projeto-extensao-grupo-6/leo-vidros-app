@@ -31,7 +31,7 @@ function Login() {
         { email, senha },
         { skipAuthRedirect: true }
       );
-
+      
       const data = response.data;
       const { id, firstLogin, nome, email: userEmail } = data;
 

@@ -4,13 +4,16 @@ import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import {
   Search,
-  Download,
+  Upload,
   Edit,
   Eye,
-  UserPlus,
+  Plus,
 } from "lucide-react";
+import ClientesService from '../../api/services/clientesService';
 import ClienteFormModal from "./components/ClienteFormModal";
 import ClienteDetailsModal from "./components/ClienteDetailsModal";
+import ClienteImportModal from "./components/ClienteImportModal";
+import { Divider } from "@mui/material";
 import Api from "../../api/client/Api";
 import { formatCurrency, formatPhone } from "../../utils/formatters";
 
@@ -70,6 +73,7 @@ export default function Clientes() {
   const [openForm, setOpenForm] = useState(false);
   const [modoEdicao, setModoEdicao] = useState(false);
   const [clienteSelecionado, setClienteSelecionado] = useState(null);
+  const [openImportModal, setOpenImportModal] = useState(false);
 
   const [selecionados, setSelecionados] = useState([]);
   const [openDetails, setOpenDetails] = useState(false);
@@ -228,6 +232,10 @@ export default function Clientes() {
     setOpenDetails(true);
   };
   
+   const handleImportSuccess = () => {
+    fetchClientes();
+    setOpenImportModal(false);
+  };
 
   return (
     <div className="flex bg-[#f7f9fa] min-h-screen">
@@ -303,14 +311,13 @@ export default function Clientes() {
                       <option value="Finalizado">Finalizado</option>
                     </select>
 
-                    {/* Exportar */}
+                    {/* Importar */}
                     <button
-                      onClick={handleExportar}
-                      disabled={selecionados.length === 0}
-                      className="flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-md text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setOpenImportModal(true)}
+                      className="flex items-center gap-2 border border-gray-300 py-2.5 px-4 rounded-md text-md text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                     >
-                      <Download className="w-4 h-4" />
-                      Exportar {selecionados.length > 0 && `(${selecionados.length})`}
+                      <Upload className="w-4 h-4" />
+                      Importar
                     </button>
                   </div>
                 </div>
@@ -483,6 +490,12 @@ export default function Clientes() {
         onClose={() => setOpenDetails(false)}
         cliente={clienteDetalhes}
         servicos={Array.isArray(pedidos) ? pedidos : []}
+      />
+
+      <ClienteImportModal
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
+        onSuccess={handleImportSuccess}
       />
     </div>
   );

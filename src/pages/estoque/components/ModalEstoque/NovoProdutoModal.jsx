@@ -20,7 +20,7 @@ const useProductAPI = () => {
           (attr) => attr.tipo && attr.valor
         ),
       });
-
+      console.log(response.data);
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || "Erro ao salvar produto");
