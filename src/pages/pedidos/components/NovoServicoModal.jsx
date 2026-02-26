@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react"; // <-- Importado o Fragment
+import PropTypes from "prop-types"; // <-- Importado o PropTypes
 import {
   Wrench,
   ChevronDown,
   Plus,
-  X,
   AlertCircle,
   MapPin,
   User,
@@ -19,7 +19,6 @@ import {
   removeMask,
 } from "../../../utils/masks";
 
-// Instância separada para ViaCEP (API externa, não precisa de token)
 const viaCepApi = axios.create({
   baseURL: "https://viacep.com.br/ws",
   timeout: 5000,
@@ -93,7 +92,8 @@ const useServicoAPI = () => {
         throw new Error("CEP não encontrado");
       }
       return data;
-    } catch (error) {
+    } catch (err) { // <-- Alterado e logado para não acusar erro de não uso
+      console.error(err);
       throw new Error("Erro ao buscar CEP");
     }
   };
@@ -102,15 +102,12 @@ const useServicoAPI = () => {
 };
 
 const DEFAULT_FORM_DATA = {
-  // Etapa 1 - Cliente
-  tipoCliente: "existente", // existente ou novo
+  tipoCliente: "existente", 
   clienteId: "",
   clienteNome: "",
   clienteCpf: "",
   clienteEmail: "",
   clienteTelefone: "",
-
-  // Etapa 2 - Endereço
   cep: "",
   rua: "",
   numero: "",
@@ -118,8 +115,6 @@ const DEFAULT_FORM_DATA = {
   bairro: "",
   cidade: "",
   uf: "",
-
-  // Etapa 3 - Dados do Serviço
   descricao: "",
   data: new Date().toISOString().split("T")[0],
   observacoes: "",
@@ -166,7 +161,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
     const { name, value } = e.target;
     let maskedValue = value;
 
-    // Aplicar máscaras específicas
     if (name === "clienteCpf") {
       maskedValue = cpfMask(value);
     } else if (name === "clienteTelefone") {
@@ -185,7 +179,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleTipoClienteChange = (tipo) => {
-    // Limpar dados do cliente ao trocar o tipo
     setFormData((prev) => ({
       ...prev,
       tipoCliente: tipo,
@@ -214,7 +207,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
         clienteCpf: clienteSelecionado.cpf || "",
         clienteEmail: clienteSelecionado.email || "",
         clienteTelefone: clienteSelecionado.telefone || "",
-        // Preencher endereço se existir
         cep: enderecoPrincipal.cep || "",
         rua: enderecoPrincipal.rua || "",
         numero: enderecoPrincipal.numero || "",
@@ -331,7 +323,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
       let clienteId = formData.clienteId;
       let clienteNome = formData.clienteNome;
 
-      // Se for cliente novo, cadastrar primeiro
       if (formData.tipoCliente === "novo") {
         const novoCliente = await cadastrarCliente({
           nome: formData.clienteNome,
@@ -350,7 +341,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
         clienteNome = novoCliente.nome;
       }
 
-      // Salvar o serviço
       const enderecoCompleto = `${formData.rua}, ${formData.numero}${
         formData.complemento ? ", " + formData.complemento : ""
       } - ${formData.bairro}, ${formData.cidade}/${formData.uf} - CEP: ${
@@ -394,7 +384,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
         className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[130vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-start px-8 py-3 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="bg-[#eeeeee] p-2.5 rounded-lg">
@@ -406,11 +395,10 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         </div>
 
-        {/* Stepper */}
         <div className="px-8 pt-7 pb-6">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
-              <React.Fragment key={step.id}>
+              <Fragment key={step.id}>
                 <div className="flex flex-col items-center flex-1 gap-1">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
@@ -439,12 +427,11 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                     }`}
                   />
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         </div>
 
-        {/* Error Alert */}
         <div className="flex justify-center w-full px-8">
           {error && (
             <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex flex-row items-center gap-3">
@@ -457,9 +444,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
 
-        {/* Conteúdo */}
         <div className="flex flex-col px-8 py-4">
-          {/* Etapa 0 - Cliente */}
           {currentStep === 0 && (
             <div className="flex flex-col gap-2">
               <div className="text-left flex flex-col gap-1">
@@ -600,7 +585,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 1 - Endereço */}
           {currentStep === 1 && (
             <div className="flex flex-col gap-4">
               <div className="text-left">
@@ -756,7 +740,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 2 - Dados do Serviço */}
           {currentStep === 2 && (
             <div className="flex flex-col gap-4">
               <div className="text-left">
@@ -806,7 +789,7 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                     <p className="text-md text-yellow-700 mt-1">
                       Este serviço será criado com o status{" "}
                       <span className="font-semibold">
-                        "Aguardando orçamento"
+                        &quot;Aguardando orçamento&quot;
                       </span>
                       . Você poderá alterar o status posteriormente no modal de
                       edição.
@@ -817,7 +800,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 3 - Revisão */}
           {currentStep === 3 && (
             <div className="flex flex-col gap-4">
               <div className="text-left">
@@ -829,7 +811,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                 </p>
               </div>
 
-              {/* Cliente */}
               <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-5 h-5 text-[#007EA7]" />
@@ -863,7 +844,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Endereço */}
               <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <MapPin className="w-5 h-5 text-[#007EA7]" />
@@ -883,7 +863,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Serviço */}
               <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <FileText className="w-5 h-5 text-[#007EA7]" />
@@ -916,7 +895,6 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-8 py-3 border-t bg-gray-50 flex justify-between">
           <button
             type="button"
@@ -970,6 +948,12 @@ const NovoServicoModal = ({ isOpen, onClose, onSuccess }) => {
       </div>
     </div>
   );
+};
+
+NovoServicoModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
 };
 
 export default NovoServicoModal;
