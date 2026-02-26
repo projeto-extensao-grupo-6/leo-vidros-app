@@ -1,6 +1,5 @@
-import Api from '../client/Api';
+import { Api, EtlApi } from "../client/Api";
 import BaseService from '../client/BaseService';
-import axios from 'axios';
 
 /**
  * Service para gerenciamento de estoque
@@ -119,7 +118,7 @@ class EstoqueService extends BaseService {
    */
   async exportToExcel() {
     try {
-      const response = await axios.get(`${microserviceUrl}/export/clientes`, {
+      const response = await EtlApi.get(`/export/estoque`, {
         responseType: 'blob',
         withCredentials: true, // Envia cookies automaticamente (incluindo authToken httpOnly)
       });
