@@ -1,15 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import * as XLSX from "xlsx";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
-import {
-  Search,
-  Upload,
-  Edit,
-  Eye,
-  Plus,
-} from "lucide-react";
-import ClientesService from '../../api/services/clientesService';
+import { Search, Upload, Edit, Eye, Plus } from "lucide-react";
+import ClientesService from "../../api/services/clientesService";
 import ClienteFormModal from "./components/ClienteFormModal";
 import ClienteDetailsModal from "./components/ClienteDetailsModal";
 import ClienteImportModal from "./components/ClienteImportModal";
@@ -18,7 +12,11 @@ import Api from "../../api/client/Api";
 import { formatCurrency, formatPhone } from "../../utils/formatters";
 
 const getPrimaryAddress = (cliente) => {
-  if (!cliente.enderecos || !Array.isArray(cliente.enderecos) || cliente.enderecos.length === 0) {
+  if (
+    !cliente.enderecos ||
+    !Array.isArray(cliente.enderecos) ||
+    cliente.enderecos.length === 0
+  ) {
     return { rua: "N/A", cidade: "N/A", uf: "N/A" };
   }
   return cliente.enderecos[0];
@@ -37,12 +35,20 @@ const HistoryCard = ({ hist }) => (
   <div className="w-full p-6 border border-gray-200 rounded-2xl bg-white">
     <div className="flex flex-col md:flex-row justify-between mb-4">
       <div className="max-w-[65%]">
-        <span className="text-gray-500 uppercase text-xs tracking-wide">Serviço</span>
-        <h3 className="text-gray-900 font-semibold text-lg leading-snug">{hist.servico}</h3>
+        <span className="text-gray-500 uppercase text-xs tracking-wide">
+          Serviço
+        </span>
+        <h3 className="text-gray-900 font-semibold text-lg leading-snug">
+          {hist.servico}
+        </h3>
       </div>
       <div className="text-right min-w-[100px]">
-        <span className="text-gray-500 uppercase text-xs tracking-wide">Valor</span>
-        <h3 className="text-green-700 font-semibold text-lg">{formatCurrency(hist.valor)}</h3>
+        <span className="text-gray-500 uppercase text-xs tracking-wide">
+          Valor
+        </span>
+        <h3 className="text-green-700 font-semibold text-lg">
+          {formatCurrency(hist.valor)}
+        </h3>
       </div>
     </div>
 
@@ -110,17 +116,20 @@ export default function Clientes() {
 
   const clientesFiltrados = useMemo(() => {
     const clientesArray = Array.isArray(clientes) ? clientes : [];
-    
+
     let filtered = clientesArray.filter((c) => {
       return c.nome && c.nome.toLowerCase().includes(busca.toLowerCase());
     });
-    if (situacao !== "Todos") filtered = filtered.filter((c) => c.status === situacao);
+    if (situacao !== "Todos")
+      filtered = filtered.filter((c) => c.status === situacao);
 
     return filtered.sort((a, b) => {
       if (ordenar === "recentes") return b.id - a.id;
       if (ordenar === "antigos") return a.id - b.id;
-      if (ordenar === "az") return a.nome && b.nome ? a.nome.localeCompare(b.nome) : 0;
-      if (ordenar === "za") return a.nome && b.nome ? b.nome.localeCompare(a.nome) : 0;
+      if (ordenar === "az")
+        return a.nome && b.nome ? a.nome.localeCompare(b.nome) : 0;
+      if (ordenar === "za")
+        return a.nome && b.nome ? b.nome.localeCompare(a.nome) : 0;
       return 0;
     });
   }, [clientes, busca, situacao, ordenar]);
@@ -147,30 +156,30 @@ export default function Clientes() {
       try {
         const clienteAtualizado = { ...clienteSelecionado, ...dadosCliente };
 
-        const response = await Api.put(`/clientes/${clienteSelecionado.id}`, clienteAtualizado);
+        const response = await Api.put(
+          `/clientes/${clienteSelecionado.id}`,
+          clienteAtualizado,
+        );
 
         // Usar os dados retornados pela API
         const clienteRetornado = response.data;
 
         setClientes((prev) =>
           prev.map((c) =>
-            c.id === clienteSelecionado.id ? clienteRetornado : c
-          )
+            c.id === clienteSelecionado.id ? clienteRetornado : c,
+          ),
         );
-
       } catch (error) {
         console.error("Erro ao editar cliente (PUT):", error);
       }
     } else {
       try {
-
-        const novoClienteComId = { ...dadosCliente};
+        const novoClienteComId = { ...dadosCliente };
 
         const response = await Api.post("/clientes", novoClienteComId);
 
         const novoCliente = response.data;
         setClientes((prev) => [novoCliente, ...prev]);
-
       } catch (error) {
         console.error("Erro ao criar cliente (POST):", error);
       }
@@ -189,9 +198,7 @@ export default function Clientes() {
 
   const handleSelectClick = (event, id) => {
     setSelecionados((prev) =>
-      prev.includes(id)
-        ? prev.filter((selId) => selId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((selId) => selId !== id) : [...prev, id],
     );
   };
 
@@ -231,8 +238,8 @@ export default function Clientes() {
     setClienteDetalhes(cliente);
     setOpenDetails(true);
   };
-  
-   const handleImportSuccess = () => {
+
+  const handleImportSuccess = () => {
     fetchClientes();
     setOpenImportModal(false);
   };
@@ -240,7 +247,7 @@ export default function Clientes() {
   return (
     <div className="flex bg-[#f7f9fa] min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      
+
       <div className="flex-1 flex flex-col min-h-screen">
         <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
         <div className="pt-20" />
@@ -367,7 +374,9 @@ export default function Clientes() {
                   ) : (
                     clientesPagina.map((c) => {
                       const isItemSelected = isSelected(c.id);
-                      const qtdPedidos = pedidos.filter((p) => p.cliente?.id === c.id).length;
+                      const qtdPedidos = pedidos.filter(
+                        (p) => p.cliente?.id === c.id,
+                      ).length;
 
                       return (
                         <React.Fragment key={c.id}>
@@ -380,7 +389,9 @@ export default function Clientes() {
                               <input
                                 type="checkbox"
                                 checked={isItemSelected}
-                                onChange={(event) => handleSelectClick(event, c.id)}
+                                onChange={(event) =>
+                                  handleSelectClick(event, c.id)
+                                }
                                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                               />
                             </div>
@@ -399,8 +410,8 @@ export default function Clientes() {
                                   c.status === "Ativo"
                                     ? "bg-green-100 text-green-800"
                                     : c.status === "Inativo"
-                                    ? "bg-red-100 text-red-800"
-                                    : "bg-gray-100 text-gray-800"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-800"
                                 }`}
                               >
                                 {c.status}
@@ -448,9 +459,13 @@ export default function Clientes() {
                   <p className="text-sm text-gray-600">
                     Mostrando{" "}
                     <span className="font-medium">
-                      {clientesFiltrados.length > 0 ? indexPrimeiro + 1 : 0}-{Math.min(indexUltimo, clientesFiltrados.length)}
+                      {clientesFiltrados.length > 0 ? indexPrimeiro + 1 : 0}-
+                      {Math.min(indexUltimo, clientesFiltrados.length)}
                     </span>{" "}
-                    de <span className="font-medium">{clientesFiltrados.length}</span>{" "}
+                    de{" "}
+                    <span className="font-medium">
+                      {clientesFiltrados.length}
+                    </span>{" "}
                     resultados
                   </p>
                   <div className="flex gap-2">
@@ -462,7 +477,9 @@ export default function Clientes() {
                       Anterior
                     </button>
                     <button
-                      onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
+                      onClick={() =>
+                        setPagina((prev) => Math.min(prev + 1, totalPaginas))
+                      }
                       disabled={pagina === totalPaginas}
                       className="flex items-center gap-1 border border-gray-300 py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
@@ -484,7 +501,7 @@ export default function Clientes() {
         modoEdicao={modoEdicao}
         clienteInicial={clienteSelecionado}
       />
-      
+
       <ClienteDetailsModal
         open={openDetails}
         onClose={() => setOpenDetails(false)}

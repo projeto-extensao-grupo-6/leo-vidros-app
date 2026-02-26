@@ -24,9 +24,9 @@ const InativarProdutoModal = ({ isOpen, onClose, onConfirm }) => {
         </h3>
         <br />
         <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-          Esta ação não irá deletar o produto.  
-          Ele apenas será marcado como <strong>inativo</strong> para fins de histórico
-          e não aparecerá mais nas operações ativas.
+          Esta ação não irá deletar o produto. Ele apenas será marcado como{" "}
+          <strong>inativo</strong> para fins de histórico e não aparecerá mais
+          nas operações ativas.
         </p>
         <br />
         <div className="flex items-center justify-between mt-4 gap-3">

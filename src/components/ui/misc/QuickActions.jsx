@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Button from '../Button/Button.component';
-import Icon from './AppIcon';
-import TaskCreateModal from './TaskCreateModal';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "../Button/Button.component";
+import Icon from "./AppIcon";
+import TaskCreateModal from "./TaskCreateModal";
 
 const QuickActions = () => {
   const navigate = useNavigate();
@@ -11,52 +11,52 @@ const QuickActions = () => {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    const savedTasks = JSON.parse(sessionStorage.getItem('tasks') || '[]');
+    const savedTasks = JSON.parse(sessionStorage.getItem("tasks") || "[]");
     setTasks(savedTasks);
   }, []);
 
   const saveTasks = (newTasks) => {
     setTasks(newTasks);
-    sessionStorage.setItem('tasks', JSON.stringify(newTasks));
+    sessionStorage.setItem("tasks", JSON.stringify(newTasks));
   };
 
   const handleTaskSave = (taskData) => {
     const newTask = {
       id: Date.now(),
       ...taskData,
-      createdAt: new Date()?.toISOString()
+      createdAt: new Date()?.toISOString(),
     };
     const updatedTasks = [...tasks, newTask];
     saveTasks(updatedTasks);
 
-    alert('Task created successfully!');
+    alert("Task created successfully!");
   };
 
   const quickActions = [
     {
-      icon: 'Plus',
-      label: 'Quick Task',
+      icon: "Plus",
+      label: "Quick Task",
       onClick: () => setShowTaskModal(true),
-      color: 'bg-primary hover:bg-primary/90'
+      color: "bg-primary hover:bg-primary/90",
     },
     {
-      icon: 'Calendar',
-      label: 'Calendar',
-      onClick: () => navigate('/calendar-dashboard'),
-      color: 'bg-blue-500 hover:bg-blue-600'
+      icon: "Calendar",
+      label: "Calendar",
+      onClick: () => navigate("/calendar-dashboard"),
+      color: "bg-blue-500 hover:bg-blue-600",
     },
     {
-      icon: 'Search',
-      label: 'Search',
-      onClick: () => navigate('/event-search-and-filtering'),
-      color: 'bg-emerald-500 hover:bg-emerald-600'
+      icon: "Search",
+      label: "Search",
+      onClick: () => navigate("/event-search-and-filtering"),
+      color: "bg-emerald-500 hover:bg-emerald-600",
     },
     {
-      icon: 'Settings',
-      label: 'Settings',
+      icon: "Settings",
+      label: "Settings",
       onClick: () => {},
-      color: 'bg-slate-500 hover:bg-slate-600'
-    }
+      color: "bg-slate-500 hover:bg-slate-600",
+    },
   ];
 
   return (
@@ -91,8 +91,9 @@ const QuickActions = () => {
           <Button
             size="icon"
             className={`h-14 w-14 rounded-full shadow-lg transition-transform duration-200 ${
-              isExpanded 
-                ? 'bg-slate-500 hover:bg-slate-600 rotate-45' :'bg-primary hover:bg-primary/90'
+              isExpanded
+                ? "bg-slate-500 hover:bg-slate-600 rotate-45"
+                : "bg-primary hover:bg-primary/90"
             } text-white border-0`}
             onClick={() => setIsExpanded(!isExpanded)}
           >

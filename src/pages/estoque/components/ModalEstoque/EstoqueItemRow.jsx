@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 import { Eye, Edit, Trash2 } from "lucide-react";
 
 const EstoqueItemRow = ({
@@ -13,10 +13,10 @@ const EstoqueItemRow = ({
     item.situacao === "Fora de estoque"
       ? "text-red-600 font-semibold"
       : item.situacao === "Abaixo do normal"
-      ? "text-yellow-600 font-semibold"
-      : item.situacao === "Reservado"
-      ? "text-yellow-500 font-semibold"
-      : "text-green-600 font-semibold";
+        ? "text-yellow-600 font-semibold"
+        : item.situacao === "Reservado"
+          ? "text-yellow-500 font-semibold"
+          : "text-green-600 font-semibold";
 
   const produto = item.produto || {};
   const unidadeMedida = produto.unidademedida || "—";
@@ -45,7 +45,7 @@ const EstoqueItemRow = ({
         />
       </div>
 
-      <div 
+      <div
         className="py-3 w-[15%] pl-2 pr-1 truncate font-medium text-gray-800"
         title={nome}
       >
@@ -55,27 +55,25 @@ const EstoqueItemRow = ({
         {preco}
       </div>
 
-      <div 
-        className="py-3 w-[15%] px-4 text-gray-600 truncate">
+      <div className="py-3 w-[15%] px-4 text-gray-600 truncate">
         {unidadeMedida}
       </div>
-
 
       <div className="py-3 w-[20%] text-center font-semibold text-gray-800">
         {quantidade}
       </div>
 
-      <div className={`py-3 w-[10%] text-center ${ativo === true ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}`}>
-        {ativo === true ? "Ativo" : "Inativo"} 
+      <div
+        className={`py-3 w-[10%] text-center ${ativo === true ? "text-green-600 font-semibold" : "text-red-600 font-semibold"}`}
+      >
+        {ativo === true ? "Ativo" : "Inativo"}
       </div>
 
       <div className={`py-3 w-[10%] text-center ${situacaoClasse}`}>
         {item.situacao}
       </div>
 
-
       <div className="py-3 w-[15%] text-right pr-4 flex justify-end gap-2">
-       
         <button
           onClick={onViewDetails}
           className="p-2 rounded-md hover:bg-blue-50 text-[#007EA7] transition-colors duration-150 cursor-pointer"
@@ -85,7 +83,6 @@ const EstoqueItemRow = ({
           <Eye className="w-5 h-5" />
         </button>
 
-       
         <button
           onClick={onDelete}
           className="p-2 rounded-md hover:bg-red-50 text-red-600 transition-colors duration-150"

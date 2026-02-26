@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import EmailIcon from "@mui/icons-material/Email";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -35,16 +35,15 @@ const EsqueceuSenha = () => {
             timer: 3000,
             showConfirmButton: false,
           });
-          
+
           setTimeout(() => {
             navigate("/Login");
           }, 3500);
         }, 2000);
       }
-
     } catch (error) {
       console.error("Erro ao recuperar senha:", error);
-      
+
       // Tratamento de diferentes tipos de erro
       if (error.response?.status === 404) {
         Swal.fire({
@@ -94,7 +93,7 @@ const EsqueceuSenha = () => {
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
           style={{
             backgroundImage:
-              'url("/src/assets/images/GlaserAdobeStock_741312364.jpeg")'
+              'url("/src/assets/images/GlaserAdobeStock_741312364.jpeg")',
           }}
         />
 
@@ -114,7 +113,9 @@ const EsqueceuSenha = () => {
                 className="flex items-center gap-2 text-[#007EA7] hover:text-[#005f73] transition-colors"
               >
                 <ArrowBackIcon className="text-xl cursor-pointer" />
-                <span className="text-md font-semibold cursor-pointer">Voltar ao login</span>
+                <span className="text-md font-semibold cursor-pointer">
+                  Voltar ao login
+                </span>
               </button>
             </div>
 

@@ -7,8 +7,13 @@
   font-weight: 500;
   transition: background 0.2s ease, transform 0.15s ease;
   font-family: "Inter", sans-serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
+/* Tamanhos */
 .btn-sm {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -24,13 +29,14 @@
   font-size: 1.1rem;
 }
 
+/* Variantes usando suas variáveis de cor */
 .btn-primary {
   background: var(--primary-color);
   color: var(--neutral-color-0);
   border-radius: 8px;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: var(--secondary-color);
 }
 
@@ -40,7 +46,7 @@
   border-radius: 8px;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:not(:disabled) {
   background: var(--tertiary-color);
   color: var(--neutral-color-0);
   border-radius: 8px;
@@ -55,7 +61,7 @@
   border-radius: 8px;
 }
 
-.btn-outline:hover {
+.btn-outline:hover:not(:disabled) {
   color: var(--neutral-color-1);
 }
 
@@ -65,11 +71,17 @@
   border-radius: 8px;
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
   background: #b91c1c;
 }
 
 /* Efeito ao clicar */
-.btn:active {
+.btn:active:not(:disabled) {
   transform: scale(0.97);
+}
+
+/* Estado disabled */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

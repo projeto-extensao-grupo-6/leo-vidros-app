@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, isToday } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import Icon from '../../../components/ui/misc/AppIcon';
-import Button from '../../../components/ui/Button/Button.component';
+import { useState } from "react";
+import {
+  format,
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  addDays,
+  isSameMonth,
+  isSameDay,
+  isToday,
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import Icon from "../../../components/ui/misc/AppIcon";
+import Button from "../../../components/ui/Button/Button.component";
 
 const MiniCalendar = ({ selectedDate, onDateSelect }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const fixedHolidays = [
-    '01/01', '21/04', '01/05', '07/09', '12/10', '02/11', '15/11', '25/12'
+    "01/01",
+    "21/04",
+    "01/05",
+    "07/09",
+    "12/10",
+    "02/11",
+    "15/11",
+    "25/12",
   ];
 
   const monthStart = startOfMonth(currentMonth);
@@ -26,27 +43,31 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
     for (let i = 0; i < 7; i++) {
       formattedDate = format(day, dateFormat);
       const cloneDay = day;
-      
+
       const isCurrentMonth = isSameMonth(day, monthStart);
       const isSelected = isSameDay(day, selectedDate);
       const isDateToday = isToday(day);
-      const isHoliday = fixedHolidays.includes(format(day, 'dd/MM'));
+      const isHoliday = fixedHolidays.includes(format(day, "dd/MM"));
 
       // Removi o 'hover-scale' daqui
-      let dayClasses = "aspect-square p-1 cursor-pointer transition-micro text-xs flex items-center justify-center ";
+      let dayClasses =
+        "aspect-square p-1 cursor-pointer transition-micro text-xs flex items-center justify-center ";
 
       if (!isCurrentMonth) {
         // Dia de outro mês: Adicionei o hover azul claro também
         dayClasses += "text-text-secondary/50 rounded-modern hover:bg-blue-100";
       } else if (isDateToday) {
         // HOJE: Azul forte (bg-blue-500)
-        dayClasses += "bg-blue-500 text-white font-bold rounded-full hover:bg-blue-600";
+        dayClasses +=
+          "bg-blue-500 text-white font-bold rounded-full hover:bg-blue-600";
       } else if (isSelected) {
         // Selecionado
-        dayClasses += "bg-primary text-primary-foreground rounded-modern hover:bg-primary/90";
+        dayClasses +=
+          "bg-primary text-primary-foreground rounded-modern hover:bg-primary/90";
       } else if (isHoliday) {
         // Feriado: Hover azul claro
-        dayClasses += "bg-warning/10 text-warning font-medium rounded-modern hover:bg-blue-100";
+        dayClasses +=
+          "bg-warning/10 text-warning font-medium rounded-modern hover:bg-blue-100";
       } else {
         // Dia comum: Hover azul claro (bg-blue-100)
         dayClasses += "text-text-primary rounded-modern hover:bg-blue-100";
@@ -59,24 +80,28 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
           onClick={() => onDateSelect?.(cloneDay)}
         >
           <span>{formattedDate}</span>
-        </div>
+        </div>,
       );
       day = addDays(day, 1);
     }
     rows?.push(
       <div className="grid grid-cols-7 gap-1" key={day}>
         {days}
-      </div>
+      </div>,
     );
     days = [];
   }
 
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+    );
   };
 
   const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+    );
   };
 
   return (
@@ -87,20 +112,20 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
           variant="ghost"
           size="icon"
           onClick={prevMonth}
-          className='cursor-pointer hover:bg-blue-100'
+          className="cursor-pointer hover:bg-blue-100"
         >
           <Icon name="ChevronLeft" size={16} />
         </Button>
 
         <span className="font-medium text-text-primary text-sm capitalize">
-          {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
+          {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
         </span>
 
         <Button
           variant="ghost"
           size="icon"
           onClick={nextMonth}
-          className='cursor-pointer hover:bg-blue-100'
+          className="cursor-pointer hover:bg-blue-100"
         >
           <Icon name="ChevronRight" size={16} />
         </Button>
@@ -108,17 +133,18 @@ const MiniCalendar = ({ selectedDate, onDateSelect }) => {
 
       {/* Days of week */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']?.map((day) => (
-          <div key={day} className="aspect-square p-1 text-xs font-medium text-text-secondary text-center flex items-center justify-center">
+        {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"]?.map((day) => (
+          <div
+            key={day}
+            className="aspect-square p-1 text-xs font-medium text-text-secondary text-center flex items-center justify-center"
+          >
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="space-y-1">
-        {rows}
-      </div>
+      <div className="space-y-1">{rows}</div>
     </div>
   );
 };

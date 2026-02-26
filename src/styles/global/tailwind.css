@@ -1,6 +1,6 @@
 /* ===== Imports de fontes ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap");
 
 /* ===== Importações explícitas do Tailwind compilado ===== */
 @import "tailwindcss";
@@ -8,56 +8,56 @@
 /* ===== Variáveis base ===== */
 :root {
   /* Core Colors */
-  --color-background: #FAFBFC;
-  --color-foreground: #1E293B;
+  --color-background: #fafbfc;
+  --color-foreground: #1e293b;
   --color-border: rgba(0, 0, 0, 0.06);
-  --color-input: #FFFFFF;
-  --color-ring: #2563EB;
-  
+  --color-input: #ffffff;
+  --color-ring: #2563eb;
+
   /* Card Colors */
-  --color-card: #FFFFFF;
-  --color-card-foreground: #1E293B;
-  
+  --color-card: #ffffff;
+  --color-card-foreground: #1e293b;
+
   /* Popover Colors */
-  --color-popover: #FFFFFF;
-  --color-popover-foreground: #1E293B;
-  
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1e293b;
+
   /* Muted Colors */
-  --color-muted: #F1F5F9;
-  --color-muted-foreground: #64748B;
-  
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+
   /* Primary Colors */
-  --color-primary: #2563EB;
-  --color-primary-foreground: #FFFFFF;
-  
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+
   /* Secondary Colors */
-  --color-secondary: #64748B;
-  --color-secondary-foreground: #FFFFFF;
-  
+  --color-secondary: #64748b;
+  --color-secondary-foreground: #ffffff;
+
   /* Destructive Colors */
-  --color-destructive: #EF4444;
-  --color-destructive-foreground: #FFFFFF;
-  
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
   /* Accent Colors */
-  --color-accent: #F59E0B;
-  --color-accent-foreground: #FFFFFF;
-  
+  --color-accent: #f59e0b;
+  --color-accent-foreground: #ffffff;
+
   /* Success Colors */
-  --color-success: #10B981;
-  --color-success-foreground: #FFFFFF;
-  
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+
   /* Warning Colors */
-  --color-warning: #F59E0B;
-  --color-warning-foreground: #FFFFFF;
-  
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+
   /* Error Colors */
-  --color-error: #EF4444;
-  --color-error-foreground: #FFFFFF;
-  
+  --color-error: #ef4444;
+  --color-error-foreground: #ffffff;
+
   /* Surface/Text */
-  --color-surface: #FFFFFF;
-  --color-text-primary: #1E293B;
-  --color-text-secondary: #64748B;
+  --color-surface: #ffffff;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #64748b;
 }
 
 /* ===== Reset global ===== */
@@ -68,20 +68,27 @@
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Inter", sans-serif;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
 }
 
 /* ===== Componentes customizados ===== */
 .shadow-soft {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .shadow-interactive {

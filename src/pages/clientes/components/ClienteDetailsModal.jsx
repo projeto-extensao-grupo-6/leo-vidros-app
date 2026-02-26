@@ -1,10 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal } from "@mui/material";
 import api from "../../../api/client/Api";
 import { formatCurrency } from "../../../utils/formatters";
 
-export default function ClienteDetailsModal({ open, onClose, cliente, servicos: servicosProp }) {
-
+export default function ClienteDetailsModal({
+  open,
+  onClose,
+  cliente,
+  servicos: servicosProp,
+}) {
   if (!cliente) return null;
 
   const PEDIDOS_URL = "/Pedidos";
@@ -35,7 +39,9 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
 
       setLoading(true);
       try {
-        const response = await api.get(`${PEDIDOS_URL}?clienteId=${cliente.id}`);
+        const response = await api.get(
+          `${PEDIDOS_URL}?clienteId=${cliente.id}`,
+        );
         const data = Array.isArray(response.data) ? response.data : [];
         if (isMounted) setServicos(data);
       } catch (err) {
@@ -54,9 +60,10 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
 
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                      w-11/12 max-h-[90vh] bg-white rounded-xl shadow-xs p-8 overflow-hidden space-y-8">
-
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                      w-11/12 max-h-[90vh] bg-white rounded-xl shadow-xs p-8 overflow-hidden space-y-8"
+      >
         <div className="flex justify-between items-center mb-6 ">
           <h2 className="text-2xl font-bold">Detalhes do Cliente</h2>
           <button
@@ -73,7 +80,7 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
             <input
               type="text"
               className="border border-gray-300 rounded-md p-3 w-full font-normal"
-              value={cliente.nome || (cliente?.cliente?.nome) || "N/A"}
+              value={cliente.nome || cliente?.cliente?.nome || "N/A"}
               readOnly
             />
           </div>
@@ -105,7 +112,11 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
             type="text"
             className="border border-gray-300 rounded-md p-3 w-full font-normal"
             value={
-              endereco && (endereco.rua || endereco.bairro || endereco.cep || endereco.numero)
+              endereco &&
+              (endereco.rua ||
+                endereco.bairro ||
+                endereco.cep ||
+                endereco.numero)
                 ? `${endereco.rua || ""}${endereco.numero ? ", " + endereco.numero : ""}${endereco.bairro ? " - " + endereco.bairro : ""}${endereco.cidade ? " / " + endereco.cidade : ""}${endereco.uf ? " - " + endereco.uf : ""}`
                 : "N/A"
             }
@@ -123,28 +134,43 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
                     <th className="p-3 text-left font-semibold">Serviço</th>
                     <th className="p-3 text-left font-semibold">Valor Total</th>
                     <th className="p-3 text-left font-semibold">Status</th>
-                    <th className="p-3 text-left font-semibold">Forma de Pagamento</th>
+                    <th className="p-3 text-left font-semibold">
+                      Forma de Pagamento
+                    </th>
                     <th className="p-3 text-left font-semibold">Observação</th>
-                    <th className="p-3 text-left font-semibold">Etapa / Tipo</th>
-                    <th className="p-3 text-left font-semibold">Descrição do Serviço</th>
+                    <th className="p-3 text-left font-semibold">
+                      Etapa / Tipo
+                    </th>
+                    <th className="p-3 text-left font-semibold">
+                      Descrição do Serviço
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {servicos.map((pedido, index) => {
                     const serv = pedido.servico || {};
-                    const statusNome = pedido.status?.nome || pedido.status || (pedido.ativo ? "ATIVO" : "INATIVO");
+                    const statusNome =
+                      pedido.status?.nome ||
+                      pedido.status ||
+                      (pedido.ativo ? "ATIVO" : "INATIVO");
 
                     return (
-                      <tr key={pedido.id ?? index} className="hover:bg-gray-50 transition-colors">
+                      <tr
+                        key={pedido.id ?? index}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
                         <td className="p-3 text-gray-900">
-                          {serv.nome || serv.codigo || pedido.observacao || "N/A"}
+                          {serv.nome ||
+                            serv.codigo ||
+                            pedido.observacao ||
+                            "N/A"}
                         </td>
                         <td className="p-3 text-gray-900">
-                          {formatCurrency(pedido.valorTotal ?? pedido.valor ?? serv.precoBase)}
+                          {formatCurrency(
+                            pedido.valorTotal ?? pedido.valor ?? serv.precoBase,
+                          )}
                         </td>
-                        <td className="p-3 text-gray-900">
-                          {statusNome}
-                        </td>
+                        <td className="p-3 text-gray-900">{statusNome}</td>
                         <td className="p-3 text-gray-900">
                           {pedido.formaPagamento || "N/A"}
                         </td>
@@ -152,7 +178,10 @@ export default function ClienteDetailsModal({ open, onClose, cliente, servicos: 
                           {pedido.observacao || "N/A"}
                         </td>
                         <td className="p-3 text-gray-900">
-                          {serv.etapa?.nome || pedido.status?.tipo || pedido.tipoPedido || "N/A"}
+                          {serv.etapa?.nome ||
+                            pedido.status?.tipo ||
+                            pedido.tipoPedido ||
+                            "N/A"}
                         </td>
                         <td className="p-3 text-gray-900">
                           {serv.descricao || pedido.descricao || "N/A"}

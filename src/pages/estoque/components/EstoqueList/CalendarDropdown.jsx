@@ -1,10 +1,20 @@
-import React, { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const getMonthName = (monthIndex) => {
   const months = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
   ];
   return months[monthIndex];
 };
@@ -35,7 +45,11 @@ const CalendarDropdown = ({ isOpen, onClose, onDateSelect }) => {
       days.push({ day: null, isCurrentMonth: false });
     }
     for (let day = 1; day <= totalDays; day++) {
-      days.push({ day, isCurrentMonth: true, date: new Date(year, month, day) });
+      days.push({
+        day,
+        isCurrentMonth: true,
+        date: new Date(year, month, day),
+      });
     }
     return days;
   }, [currentDate]);
@@ -81,16 +95,23 @@ const CalendarDropdown = ({ isOpen, onClose, onDateSelect }) => {
 
       <div className="grid grid-cols-7 gap-1">
         {calendarDays.map((dayItem, index) => {
-          const isToday = dayItem.day && dayItem.date.toDateString() === new Date().toDateString();
-          const isSelected = dayItem.day && selectedDate && dayItem.date.toDateString() === selectedDate.toDateString();
+          const isToday =
+            dayItem.day &&
+            dayItem.date.toDateString() === new Date().toDateString();
+          const isSelected =
+            dayItem.day &&
+            selectedDate &&
+            dayItem.date.toDateString() === selectedDate.toDateString();
 
-          let dayClasses = "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors text-sm";
+          let dayClasses =
+            "w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-colors text-sm";
 
           if (dayItem.day) {
             if (isSelected) {
               dayClasses += " bg-[#003d6b] text-white font-semibold";
             } else if (isToday) {
-              dayClasses += " border border-[#003d6b] text-[#003d6b] font-medium hover:bg-gray-100";
+              dayClasses +=
+                " border border-[#003d6b] text-[#003d6b] font-medium hover:bg-gray-100";
             } else {
               dayClasses += " text-gray-900 hover:bg-gray-100";
             }

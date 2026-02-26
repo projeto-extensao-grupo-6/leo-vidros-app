@@ -15,7 +15,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com lista de estoque
    */
   getAll() {
-    return this.get('/estoques');
+    return this.get("/estoques");
   }
 
   /**
@@ -32,7 +32,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com produtos em estoque baixo
    */
   getLowStock() {
-    return this.get('/estoques/baixo');
+    return this.get("/estoques/baixo");
   }
 
   /**
@@ -40,7 +40,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com itens críticos
    */
   getCriticalItems() {
-    return this.get('/estoques/criticos');
+    return this.get("/estoques/criticos");
   }
 
   /**
@@ -49,7 +49,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com resultado
    */
   registrarEntrada(data) {
-    return this.post('/estoques/entrada', data);
+    return this.post("/estoques/entrada", data);
   }
 
   /**
@@ -58,7 +58,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com resultado
    */
   registrarSaida(data) {
-    return this.post('/estoques/saida', data);
+    return this.post("/estoques/saida", data);
   }
 
   /**
@@ -76,7 +76,7 @@ class EstoqueService extends BaseService {
    * @returns {Promise} Promise com produtos da categoria
    */
   getByCategoria(categoria) {
-    return this.get('/estoques', { params: { categoria } });
+    return this.get("/estoques", { params: { categoria } });
   }
 
   /**
@@ -100,15 +100,14 @@ class EstoqueService extends BaseService {
 
   importarPlanilha(arquivo) {
     const formData = new FormData();
-    formData.append('file', arquivo);
+    formData.append("file", arquivo);
 
-    return this.post('/estoques/importar', formData, {
+    return this.post("/estoques/importar", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
   }
-
 
   /**
    * Exporta estoque para Excel via microservice
@@ -122,19 +121,22 @@ class EstoqueService extends BaseService {
         responseType: 'blob',
         withCredentials: true, // Envia cookies automaticamente (incluindo authToken httpOnly)
       });
-      
+
       return {
         success: true,
         data: response.data,
-        status: response.status
+        status: response.status,
       };
     } catch (error) {
-      console.error('Erro ao exportar planilha de estoque:', error);
+      console.error("Erro ao exportar planilha de estoque:", error);
       return {
         success: false,
         data: null,
-        error: error.response?.data?.message ?? error.message ?? 'Erro ao exportar planilha',
-        status: error.response?.status
+        error:
+          error.response?.data?.message ??
+          error.message ??
+          "Erro ao exportar planilha",
+        status: error.response?.status,
       };
     }
   }

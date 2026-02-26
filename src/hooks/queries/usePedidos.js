@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../api/queryKeys';
-import PedidosService from '../../api/services/pedidosService';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
+import PedidosService from "../../api/services/pedidosService";
 
 const sortById = (lista) =>
   [...lista].sort((a, b) => {
@@ -10,14 +10,16 @@ const sortById = (lista) =>
     return String(b.id) < String(a.id) ? -1 : 1;
   });
 
-
 export function usePedidosProduto(options = {}) {
   return useQuery({
     queryKey: queryKeys.pedidos.produtos(),
     queryFn: async () => {
       const res = await PedidosService.buscarPedidosDeProduto();
-      if (!res.success) throw new Error(res.error ?? 'Erro ao carregar pedidos');
-      const mapeados = (res.data ?? []).map((p) => PedidosService.mapearParaFrontend(p));
+      if (!res.success)
+        throw new Error(res.error ?? "Erro ao carregar pedidos");
+      const mapeados = (res.data ?? []).map((p) =>
+        PedidosService.mapearParaFrontend(p),
+      );
       return sortById(mapeados);
     },
     ...options,
@@ -29,8 +31,11 @@ export function usePedidosServico(options = {}) {
     queryKey: queryKeys.pedidos.servicos(),
     queryFn: async () => {
       const res = await PedidosService.buscarPedidosDeServico();
-      if (!res.success) throw new Error(res.error ?? 'Erro ao carregar serviços');
-      const mapeados = (res.data ?? []).map((p) => PedidosService.mapearParaFrontend(p));
+      if (!res.success)
+        throw new Error(res.error ?? "Erro ao carregar serviços");
+      const mapeados = (res.data ?? []).map((p) =>
+        PedidosService.mapearParaFrontend(p),
+      );
       return sortById(mapeados);
     },
     ...options,
@@ -42,7 +47,7 @@ export function usePedido(id, options = {}) {
     queryKey: queryKeys.pedidos.detail(id),
     queryFn: async () => {
       const res = await PedidosService.buscarPorId(id);
-      if (!res.success) throw new Error(res.error ?? 'Erro ao carregar pedido');
+      if (!res.success) throw new Error(res.error ?? "Erro ao carregar pedido");
       return res.data ?? null;
     },
     enabled: !!id,

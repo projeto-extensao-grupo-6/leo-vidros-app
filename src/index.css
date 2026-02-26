@@ -1,8 +1,8 @@
 @import "tailwindcss";
- 
- *{
+
+* {
   font-family: "Poppins", sans-serif;
- }
+}
 
 /* Custom scrollbar styles */
 .scrollbar-thin {
@@ -78,11 +78,11 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 }
 
 .card {
-  padding: 2em; 
+  padding: 2em;
 }
 
 .read-the-docs {
-  color: #888; 
+  color: #888;
 }
 
 /* --- CORREÇÕES DO MODAL --- */

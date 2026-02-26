@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import LockIcon from "@mui/icons-material/Lock";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Button from "../../components/ui/Button/Button.component";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import Api from "../../api/client/Api";
 import { useUser } from "../../context/UserContext.jsx";
 
@@ -19,7 +19,6 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useUser();
 
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
@@ -29,9 +28,9 @@ function Login() {
       const response = await Api.post(
         "/auth/login",
         { email, senha },
-        { skipAuthRedirect: true }
+        { skipAuthRedirect: true },
       );
-      
+
       const data = response.data;
       const { id, firstLogin, nome, email: userEmail } = data;
 
@@ -49,14 +48,12 @@ function Login() {
           navigate("/pagina-inicial");
         }
       }, 2000);
-
     } catch (error) {
       setError(error.response?.data?.message || "Email ou senha inválidos");
     } finally {
       setLoading(false);
     }
   };
-
 
   const variants = {
     initial: { opacity: 0, x: 20 },
@@ -79,7 +76,7 @@ function Login() {
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg/20"
           style={{
             backgroundImage:
-              'url("src/assets/images/GlazierAdobeStock_576236137.jpeg")'
+              'url("src/assets/images/GlazierAdobeStock_576236137.jpeg")',
           }}
         />
 
@@ -90,7 +87,6 @@ function Login() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md backdrop-blur-sm p-8 rounded-xl relative"
         >
-
           <div className="flex flex-col gap-6">
             <div className="mb-10 text-center flex flex-col gap-2">
               <h1 className="text-4xl font-bold text-[#111827] mb-2">
@@ -203,10 +199,6 @@ function Login() {
               </div>
             </form>
 
-            {/* Divisor */}
-            <div className="my-8">
-              <div className="h-px bg-black w-full" />
-            </div>
 
             {/* Cadastro link */}
             <div className="text-center">
@@ -259,9 +251,7 @@ function Login() {
                 <h2 className="text-xl font-bold text-[#111827] text-center">
                   Login realizado com sucesso!
                 </h2>
-                <p className="text-[#6b7280] text-center">
-                  Redirecionando...
-                </p>
+                <p className="text-[#6b7280] text-center">Redirecionando...</p>
               </div>
             </motion.div>
           </motion.div>

@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useState, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import {
@@ -20,9 +20,11 @@ import { useDashboardKpis } from "../../hooks/queries/useDashboard";
 const isToday = (date) => {
   if (!date) return false;
   const today = new Date();
-  return date.getDate() === today.getDate() &&
+  return (
+    date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+    date.getFullYear() === today.getFullYear()
+  );
 };
 
 /**
@@ -46,11 +48,11 @@ const isFuture = (date) => {
 const parseDate = (dateString) => {
   if (!dateString) return null;
   try {
-    if (dateString.includes('/')) {
-      const parts = dateString.split('/');
+    if (dateString.includes("/")) {
+      const parts = dateString.split("/");
       return new Date(parts[2], parts[1] - 1, parts[0]);
-    } else if (dateString.includes('-')) {
-      const parts = dateString.split('-');
+    } else if (dateString.includes("-")) {
+      const parts = dateString.split("-");
       return new Date(parts[0], parts[1] - 1, parts[2]);
     }
     const date = new Date(dateString);
@@ -89,35 +91,46 @@ export default function PaginaInicial() {
     navigate(`/agendamentos?id=${agendamentoId}`);
   };
 
-  const calculatedKpiData = useMemo(() => [
-    {
-      title: "Total de Itens em Baixo Estoque",
-      value: qtdItensCriticos,
-      icon: Info,
-      caption: `${qtdItensCriticos} item(ns) requer atenção`
-    },
-    {
-      title: "Agendamentos de Hoje",
-      value: qtdAgendamentosHoje,
-      icon: CalendarDays,
-      caption: `${qtdAgendamentosHoje} agendamento(s) hoje`
-    },
-    {
-      title: "Taxa de Ocupação de Serviços",
-      value: `${taxaOcupacaoServicos}%`,
-      icon: TrendingUp,
-      caption: `${qtdAgendamentosFuturos} agendamentos futuros`
-    },
-    {
-      title: "Total de Agendamentos Futuros",
-      value: qtdAgendamentosFuturos,
-      icon: Clock,
-      caption: `Próximos serviços`
-    },
-  ], [qtdItensCriticos, qtdAgendamentosHoje, taxaOcupacaoServicos, qtdAgendamentosFuturos]);
+  const calculatedKpiData = useMemo(
+    () => [
+      {
+        title: "Total de Itens em Baixo Estoque",
+        value: qtdItensCriticos,
+        icon: Info,
+        caption: `${qtdItensCriticos} item(ns) requer atenção`,
+      },
+      {
+        title: "Agendamentos de Hoje",
+        value: qtdAgendamentosHoje,
+        icon: CalendarDays,
+        caption: `${qtdAgendamentosHoje} agendamento(s) hoje`,
+      },
+      {
+        title: "Taxa de Ocupação de Serviços",
+        value: `${taxaOcupacaoServicos}%`,
+        icon: TrendingUp,
+        caption: `${qtdAgendamentosFuturos} agendamentos futuros`,
+      },
+      {
+        title: "Total de Agendamentos Futuros",
+        value: qtdAgendamentosFuturos,
+        icon: Clock,
+        caption: `Próximos serviços`,
+      },
+    ],
+    [
+      qtdItensCriticos,
+      qtdAgendamentosHoje,
+      taxaOcupacaoServicos,
+      qtdAgendamentosFuturos,
+    ],
+  );
 
   return (
-    <div className="flex min-h-screen font-[Inter]" style={{ backgroundColor: '#f7f9fa' }}>
+    <div
+      className="flex min-h-screen font-[Inter]"
+      style={{ backgroundColor: "#f7f9fa" }}
+    >
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
       <div className="flex-1 flex flex-col">
@@ -143,7 +156,11 @@ export default function PaginaInicial() {
 
           {/* KPIs */}
           <div className="w-full max-w-[1600px]">
-            {loading ? <p>Carregando KPIs...</p> : <Kpis stats={calculatedKpiData} />}
+            {loading ? (
+              <p>Carregando KPIs...</p>
+            ) : (
+              <Kpis stats={calculatedKpiData} />
+            )}
           </div>
 
           {/* Seções lado a lado */}
@@ -156,7 +173,9 @@ export default function PaginaInicial() {
                 {loading ? (
                   <p className="p-6 text-center">Carregando...</p>
                 ) : itensCriticos.length === 0 ? (
-                  <p className="p-6 text-center text-gray-500">Nenhum item crítico encontrado.</p>
+                  <p className="p-6 text-center text-gray-500">
+                    Nenhum item crítico encontrado.
+                  </p>
                 ) : (
                   itensCriticos.map((item) => (
                     <div
@@ -168,7 +187,8 @@ export default function PaginaInicial() {
                           {item.nomeProduto || "Sem nome"}
                         </p>
                         <p className="text-lg text-gray-600">
-                          Quantidade: {item.quantidadeTotal} | Mínimo: {item.nivelMinimo}
+                          Quantidade: {item.quantidadeTotal} | Mínimo:{" "}
+                          {item.nivelMinimo}
                         </p>
                       </div>
                       <div className="flex items-center gap-3 mt-3 md:mt-0">
@@ -203,7 +223,9 @@ export default function PaginaInicial() {
                 {loading ? (
                   <p className="p-6 text-center">Carregando...</p>
                 ) : agendamentosFuturos.length === 0 ? (
-                  <p className="p-6 text-center text-gray-500">Nenhum agendamento futuro encontrado.</p>
+                  <p className="p-6 text-center text-gray-500">
+                    Nenhum agendamento futuro encontrado.
+                  </p>
                 ) : (
                   agendamentosFuturos.map((ag) => (
                     <div
@@ -215,7 +237,8 @@ export default function PaginaInicial() {
                           {ag.agendamentoObservacao || "Sem descrição"}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Etapa: {ag.status} | Valor: R$ {ag.valorTotal.toFixed(2)}
+                          Etapa: {ag.status} | Valor: R${" "}
+                          {ag.valorTotal.toFixed(2)}
                         </p>
                       </div>
                       <div className="flex items-center gap-3 mt-3 md:mt-0">
@@ -227,7 +250,9 @@ export default function PaginaInicial() {
                         </span>
                         <button
                           title="Ver detalhes do agendamento"
-                          onClick={() => handleAgendamentoItemClick(ag.idAgendamento)}
+                          onClick={() =>
+                            handleAgendamentoItemClick(ag.idAgendamento)
+                          }
                           className="border border-gray-300 p-1.5 rounded-md hover:bg-gray-100 transition text-gray-600 hover:text-[#003d6b]"
                         >
                           <ExternalLink className="w-4 h-4" />

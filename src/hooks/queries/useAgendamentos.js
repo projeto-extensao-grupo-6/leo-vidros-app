@@ -1,16 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../api/queryKeys';
-import { agendamentosService } from '../../api/services/agendamentosService';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
+import { agendamentosService } from "../../api/services/agendamentosService";
 
 const unwrapList = async (promise) => {
   const res = await promise;
-  if (!res.success) throw new Error(res.error ?? 'Erro ao carregar agendamentos');
+  if (!res.success)
+    throw new Error(res.error ?? "Erro ao carregar agendamentos");
   return Array.isArray(res.data) ? res.data : [];
 };
 
 const unwrapOne = async (promise) => {
   const res = await promise;
-  if (!res.success) throw new Error(res.error ?? 'Erro ao carregar agendamento');
+  if (!res.success)
+    throw new Error(res.error ?? "Erro ao carregar agendamento");
   return res.data ?? null;
 };
 

@@ -1,5 +1,5 @@
-import Api from '../client/Api';
-import BaseService from '../client/BaseService';
+import Api from "../client/Api";
+import BaseService from "../client/BaseService";
 
 /**
  * Service de Agendamentos — estende BaseService para herdar
@@ -12,7 +12,7 @@ class AgendamentosService extends BaseService {
 
   /** Busca todos os agendamentos */
   getAll() {
-    return this.get('/agendamentos');
+    return this.get("/agendamentos");
   }
 
   /** Busca agendamento por ID */
@@ -22,7 +22,7 @@ class AgendamentosService extends BaseService {
 
   /** Cria novo agendamento */
   create(agendamento) {
-    return this.post('/agendamentos', agendamento);
+    return this.post("/agendamentos", agendamento);
   }
 
   /** Atualiza dados básicos de um agendamento pelo ID */

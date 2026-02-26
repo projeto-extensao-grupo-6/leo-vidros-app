@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -8,7 +8,10 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import Stepper from "@mui/material/Stepper";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
-import { QontoConnector, QontoStepIcon } from "../../components/stepper/QontoStepper.jsx";
+import {
+  QontoConnector,
+  QontoStepIcon,
+} from "../../components/stepper/QontoStepper.jsx";
 import Button from "../../components/ui/Button/Button.component";
 import Api from "../../api/client/Api";
 
@@ -49,12 +52,14 @@ function Cadastro() {
 
     if (step === 3) {
       const cpfNumbers = cpf.replace(/\D/g, "");
-      if (!cpfNumbers || cpfNumbers.length !== 11) return setError("Digite um CPF válido");
+      if (!cpfNumbers || cpfNumbers.length !== 11)
+        return setError("Digite um CPF válido");
     }
 
     if (step === 4) {
       const telefoneNumbers = telefone.replace(/\D/g, "");
-      if (!telefoneNumbers || telefoneNumbers.length !== 11) return setError("Digite um telefone válido");
+      if (!telefoneNumbers || telefoneNumbers.length !== 11)
+        return setError("Digite um telefone válido");
     }
 
     if (step < 4) {
@@ -87,7 +92,10 @@ function Cadastro() {
       }, 3000);
     } catch (error) {
       console.error("Erro no cadastro:", error);
-      setError(error.response?.data?.message || "Erro ao realizar cadastro. Tente novamente.");
+      setError(
+        error.response?.data?.message ||
+          "Erro ao realizar cadastro. Tente novamente.",
+      );
     } finally {
       setLoading(false);
     }
@@ -111,7 +119,10 @@ function Cadastro() {
       <div className="w-full max-w-6xl flex items-center justify-center gap-12">
         <div
           className="hidden lg:flex flex-1 h-[600px] rounded-xl bg-cover bg-center shadow-lg"
-          style={{ backgroundImage: 'url("/src/assets/images/GlazierAdobeStock_576236137.jpeg")' }}
+          style={{
+            backgroundImage:
+              'url("/src/assets/images/GlazierAdobeStock_576236137.jpeg")',
+          }}
         />
 
         <motion.div
@@ -120,18 +131,27 @@ function Cadastro() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md p-8 rounded-xl relative"
         >
-          
           <div className="flex flex-col gap-8">
             <div className="mb-10 text-center flex flex-col gap-2">
-              <h1 className="text-4xl font-bold text-[#111827] mb-2">Criar conta</h1>
-              <p className="text-[#6b7280] text-sm">Preencha os dados para criar sua conta</p>
+              <h1 className="text-4xl font-bold text-[#111827] mb-2">
+                Criar conta
+              </h1>
+              <p className="text-[#6b7280] text-sm">
+                Preencha os dados para criar sua conta
+              </p>
             </div>
 
             <div className="mb-10">
-              <Stepper alternativeLabel activeStep={step - 1} connector={<QontoConnector />}>
+              <Stepper
+                alternativeLabel
+                activeStep={step - 1}
+                connector={<QontoConnector />}
+              >
                 {steps.map((label) => (
                   <Step key={label}>
-                    <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
+                    <StepLabel StepIconComponent={QontoStepIcon}>
+                      {label}
+                    </StepLabel>
                   </Step>
                 ))}
               </Stepper>
@@ -140,8 +160,18 @@ function Cadastro() {
             <form onSubmit={handleNext} className="space-y-6">
               <AnimatePresence mode="wait">
                 {step === 1 && (
-                  <motion.div key="step1" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Nome</label>
+                  <motion.div
+                    key="step1"
+                    variants={variants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.4 }}
+                    className="space-y-3"
+                  >
+                    <label className="block text-sm font-medium text-[#6b7280] text-left">
+                      Nome
+                    </label>
                     <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
                       <AccountCircle className="text-[#6b7280] text-3xl" />
                       <input
@@ -156,8 +186,18 @@ function Cadastro() {
                 )}
 
                 {step === 2 && (
-                  <motion.div key="step2" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Email</label>
+                  <motion.div
+                    key="step2"
+                    variants={variants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.4 }}
+                    className="space-y-3"
+                  >
+                    <label className="block text-sm font-medium text-[#6b7280] text-left">
+                      Email
+                    </label>
                     <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
                       <EmailIcon className="text-[#6b7280] text-3xl" />
                       <input
@@ -172,8 +212,18 @@ function Cadastro() {
                 )}
 
                 {step === 3 && (
-                  <motion.div key="step3" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">CPF</label>
+                  <motion.div
+                    key="step3"
+                    variants={variants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.4 }}
+                    className="space-y-3"
+                  >
+                    <label className="block text-sm font-medium text-[#6b7280] text-left">
+                      CPF
+                    </label>
                     <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
                       <BadgeIcon className="text-[#6b7280] text-3xl" />
                       <input
@@ -188,8 +238,18 @@ function Cadastro() {
                 )}
 
                 {step === 4 && (
-                  <motion.div key="step4" variants={variants} initial="initial" animate="animate" exit="exit" transition={{ duration: 0.4 }} className="space-y-3">
-                    <label className="block text-sm font-medium text-[#6b7280] text-left">Telefone</label>
+                  <motion.div
+                    key="step4"
+                    variants={variants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    transition={{ duration: 0.4 }}
+                    className="space-y-3"
+                  >
+                    <label className="block text-sm font-medium text-[#6b7280] text-left">
+                      Telefone
+                    </label>
                     <div className="flex items-center gap-3 border-b-2 border-[#8a8e97] bg-transparent focus-within:border-[#007EA7] transition-all py-3">
                       <PhoneIcon className="text-[#6b7280] text-3xl" />
                       <input
@@ -205,17 +265,35 @@ function Cadastro() {
               </AnimatePresence>
 
               {error && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"
+                >
                   {error}
                 </motion.div>
               )}
 
               <div className="flex gap-3 items-center justify-center pt-4">
-                <Button type="submit" variant="primary" size="lg" disabled={loading} className="flex-1 bg-[#007EA7] text-white font-medium py-4 rounded-lg max-w-xl cursor-pointer">
-                  {loading ? "Processando..." : step < 4 ? "Próximo" : "Solicitar cadastro"}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={loading}
+                  className="flex-1 bg-[#007EA7] text-white font-medium py-4 rounded-lg max-w-xl cursor-pointer"
+                >
+                  {loading
+                    ? "Processando..."
+                    : step < 4
+                      ? "Próximo"
+                      : "Solicitar cadastro"}
                 </Button>
                 {step > 1 && (
-                  <button type="button" onClick={() => setStep(step - 1)} className="px-8 py-4 text-[#007EA7] hover:bg-[#f0f0f0] rounded-lg transition-colors font-medium cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => setStep(step - 1)}
+                    className="px-8 py-4 text-[#007EA7] hover:bg-[#f0f0f0] rounded-lg transition-colors font-medium cursor-pointer"
+                  >
                     Voltar
                   </button>
                 )}
@@ -226,42 +304,52 @@ function Cadastro() {
               <div className="h-px bg-black w-full" />
             </div>
 
-              <div className="text-center">
-                <p className="text-sm text-[#6b7280]">
-                  Já possui uma conta?{" "}
-                  <button
-                    type="button"
-                    onClick={() => (window.location.href = "/Login")}
-                    className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
-                  >
-                    Login
-                  </button>
-                </p>
-              </div>
+            <div className="text-center">
+              <p className="text-sm text-[#6b7280]">
+                Já possui uma conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => (window.location.href = "/Login")}
+                  className="text-[#007EA7] hover:text-[#005f73] font-medium transition-colors cursor-pointer"
+                >
+                  Login
+                </button>
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>
 
       <AnimatePresence>
         {modalOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }} 
-            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" 
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
             onClick={() => setModalOpen(false)}
           >
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
-              className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full" 
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-xl shadow-2xl p-8 max-w-sm w-full"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col items-center gap-4">
                 <div className="w-15 h-15 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-8 h-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <h2 className="text-xl font-bold text-[#111827] text-center">

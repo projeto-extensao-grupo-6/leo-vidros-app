@@ -1,56 +1,53 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/ui/misc/AppIcon';
-
+import { useState } from "react";
+import Icon from "../../../components/ui/misc/AppIcon";
 
 const SharedCalendarList = ({ onCalendarToggle }) => {
   const [calendars, setCalendars] = useState([
     {
       id: 1,
-      name: 'Meu Calendário',
-      owner: 'Você',
-      color: '#3B82F6',
+      name: "Meu Calendário",
+      owner: "Você",
+      color: "#3B82F6",
       visible: true,
-      type: 'personal'
+      type: "personal",
     },
     {
       id: 2,
-      name: 'Calendário da Equipe',
-      owner: 'Equipe de Desenvolvimento',
-      color: '#10B981',
+      name: "Calendário da Equipe",
+      owner: "Equipe de Desenvolvimento",
+      color: "#10B981",
       visible: true,
-      type: 'team'
+      type: "team",
     },
     {
       id: 3,
-      name: 'Reuniões da Empresa',
-      owner: 'RH',
-      color: '#F59E0B',
+      name: "Reuniões da Empresa",
+      owner: "RH",
+      color: "#F59E0B",
       visible: false,
-      type: 'company'
-    }
+      type: "company",
+    },
   ]);
 
   const toggleCalendar = (calendarId) => {
-    setCalendars(prev => 
-      prev?.map(cal => 
-        cal?.id === calendarId 
-          ? { ...cal, visible: !cal?.visible }
-          : cal
-      )
+    setCalendars((prev) =>
+      prev?.map((cal) =>
+        cal?.id === calendarId ? { ...cal, visible: !cal?.visible } : cal,
+      ),
     );
     onCalendarToggle?.(calendarId);
   };
 
   const getCalendarIcon = (type) => {
     switch (type) {
-      case 'personal':
-        return 'User';
-      case 'team':
-        return 'Users';
-      case 'company':
-        return 'Building';
+      case "personal":
+        return "User";
+      case "team":
+        return "Users";
+      case "company":
+        return "Building";
       default:
-        return 'Calendar';
+        return "Calendar";
     }
   };
 
@@ -76,11 +73,14 @@ const SharedCalendarList = ({ onCalendarToggle }) => {
               <div
                 className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center transition-micro ${
                   calendar?.visible
-                    ? 'border-primary bg-primary' :'border-hairline hover:border-primary'
+                    ? "border-primary bg-primary"
+                    : "border-hairline hover:border-primary"
                 }`}
                 style={{
-                  backgroundColor: calendar?.visible ? calendar?.color : 'transparent',
-                  borderColor: calendar?.color
+                  backgroundColor: calendar?.visible
+                    ? calendar?.color
+                    : "transparent",
+                  borderColor: calendar?.color,
                 }}
               >
                 {calendar?.visible && (
@@ -90,9 +90,9 @@ const SharedCalendarList = ({ onCalendarToggle }) => {
             </button>
 
             <div className="flex items-center space-x-2 flex-1 min-w-0">
-              <Icon 
-                name={getCalendarIcon(calendar?.type)} 
-                size={16} 
+              <Icon
+                name={getCalendarIcon(calendar?.type)}
+                size={16}
                 className="text-text-secondary shrink-0"
               />
               <div className="flex-1 min-w-0">

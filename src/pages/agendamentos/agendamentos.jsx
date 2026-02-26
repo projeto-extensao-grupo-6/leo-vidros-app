@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   format,
   startOfMonth,
@@ -51,12 +51,22 @@ import { useAgendamentos } from "../../hooks/queries/useAgendamentos";
 import { useAgendamentoNotifications } from "../calendar-dashboard/hooks/useAgendamentoNotifications";
 import agendamentosService from "../../api/services/agendamentosService";
 
-import { normalizeStatus, statusConfig, getStatusConfig, tipoConfig } from "../../utils/agendamentoStatus";
+import {
+  normalizeStatus,
+  statusConfig,
+  getStatusConfig,
+  tipoConfig,
+} from "../../utils/agendamentoStatus";
 
 function StatusBadge({ status }) {
   const config = getStatusConfig(status);
   return (
-    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold", config.color)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+        config.color,
+      )}
+    >
       <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
       {config.label}
     </span>
@@ -66,7 +76,12 @@ function StatusBadge({ status }) {
 function TipoBadge({ tipo }) {
   const config = tipoConfig[tipo] || tipoConfig.SERVICO;
   return (
-    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold", config.color)}>
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold",
+        config.color,
+      )}
+    >
       {config.label}
     </span>
   );
@@ -75,7 +90,12 @@ function TipoBadge({ tipo }) {
 function StatCard({ icon: IconComp, iconColor, value, label }) {
   return (
     <div className="bg-gray-50 rounded-xl border border-gray-200 p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", iconColor)}>
+      <div
+        className={cn(
+          "w-12 h-12 rounded-xl flex items-center justify-center",
+          iconColor,
+        )}
+      >
         <IconComp className="h-6 w-6" />
       </div>
       <div>
@@ -86,7 +106,14 @@ function StatCard({ icon: IconComp, iconColor, value, label }) {
   );
 }
 
-function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView, onLocation }) {
+function ActionsDropdown({
+  agendamento,
+  onStatusChange,
+  onDelete,
+  onEdit,
+  onView,
+  onLocation,
+}) {
   const [open, setOpen] = useState(false);
 
   const hasEndereco = (() => {
@@ -98,7 +125,10 @@ function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView
   return (
     <div className="relative">
       <button
-        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
         className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
       >
         <MoreHorizontal className="h-4 w-4 text-gray-500" />
@@ -110,14 +140,22 @@ function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView
           <div className="absolute right-0 top-8 z-50 w-48 bg-white rounded-xl border border-gray-200 shadow-xl py-1.5 animate-in fade-in slide-in-from-top-2">
             <button
               className="w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onView?.(agendamento); setOpen(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onView?.(agendamento);
+                setOpen(false);
+              }}
             >
               <Eye className="h-4 w-4 text-gray-400" /> Ver informações
             </button>
             {hasEndereco && (
               <button
                 className="w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 transition-colors cursor-pointer"
-                onClick={(e) => { e.stopPropagation(); onLocation?.(agendamento); setOpen(false); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLocation?.(agendamento);
+                  setOpen(false);
+                }}
               >
                 <MapPin className="h-4 w-4 text-gray-400" /> Ver localização
               </button>
@@ -125,26 +163,42 @@ function ActionsDropdown({ agendamento, onStatusChange, onDelete, onEdit, onView
             <div className="border-t border-gray-100 my-1" />
             <button
               className="w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 flex items-center gap-2 text-gray-700 transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onEdit?.(agendamento); setOpen(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit?.(agendamento);
+                setOpen(false);
+              }}
             >
               <Edit3 className="h-4 w-4 text-gray-400" /> Editar
             </button>
             <button
               className="w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 flex items-center gap-2 text-green-600 transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onStatusChange(agendamento, "CONFIRMADO"); setOpen(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(agendamento, "CONFIRMADO");
+                setOpen(false);
+              }}
             >
               <Check className="h-4 w-4" /> Confirmar
             </button>
             <button
               className="w-full px-4 py-2.5 text-sm text-left hover:bg-gray-50 flex items-center gap-2 text-blue-600 transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onStatusChange(agendamento, "CONCLUIDO"); setOpen(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStatusChange(agendamento, "CONCLUIDO");
+                setOpen(false);
+              }}
             >
               <Check className="h-4 w-4" /> Concluir
             </button>
             <div className="border-t border-gray-100 my-1" />
             <button
               className="w-full px-4 py-2.5 text-sm text-left hover:bg-red-50 flex items-center gap-2 text-red-600 transition-colors cursor-pointer"
-              onClick={(e) => { e.stopPropagation(); onDelete?.(agendamento); setOpen(false); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(agendamento);
+                setOpen(false);
+              }}
             >
               <Trash2 className="h-4 w-4" /> Excluir
             </button>
@@ -178,7 +232,9 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, isDeleting }) {
               <div className="p-3 bg-red-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Excluir Agendamento?</h3>
+              <h3 className="text-lg font-bold text-gray-900">
+                Excluir Agendamento?
+              </h3>
             </div>
             <p className="text-gray-600 mb-6">
               Esta ação é irreversível e removerá o agendamento permanentemente.
@@ -197,7 +253,9 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, isDeleting }) {
                 className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 flex items-center gap-2 disabled:opacity-70 transition-colors cursor-pointer"
               >
                 {isDeleting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Excluindo...</>
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Excluindo...
+                  </>
                 ) : (
                   "Sim, excluir"
                 )}
@@ -227,16 +285,18 @@ export default function Agendamentos() {
 
   const { data: agendamentos = [], isLoading, refetch } = useAgendamentos();
 
-  const transformedForNotifications = useMemo(() =>
-    agendamentos.map((a) => ({
-      ...a,
-      date: a.dataAgendamento,
-      startTime: a.inicioAgendamento?.substring(0, 5),
-      endTime: a.fimAgendamento?.substring(0, 5),
-    })),
-    [agendamentos]
+  const transformedForNotifications = useMemo(
+    () =>
+      agendamentos.map((a) => ({
+        ...a,
+        date: a.dataAgendamento,
+        startTime: a.inicioAgendamento?.substring(0, 5),
+        endTime: a.fimAgendamento?.substring(0, 5),
+      })),
+    [agendamentos],
   );
-  const { currentNotification, dismissNotification } = useAgendamentoNotifications(transformedForNotifications);
+  const { currentNotification, dismissNotification } =
+    useAgendamentoNotifications(transformedForNotifications);
 
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
@@ -259,32 +319,48 @@ export default function Agendamentos() {
   const selectedDayAgendamentos = useMemo(() => {
     const key = format(selectedDate, "yyyy-MM-dd");
     return (agendamentosByDate.get(key) || []).sort((a, b) =>
-      (a.inicioAgendamento || "").localeCompare(b.inicioAgendamento || "")
+      (a.inicioAgendamento || "").localeCompare(b.inicioAgendamento || ""),
     );
   }, [selectedDate, agendamentosByDate]);
 
   const agendamentoDates = useMemo(
     () => [...new Set(agendamentos.map((a) => a.dataAgendamento))],
-    [agendamentos]
+    [agendamentos],
   );
 
   const stats = useMemo(() => {
     const todayKey = format(new Date(), "yyyy-MM-dd");
     return {
       today: agendamentos.filter((a) => a.dataAgendamento === todayKey).length,
-      confirmed: agendamentos.filter((a) => a.statusAgendamento?.nome === "CONFIRMADO").length,
-      pending: agendamentos.filter((a) => a.statusAgendamento?.nome === "PENDENTE").length,
+      confirmed: agendamentos.filter(
+        (a) => a.statusAgendamento?.nome === "CONFIRMADO",
+      ).length,
+      pending: agendamentos.filter(
+        (a) => a.statusAgendamento?.nome === "PENDENTE",
+      ).length,
     };
   }, [agendamentos]);
 
   const navigate = useNavigate();
 
-  const handleLocation = useCallback((apt) => {
-    if (!apt?.endereco) return;
-    const e = apt.endereco;
-    const address = [e.rua, e.numero, e.bairro, e.cidade, e.uf || e.estado, e.cep].filter(Boolean).join(", ");
-    navigate('/geo-localizacao', { state: { address } });
-  }, [navigate]);
+  const handleLocation = useCallback(
+    (apt) => {
+      if (!apt?.endereco) return;
+      const e = apt.endereco;
+      const address = [
+        e.rua,
+        e.numero,
+        e.bairro,
+        e.cidade,
+        e.uf || e.estado,
+        e.cep,
+      ]
+        .filter(Boolean)
+        .join(", ");
+      navigate("/geo-localizacao", { state: { address } });
+    },
+    [navigate],
+  );
 
   const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
@@ -303,48 +379,60 @@ export default function Agendamentos() {
     }
   };
 
-  const handleNewAgendamento = useCallback((overrides = {}) => {
-    setModalInitialData({
-      eventDate: overrides.date || format(selectedDate, "yyyy-MM-dd"),
-      startTime: overrides.startTime || "",
-      endTime: overrides.endTime || "",
-      tipoAgendamento: "",
-      pedido: null,
-      funcionarios: [],
-    });
-    setShowTaskModal(true);
-  }, [selectedDate]);
+  const handleNewAgendamento = useCallback(
+    (overrides = {}) => {
+      setModalInitialData({
+        eventDate: overrides.date || format(selectedDate, "yyyy-MM-dd"),
+        startTime: overrides.startTime || "",
+        endTime: overrides.endTime || "",
+        tipoAgendamento: "",
+        pedido: null,
+        funcionarios: [],
+      });
+      setShowTaskModal(true);
+    },
+    [selectedDate],
+  );
 
   const handleTaskSave = useCallback(() => {
     refetch();
   }, [refetch]);
 
-  const handleStatusChange = useCallback(async (apt, newStatusNome) => {
-    try {
-      const result = await agendamentosService.update(apt.id, {
-        tipoAgendamento: apt.tipoAgendamento,
-        dataAgendamento: apt.dataAgendamento,
-        inicioAgendamento: apt.inicioAgendamento,
-        fimAgendamento: apt.fimAgendamento,
-        statusAgendamento: { tipo: "AGENDAMENTO", nome: newStatusNome },
-        observacao: apt.observacao || null,
-      });
-      if (result.success) {
-        refetch();
-      } else {
-        console.error("Erro ao atualizar status:", result.error, result.status);
-        Swal.fire({
-          icon: "error",
-          title: "Erro ao atualizar status",
-          text: result.error || "Não foi possível alterar o status do agendamento.",
-          timer: 4000,
-          showConfirmButton: true,
+  const handleStatusChange = useCallback(
+    async (apt, newStatusNome) => {
+      try {
+        const result = await agendamentosService.update(apt.id, {
+          tipoAgendamento: apt.tipoAgendamento,
+          dataAgendamento: apt.dataAgendamento,
+          inicioAgendamento: apt.inicioAgendamento,
+          fimAgendamento: apt.fimAgendamento,
+          statusAgendamento: { tipo: "AGENDAMENTO", nome: newStatusNome },
+          observacao: apt.observacao || null,
         });
+        if (result.success) {
+          refetch();
+        } else {
+          console.error(
+            "Erro ao atualizar status:",
+            result.error,
+            result.status,
+          );
+          Swal.fire({
+            icon: "error",
+            title: "Erro ao atualizar status",
+            text:
+              result.error ||
+              "Não foi possível alterar o status do agendamento.",
+            timer: 4000,
+            showConfirmButton: true,
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao atualizar status:", err);
       }
-    } catch (err) {
-      console.error("Erro ao atualizar status:", err);
-    }
-  }, [refetch]);
+    },
+    [refetch],
+  );
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
@@ -378,40 +466,50 @@ export default function Agendamentos() {
       endTime: apt.fimAgendamento?.substring(0, 5) || "",
       tipoAgendamento: apt.tipoAgendamento || "",
       pedido: null,
-      funcionarios: apt.funcionarios?.map(f => f.id) || [],
+      funcionarios: apt.funcionarios?.map((f) => f.id) || [],
       agendamentoId: apt.id,
     });
     setShowTaskModal(true);
   }, []);
 
-  const handleNotificationCancelar = useCallback(async (agendamento) => {
-    if (window.confirm(`Cancelar agendamento #${String(agendamento.id).padStart(3, "0")}?`)) {
+  const handleNotificationCancelar = useCallback(
+    async (agendamento) => {
+      if (
+        window.confirm(
+          `Cancelar agendamento #${String(agendamento.id).padStart(3, "0")}?`,
+        )
+      ) {
+        try {
+          await agendamentosService.delete(agendamento.id);
+          dismissNotification();
+          refetch();
+        } catch (err) {
+          console.error("Erro ao cancelar:", err);
+        }
+      }
+    },
+    [dismissNotification, refetch],
+  );
+
+  const handleNotificationIniciar = useCallback(
+    async (agendamento) => {
       try {
-        await agendamentosService.delete(agendamento.id);
+        await agendamentosService.update(agendamento.id, {
+          tipoAgendamento: agendamento.tipoAgendamento,
+          dataAgendamento: agendamento.dataAgendamento,
+          inicioAgendamento: agendamento.inicioAgendamento,
+          fimAgendamento: agendamento.fimAgendamento,
+          statusAgendamento: { tipo: "AGENDAMENTO", nome: "EM ANDAMENTO" },
+          observacao: agendamento.observacao || "",
+        });
         dismissNotification();
         refetch();
       } catch (err) {
-        console.error("Erro ao cancelar:", err);
+        console.error("Erro ao iniciar:", err);
       }
-    }
-  }, [dismissNotification, refetch]);
-
-  const handleNotificationIniciar = useCallback(async (agendamento) => {
-    try {
-      await agendamentosService.update(agendamento.id, {
-        tipoAgendamento: agendamento.tipoAgendamento,
-        dataAgendamento: agendamento.dataAgendamento,
-        inicioAgendamento: agendamento.inicioAgendamento,
-        fimAgendamento: agendamento.fimAgendamento,
-        statusAgendamento: { tipo: "AGENDAMENTO", nome: "EM ANDAMENTO" },
-        observacao: agendamento.observacao || "",
-      });
-      dismissNotification();
-      refetch();
-    } catch (err) {
-      console.error("Erro ao iniciar:", err);
-    }
-  }, [dismissNotification, refetch]);
+    },
+    [dismissNotification, refetch],
+  );
 
   const getServicoNome = (apt) => {
     if (apt.servico?.nome) return apt.servico.nome;
@@ -428,7 +526,7 @@ export default function Agendamentos() {
 
   const getFuncionarioNomes = (apt) => {
     if (!apt.funcionarios?.length) return "Sem funcionário";
-    return apt.funcionarios.map(f => f.nome).join(", ");
+    return apt.funcionarios.map((f) => f.nome).join(", ");
   };
 
   const getStatusNome = (apt) => apt.statusAgendamento?.nome || "PENDENTE";
@@ -449,7 +547,6 @@ export default function Agendamentos() {
   }
 
   return (
-
     <div className="flex bg-gray-100 min-h-screen">
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <div className="flex-1 flex flex-col min-h-screen">
@@ -458,13 +555,16 @@ export default function Agendamentos() {
 
         <main className="flex-1 flex flex-col items-center px-4 md:px-8 pt-6 pb-10 gap-6">
           <div className="w-full max-w-[1680px] space-y-6">
-
             {/* ====== Header ====== */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="hidden sm:block flex-1" />
               <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-800">Agendamentos</h1>
-                <p className="text-gray-500 mt-1">Gerencie os agendamentos da Leo Vidros</p>
+                <h1 className="text-3xl font-bold text-gray-800">
+                  Agendamentos
+                </h1>
+                <p className="text-gray-500 mt-1">
+                  Gerencie os agendamentos da Leo Vidros
+                </p>
               </div>
               <div className="flex-1 flex sm:justify-end">
                 <button
@@ -499,7 +599,10 @@ export default function Agendamentos() {
             </div>
 
             {/* ====== Abas de Visualização ====== */}
-            <div className="flex items-center gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-200 w-fit shadow-sm" style={{ marginTop: '15px' }}>
+            <div
+              className="flex items-center gap-1 bg-gray-50 p-1.5 rounded-xl border border-gray-200 w-fit shadow-sm"
+              style={{ marginTop: "15px" }}
+            >
               {[
                 { key: "calendar", label: "Mensal", icon: CalendarIcon },
                 { key: "week", label: "Semanal", icon: LayoutGrid },
@@ -512,7 +615,7 @@ export default function Agendamentos() {
                     "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer",
                     viewMode === key
                       ? "bg-[#007EA7] text-white shadow-md"
-                      : "text-gray-600 hover:bg-gray-100"
+                      : "text-gray-600 hover:bg-gray-100",
                   )}
                 >
                   <TabIcon className="h-4 w-4" /> {label}
@@ -537,10 +640,16 @@ export default function Agendamentos() {
                       >
                         Hoje
                       </button>
-                      <button onClick={handlePrevMonth} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                      <button
+                        onClick={handlePrevMonth}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
                         <ChevronLeft className="h-5 w-5 text-gray-600" />
                       </button>
-                      <button onClick={handleNextMonth} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                      <button
+                        onClick={handleNextMonth}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
                         <ChevronRight className="h-5 w-5 text-gray-600" />
                       </button>
                     </div>
@@ -548,18 +657,24 @@ export default function Agendamentos() {
 
                   {/* Dias da semana */}
                   <div className="grid grid-cols-7 border-b border-gray-100">
-                    {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
-                      <div key={day} className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider py-3">
-                        {day}
-                      </div>
-                    ))}
+                    {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
+                      (day) => (
+                        <div
+                          key={day}
+                          className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider py-3"
+                        >
+                          {day}
+                        </div>
+                      ),
+                    )}
                   </div>
 
                   {/* Grid de dias */}
                   <div className="grid grid-cols-7">
                     {calendarDays.map((day, i) => {
                       const dayKey = format(day, "yyyy-MM-dd");
-                      const dayAgendamentos = agendamentosByDate.get(dayKey) || [];
+                      const dayAgendamentos =
+                        agendamentosByDate.get(dayKey) || [];
                       const isSelected = isSameDay(day, selectedDate);
                       const isToday = isSameDay(day, new Date());
                       const isCurrentMonth = isSameMonth(day, currentMonth);
@@ -570,16 +685,19 @@ export default function Agendamentos() {
                           onClick={() => handleDayClick(day)}
                           className={cn(
                             "relative p-2 min-h-[90px] text-left border-b border-r border-gray-100 transition-all cursor-pointer",
-                            isSelected ? "bg-[#007EA7]/5 ring-2 ring-inset ring-[#007EA7]/30" : "hover:bg-gray-50",
-                            !isCurrentMonth && "opacity-40"
+                            isSelected
+                              ? "bg-[#007EA7]/5 ring-2 ring-inset ring-[#007EA7]/30"
+                              : "hover:bg-gray-50",
+                            !isCurrentMonth && "opacity-40",
                           )}
                         >
                           <span
                             className={cn(
                               "text-sm font-semibold inline-flex items-center justify-center",
-                              isToday && "bg-[#007EA7] text-white rounded-full w-7 h-7",
+                              isToday &&
+                                "bg-[#007EA7] text-white rounded-full w-7 h-7",
                               !isToday && isSelected && "text-[#007EA7]",
-                              !isToday && !isSelected && "text-gray-700"
+                              !isToday && !isSelected && "text-gray-700",
                             )}
                           >
                             {format(day, "d")}
@@ -588,16 +706,19 @@ export default function Agendamentos() {
                           {dayAgendamentos.length > 0 && (
                             <div className="mt-1.5 space-y-1">
                               {dayAgendamentos.slice(0, 2).map((apt) => {
-                                const tipoCfg = tipoConfig[apt.tipoAgendamento] || tipoConfig.SERVICO;
+                                const tipoCfg =
+                                  tipoConfig[apt.tipoAgendamento] ||
+                                  tipoConfig.SERVICO;
                                 return (
                                   <div
                                     key={apt.id}
                                     className={cn(
                                       "text-[10px] px-1.5 py-0.5 rounded-md truncate font-medium",
-                                      tipoCfg.color
+                                      tipoCfg.color,
                                     )}
                                   >
-                                    {apt.inicioAgendamento?.substring(0, 5)} {getServicoNome(apt)?.split(" ")[0]}
+                                    {apt.inicioAgendamento?.substring(0, 5)}{" "}
+                                    {getServicoNome(apt)?.split(" ")[0]}
                                   </div>
                                 );
                               })}
@@ -629,10 +750,18 @@ export default function Agendamentos() {
                     {selectedDayAgendamentos.length === 0 ? (
                       <div className="text-center py-12">
                         <CalendarIcon className="h-14 w-14 mx-auto mb-3 text-gray-200" />
-                        <p className="text-gray-400 font-medium">Nenhum agendamento</p>
-                        <p className="text-xs text-gray-300 mt-1">Clique abaixo para agendar</p>
+                        <p className="text-gray-400 font-medium">
+                          Nenhum agendamento
+                        </p>
+                        <p className="text-xs text-gray-300 mt-1">
+                          Clique abaixo para agendar
+                        </p>
                         <button
-                          onClick={() => handleNewAgendamento({ date: format(selectedDate, "yyyy-MM-dd") })}
+                          onClick={() =>
+                            handleNewAgendamento({
+                              date: format(selectedDate, "yyyy-MM-dd"),
+                            })
+                          }
                           className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#007EA7] border border-[#007EA7]/30 rounded-lg hover:bg-[#007EA7]/5 transition-colors cursor-pointer"
                         >
                           <Plus className="h-4 w-4" /> Agendar
@@ -673,12 +802,15 @@ export default function Agendamentos() {
                             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {apt.inicioAgendamento?.substring(0, 5)} - {apt.fimAgendamento?.substring(0, 5)}
+                                {apt.inicioAgendamento?.substring(0, 5)} -{" "}
+                                {apt.fimAgendamento?.substring(0, 5)}
                               </span>
                               {getEnderecoResumo(apt) && (
                                 <span className="flex items-center gap-1">
                                   <MapPin className="h-3 w-3" />
-                                  <span className="truncate max-w-[120px]">{getEnderecoResumo(apt)}</span>
+                                  <span className="truncate max-w-[120px]">
+                                    {getEnderecoResumo(apt)}
+                                  </span>
                                 </span>
                               )}
                             </div>
@@ -724,19 +856,33 @@ export default function Agendamentos() {
 
                   {/* Legenda */}
                   <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 shadow-sm">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legenda</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                      Legenda
+                    </p>
                     <div className="space-y-2">
                       {Object.entries(tipoConfig).map(([key, cfg]) => (
                         <div key={key} className="flex items-center gap-2">
-                          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: cfg.dotColor }} />
-                          <span className="text-xs text-gray-600">{cfg.label}</span>
+                          <span
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: cfg.dotColor }}
+                          />
+                          <span className="text-xs text-gray-600">
+                            {cfg.label}
+                          </span>
                         </div>
                       ))}
                       <div className="border-t border-gray-100 pt-2 mt-2">
                         {Object.entries(statusConfig).map(([key, cfg]) => (
-                          <div key={key} className="flex items-center gap-2 mt-1.5">
-                            <span className={cn("w-3 h-3 rounded-full", cfg.dot)} />
-                            <span className="text-xs text-gray-600">{cfg.label}</span>
+                          <div
+                            key={key}
+                            className="flex items-center gap-2 mt-1.5"
+                          >
+                            <span
+                              className={cn("w-3 h-3 rounded-full", cfg.dot)}
+                            />
+                            <span className="text-xs text-gray-600">
+                              {cfg.label}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -748,8 +894,16 @@ export default function Agendamentos() {
                 <div className="lg:col-span-3 bg-gray-50 rounded-2xl border border-gray-200 shadow-md overflow-hidden">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="text-lg font-bold text-gray-800">
-                      Semana de {format(startOfWeek(currentWeek, { weekStartsOn: 0 }), "dd/MM")} a{" "}
-                      {format(endOfWeek(currentWeek, { weekStartsOn: 0 }), "dd/MM/yyyy")}
+                      Semana de{" "}
+                      {format(
+                        startOfWeek(currentWeek, { weekStartsOn: 0 }),
+                        "dd/MM",
+                      )}{" "}
+                      a{" "}
+                      {format(
+                        endOfWeek(currentWeek, { weekStartsOn: 0 }),
+                        "dd/MM/yyyy",
+                      )}
                     </h2>
                     <div className="flex items-center gap-2">
                       <button
@@ -758,10 +912,16 @@ export default function Agendamentos() {
                       >
                         Hoje
                       </button>
-                      <button onClick={handlePrevWeek} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                      <button
+                        onClick={handlePrevWeek}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
                         <ChevronLeft className="h-5 w-5 text-gray-600" />
                       </button>
-                      <button onClick={handleNextWeek} className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                      <button
+                        onClick={handleNextWeek}
+                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                      >
                         <ChevronRight className="h-5 w-5 text-gray-600" />
                       </button>
                     </div>
@@ -791,23 +951,31 @@ export default function Agendamentos() {
             {viewMode === "list" && (
               <div className="bg-gray-50 rounded-2xl border border-gray-200 shadow-md">
                 <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-gray-800">Todos os Agendamentos</h2>
-                  <p className="text-sm text-gray-500">{agendamentos.length} registros</p>
+                  <h2 className="text-lg font-bold text-gray-800">
+                    Todos os Agendamentos
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {agendamentos.length} registros
+                  </p>
                 </div>
 
                 <div className="divide-y divide-gray-100">
                   {agendamentos.length === 0 ? (
                     <div className="text-center py-16 text-gray-400">
                       <CalendarIcon className="h-16 w-16 mx-auto mb-3 text-gray-200" />
-                      <p className="font-medium text-lg">Nenhum agendamento encontrado</p>
-                      <p className="text-sm mt-1">Crie o primeiro agendamento clicando no botão acima</p>
+                      <p className="font-medium text-lg">
+                        Nenhum agendamento encontrado
+                      </p>
+                      <p className="text-sm mt-1">
+                        Crie o primeiro agendamento clicando no botão acima
+                      </p>
                     </div>
                   ) : (
                     [...agendamentos]
                       .sort((a, b) =>
                         `${a.dataAgendamento}${a.inicioAgendamento}`.localeCompare(
-                          `${b.dataAgendamento}${b.inicioAgendamento}`
-                        )
+                          `${b.dataAgendamento}${b.inicioAgendamento}`,
+                        ),
                       )
                       .map((apt) => (
                         <div
@@ -820,14 +988,22 @@ export default function Agendamentos() {
                             <div
                               className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
                               style={{
-                                backgroundColor: tipoConfig[apt.tipoAgendamento]?.dotColor || "#007EA7",
+                                backgroundColor:
+                                  tipoConfig[apt.tipoAgendamento]?.dotColor ||
+                                  "#007EA7",
                               }}
                             >
-                              {apt.tipoAgendamento === "ORCAMENTO" ? "OR" : "SV"}
+                              {apt.tipoAgendamento === "ORCAMENTO"
+                                ? "OR"
+                                : "SV"}
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-800">{getServicoNome(apt)}</p>
-                              <p className="text-sm text-gray-500">{getFuncionarioNomes(apt)}</p>
+                              <p className="font-semibold text-gray-800">
+                                {getServicoNome(apt)}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {getFuncionarioNomes(apt)}
+                              </p>
                             </div>
                           </div>
 
@@ -835,11 +1011,15 @@ export default function Agendamentos() {
                           <div className="text-sm sm:text-right">
                             <p className="font-semibold text-gray-700">
                               {apt.dataAgendamento
-                                ? format(parseISO(apt.dataAgendamento), "dd/MM/yyyy")
+                                ? format(
+                                    parseISO(apt.dataAgendamento),
+                                    "dd/MM/yyyy",
+                                  )
                                 : "—"}
                             </p>
                             <p className="text-gray-500">
-                              {apt.inicioAgendamento?.substring(0, 5)} - {apt.fimAgendamento?.substring(0, 5)}
+                              {apt.inicioAgendamento?.substring(0, 5)} -{" "}
+                              {apt.fimAgendamento?.substring(0, 5)}
                             </p>
                           </div>
 
@@ -851,7 +1031,9 @@ export default function Agendamentos() {
                                 {getEnderecoResumo(apt)}
                               </span>
                             ) : (
-                              <span className="text-gray-300">Sem endereço</span>
+                              <span className="text-gray-300">
+                                Sem endereço
+                              </span>
                             )}
                           </div>
 

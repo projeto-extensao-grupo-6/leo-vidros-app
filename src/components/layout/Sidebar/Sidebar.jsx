@@ -19,7 +19,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
 
   const menuItems = [
-    { text: "Painel de Controle", icon: <Dashboard />, path: "/pagina-inicial" },
+    {
+      text: "Painel de Controle",
+      icon: <Dashboard />,
+      path: "/pagina-inicial",
+    },
     { text: "Controle de Estoque", icon: <Inventory />, path: "/Estoque" },
     { text: "Pedidos", icon: <Assignment />, path: "/Pedidos" },
     { text: "Agendamentos", icon: <Event />, path: "/Agendamentos" },
@@ -89,9 +93,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                     }`}
                   >
                     <span
-                      className={`${
-                        isActive ? "text-white" : "text-gray-600"
-                      }`}
+                      className={`${isActive ? "text-white" : "text-gray-600"}`}
                     >
                       {item.icon}
                     </span>

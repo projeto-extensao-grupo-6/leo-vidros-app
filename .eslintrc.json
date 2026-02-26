@@ -6,6 +6,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
+    "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended"
   ],
@@ -15,7 +16,6 @@
   },
   "plugins": ["react", "react-hooks", "jsx-a11y"],
   "rules": {
-    "react/react-in-jsx-scope": "off" // Next.js/React 17+ não precisa importar React
   },
   "settings": {
     "react": {

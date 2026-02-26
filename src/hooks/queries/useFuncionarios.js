@@ -1,16 +1,18 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../api/queryKeys';
-import { funcionariosService } from '../../api/services/funcionariosService';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../api/queryKeys";
+import { funcionariosService } from "../../api/services/funcionariosService";
 
 const unwrapList = async (promise) => {
   const res = await promise;
-  if (!res.success) throw new Error(res.error ?? 'Erro ao carregar funcionários');
+  if (!res.success)
+    throw new Error(res.error ?? "Erro ao carregar funcionários");
   return Array.isArray(res.data) ? res.data : [];
 };
 
 const unwrapOne = async (promise) => {
   const res = await promise;
-  if (!res.success) throw new Error(res.error ?? 'Erro ao carregar funcionário');
+  if (!res.success)
+    throw new Error(res.error ?? "Erro ao carregar funcionário");
   return res.data ?? null;
 };
 
@@ -38,7 +40,8 @@ export function useFuncionario(id, options = {}) {
 export function useAgendaFuncionario(id, dataInicio, dataFim, options = {}) {
   return useQuery({
     queryKey: queryKeys.funcionarios.agenda(id, dataInicio, dataFim),
-    queryFn: () => unwrapList(funcionariosService.getAgenda(id, dataInicio, dataFim)),
+    queryFn: () =>
+      unwrapList(funcionariosService.getAgenda(id, dataInicio, dataFim)),
     enabled: !!id && !!dataInicio && !!dataFim,
     ...options,
   });
@@ -49,7 +52,8 @@ export function useAgendaFuncionario(id, dataInicio, dataFim, options = {}) {
 export function useFuncionariosDisponiveis(data, inicio, fim, options = {}) {
   return useQuery({
     queryKey: queryKeys.funcionarios.disponiveis(data, inicio, fim),
-    queryFn: () => unwrapList(funcionariosService.getDisponiveis(data, inicio, fim)),
+    queryFn: () =>
+      unwrapList(funcionariosService.getDisponiveis(data, inicio, fim)),
     enabled: !!data && !!inicio && !!fim,
     ...options,
   });

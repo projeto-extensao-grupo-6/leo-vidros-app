@@ -1,7 +1,15 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Api from "../../api/client/Api";
-import { Trash2, Plus, ArrowLeft, Package, AlertCircle, CheckCircle, Download } from "lucide-react";
+import {
+  Trash2,
+  Plus,
+  ArrowLeft,
+  Package,
+  AlertCircle,
+  CheckCircle,
+  Download,
+} from "lucide-react";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 
@@ -20,13 +28,20 @@ const calcularSubtotalItem = (quantidade, preco_unitario, desconto) => {
 };
 
 const calcularSubtotalGeral = (itens) =>
-  itens.reduce((acc, item) => acc + calcularSubtotalItem(item.quantidade, item.preco_unitario, item.desconto), 0);
+  itens.reduce(
+    (acc, item) =>
+      acc +
+      calcularSubtotalItem(item.quantidade, item.preco_unitario, item.desconto),
+    0,
+  );
 
 const calcularTotalFinal = (subtotal, descontoGeral) =>
   Math.max(0, subtotal - (parseFloat(descontoGeral) || 0));
 
 const formatCurrencyBR = (value) =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value || 0);
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
+    value || 0,
+  );
 
 const criarItemVazio = (ordem = 1) => ({
   id: Date.now() + Math.random(),
@@ -52,12 +67,14 @@ const STATUS_OPTIONS = [
 const tw = {
   // Estrutura de cards
   card: "bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden",
-  cardHeader: "px-8 py-5 border-b border-slate-100 flex items-center gap-3 bg-slate-50",
+  cardHeader:
+    "px-8 py-5 border-b border-slate-100 flex items-center gap-3 bg-slate-50",
   cardBody: "p-8",
 
   // Campos
   fieldGroup: "flex flex-col gap-1",
-  label: "text-[11px] font-semibold text-gray-700 mb-1 block uppercase tracking-[0.05em]",
+  label:
+    "text-[11px] font-semibold text-gray-700 mb-1 block uppercase tracking-[0.05em]",
   errorText: "text-[11px] text-red-500 mt-1.5",
 
   // Inputs e selects
@@ -76,9 +93,12 @@ const tw = {
   ].join(" "),
 
   // Botões
-  btnPrimary: "px-5 py-2 rounded-md text-white font-semibold text-sm cursor-pointer transition-opacity shadow-sm bg-[var(--button-color)] hover:opacity-90",
-  btnOutline: "px-5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 font-semibold text-sm cursor-pointer hover:bg-slate-50 transition-colors",
-  btnSecondary: "px-5 py-2 rounded-md border border-[#007EA7] bg-white text-[#007EA7] font-semibold text-sm cursor-pointer hover:bg-violet-50 transition-colors",
+  btnPrimary:
+    "px-5 py-2 rounded-md text-white font-semibold text-sm cursor-pointer transition-opacity shadow-sm bg-[var(--button-color)] hover:opacity-90",
+  btnOutline:
+    "px-5 py-2 rounded-md border border-slate-300 bg-white text-slate-700 font-semibold text-sm cursor-pointer hover:bg-slate-50 transition-colors",
+  btnSecondary:
+    "px-5 py-2 rounded-md border border-[#007EA7] bg-white text-[#007EA7] font-semibold text-sm cursor-pointer hover:bg-violet-50 transition-colors",
 };
 
 // Campo de formulário com label e mensagem de erro
@@ -102,8 +122,16 @@ const OrcamentoHeader = () => (
 );
 
 // Seção de informações gerais — número e cliente preenchidos automaticamente pelo pedido
-const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos = [] }) => {
-  const statusAtual = STATUS_OPTIONS.find(s => s.value === dados.status_id) || STATUS_OPTIONS[0];
+const OrcamentoInformacoes = ({
+  dados,
+  onChange,
+  errors,
+  clientes = [],
+  pedidos = [],
+}) => {
+  const statusAtual =
+    STATUS_OPTIONS.find((s) => s.value === dados.status_id) ||
+    STATUS_OPTIONS[0];
   // Nome do cliente vem direto do pedido selecionado
   const clienteNome = dados.cliente_nome;
 
@@ -111,11 +139,17 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
     <div className={tw.card}>
       <div className={tw.cardHeader}>
         <div className="w-1.5 h-5 rounded-sm bg-[var(--button-color)]" />
-        <h2 className="m-0 text-sm font-bold text-slate-800">Informações Gerais</h2>
+        <h2 className="m-0 text-sm font-bold text-slate-800">
+          Informações Gerais
+        </h2>
       </div>
       <div className={tw.cardBody}>
-        <div className="grid gap-8" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
-
+        <div
+          className="grid gap-8"
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          }}
+        >
           {/* Número */}
           <Field label="Número do Orçamento">
             <input
@@ -141,12 +175,14 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
             <select
               className={`${tw.select} ${errors.pedido_id ? "border-red-400" : ""}`}
               value={dados.pedido_id}
-              onChange={e => onChange("pedido_id", e.target.value)}
+              onChange={(e) => onChange("pedido_id", e.target.value)}
             >
               <option value="">Selecione o pedido</option>
-              {pedidos.map(p => (
+              {pedidos.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.produtosDesc ? `Pedido #${p.id} — ${p.produtosDesc}` : `Pedido #${p.id}`}
+                  {p.produtosDesc
+                    ? `Pedido #${p.id} — ${p.produtosDesc}`
+                    : `Pedido #${p.id}`}
                 </option>
               ))}
             </select>
@@ -158,39 +194,62 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
               <select
                 className={tw.select}
                 value={dados.status_id}
-                onChange={e => onChange("status_id", e.target.value)}
+                onChange={(e) => onChange("status_id", e.target.value)}
               >
-                {STATUS_OPTIONS.map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
                 ))}
               </select>
-              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: statusAtual.color }} />
+              <div
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: statusAtual.color }}
+              />
             </div>
           </Field>
 
           {/* Data do Orçamento */}
-          <Field label="Data do Orçamento" required error={errors.data_orcamento}>
+          <Field
+            label="Data do Orçamento"
+            required
+            error={errors.data_orcamento}
+          >
             <input
               type="date"
               className={`${tw.input} ${errors.data_orcamento ? "border-red-400" : ""}`}
               value={dados.data_orcamento}
-              onChange={e => onChange("data_orcamento", e.target.value)}
+              onChange={(e) => onChange("data_orcamento", e.target.value)}
             />
           </Field>
 
           {/* Prazo de Instalação */}
           <Field label="Prazo de Instalação">
-            <input type="date" className={tw.input} value={dados.prazo_instalacao} onChange={e => onChange("prazo_instalacao", e.target.value)} />
+            <input
+              type="date"
+              className={tw.input}
+              value={dados.prazo_instalacao}
+              onChange={(e) => onChange("prazo_instalacao", e.target.value)}
+            />
           </Field>
 
           {/* Garantia */}
           <Field label="Garantia">
-            <input className={tw.input} placeholder="Ex: 12 meses" value={dados.garantia} onChange={e => onChange("garantia", e.target.value)} />
+            <input
+              className={tw.input}
+              placeholder="Ex: 12 meses"
+              value={dados.garantia}
+              onChange={(e) => onChange("garantia", e.target.value)}
+            />
           </Field>
 
           {/* Forma de Pagamento */}
           <Field label="Forma de Pagamento">
-            <select className={tw.select} value={dados.forma_pagamento} onChange={e => onChange("forma_pagamento", e.target.value)}>
+            <select
+              className={tw.select}
+              value={dados.forma_pagamento}
+              onChange={(e) => onChange("forma_pagamento", e.target.value)}
+            >
               <option value="">Selecione</option>
               <option value="BOLETO">Boleto Bancário</option>
               <option value="PIX">PIX</option>
@@ -208,7 +267,7 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
                 className={`${tw.input} min-h-[88px] resize-y`}
                 placeholder="Anotações internas, condições comerciais, detalhes técnicos..."
                 value={dados.observacoes}
-                onChange={e => onChange("observacoes", e.target.value)}
+                onChange={(e) => onChange("observacoes", e.target.value)}
               />
             </Field>
           </div>
@@ -219,13 +278,28 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, clientes = [], pedidos 
 };
 
 // Item individual do orçamento — selecionar produto preenche descrição e preço automaticamente
-const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, errors, produtos = [] }) => {
-  const subtotal = calcularSubtotalItem(item.quantidade, item.preco_unitario, item.desconto);
+const OrcamentoItemRow = ({
+  item,
+  index,
+  onChange,
+  onProductSelect,
+  onRemove,
+  errors,
+  produtos = [],
+}) => {
+  const subtotal = calcularSubtotalItem(
+    item.quantidade,
+    item.preco_unitario,
+    item.desconto,
+  );
   const errItem = errors[item.id] || {};
 
-  const handleChange = useCallback((field, value) => {
-    onChange(item.id, field, value);
-  }, [item.id, onChange]);
+  const handleChange = useCallback(
+    (field, value) => {
+      onChange(item.id, field, value);
+    },
+    [item.id, onChange],
+  );
 
   return (
     <div className={tw.card}>
@@ -248,11 +322,22 @@ const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, er
 
       <div className="p-7">
         {/* Linha 1: Produto + Descrição */}
-        <div className="grid gap-6 mb-7" style={{ gridTemplateColumns: "1fr 2fr" }}>
+        <div
+          className="grid gap-6 mb-7"
+          style={{ gridTemplateColumns: "1fr 2fr" }}
+        >
           <Field label="Produto (opcional)">
-            <select className={tw.select} value={item.produto_id} onChange={e => onProductSelect(item.id, e.target.value)}>
+            <select
+              className={tw.select}
+              value={item.produto_id}
+              onChange={(e) => onProductSelect(item.id, e.target.value)}
+            >
               <option value="">Sem produto vinculado</option>
-              {produtos.map(p => (<option key={p.id} value={p.id}>{p.nome}</option>))}
+              {produtos.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nome}
+                </option>
+              ))}
             </select>
           </Field>
           <Field label="Descrição" required error={errItem.descricao}>
@@ -260,7 +345,7 @@ const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, er
               className={`${tw.input} ${errItem.descricao ? "border-red-400" : ""}`}
               placeholder="Descrição do item ou serviço"
               value={item.descricao}
-              onChange={e => handleChange("descricao", e.target.value)}
+              onChange={(e) => handleChange("descricao", e.target.value)}
             />
           </Field>
         </div>
@@ -268,16 +353,42 @@ const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, er
         {/* Linha 2: Qtd + Preço + Desconto + Subtotal */}
         <div className="grid grid-cols-4 gap-6 mb-7">
           <Field label="Quantidade">
-            <input type="number" min="0" step="1" className={tw.input} placeholder="0" value={item.quantidade} onChange={e => handleChange("quantidade", e.target.value)} />
+            <input
+              type="number"
+              min="0"
+              step="1"
+              className={tw.input}
+              placeholder="0"
+              value={item.quantidade}
+              onChange={(e) => handleChange("quantidade", e.target.value)}
+            />
           </Field>
           <Field label="Preço Unitário (R$)">
-            <input type="number" min="0" step="0.01" className={tw.input} placeholder="0,00" value={item.preco_unitario} onChange={e => handleChange("preco_unitario", e.target.value)} />
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              className={tw.input}
+              placeholder="0,00"
+              value={item.preco_unitario}
+              onChange={(e) => handleChange("preco_unitario", e.target.value)}
+            />
           </Field>
           <Field label="Desconto (R$)">
-            <input type="number" min="0" step="0.01" className={tw.input} placeholder="0,00" value={item.desconto} onChange={e => handleChange("desconto", e.target.value)} />
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              className={tw.input}
+              placeholder="0,00"
+              value={item.desconto}
+              onChange={(e) => handleChange("desconto", e.target.value)}
+            />
           </Field>
           <Field label="Subtotal">
-            <div className={`${tw.input} ${tw.inputReadOnly} font-bold text-[var(--button-color)] flex items-center`}>
+            <div
+              className={`${tw.input} ${tw.inputReadOnly} font-bold text-[var(--button-color)] flex items-center`}
+            >
               {formatCurrencyBR(subtotal)}
             </div>
           </Field>
@@ -285,7 +396,12 @@ const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, er
 
         {/* Observação do item */}
         <Field label="Observação do Item">
-          <input className={tw.input} placeholder="Observação específica para este item..." value={item.observacao} onChange={e => handleChange("observacao", e.target.value)} />
+          <input
+            className={tw.input}
+            placeholder="Observação específica para este item..."
+            value={item.observacao}
+            onChange={(e) => handleChange("observacao", e.target.value)}
+          />
         </Field>
       </div>
     </div>
@@ -293,12 +409,22 @@ const OrcamentoItemRow = ({ item, index, onChange, onProductSelect, onRemove, er
 };
 
 // Lista de itens do orçamento
-const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, onProductSelect, errors, produtos = [] }) => (
+const OrcamentoItens = ({
+  itens,
+  onAdd,
+  onRemove,
+  onChange,
+  onProductSelect,
+  errors,
+  produtos = [],
+}) => (
   <div className={tw.card}>
     <div className={`${tw.cardHeader} justify-between`}>
       <div className="flex items-center gap-2.5">
         <div className="w-1.5 h-5 rounded-sm bg-violet-500" />
-        <h2 className="m-0 text-sm font-bold text-slate-800">Itens do Orçamento</h2>
+        <h2 className="m-0 text-sm font-bold text-slate-800">
+          Itens do Orçamento
+        </h2>
         <span className="bg-violet-100 text-violet-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
           {itens.length} {itens.length === 1 ? "item" : "itens"}
         </span>
@@ -317,7 +443,9 @@ const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, onProductSelect, err
         <div className="py-10 text-center border-2 border-dashed border-slate-200 rounded-xl text-slate-400">
           <Package size={32} className="mx-auto mb-2.5 opacity-40" />
           <p className="m-0 text-sm">Nenhum item adicionado.</p>
-          <p className="mt-1 text-xs">Clique em "Adicionar Item" para começar.</p>
+          <p className="mt-1 text-xs">
+            Clique em "Adicionar Item" para começar.
+          </p>
         </div>
       ) : (
         itens.map((item, index) => (
@@ -338,11 +466,18 @@ const OrcamentoItens = ({ itens, onAdd, onRemove, onChange, onProductSelect, err
 );
 
 // Painel lateral com resumo financeiro (sticky)
-const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoChange }) => (
+const OrcamentoResumo = ({
+  subtotalGeral,
+  descontoGeral,
+  totalFinal,
+  onDescontoChange,
+}) => (
   <div className={`${tw.card} sticky top-24`}>
     <div className={tw.cardHeader}>
       <div className="w-1.5 h-5 rounded-sm bg-emerald-500" />
-      <h2 className="m-0 text-sm font-bold text-slate-800">Resumo Financeiro</h2>
+      <h2 className="m-0 text-sm font-bold text-slate-800">
+        Resumo Financeiro
+      </h2>
     </div>
 
     <div className="p-10 flex flex-col gap-10">
@@ -358,11 +493,13 @@ const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoC
       <div className="flex flex-col gap-3">
         <label className={tw.label}>Desconto Geral (R$)</label>
         <input
-          type="number" min="0" step="0.01"
+          type="number"
+          min="0"
+          step="0.01"
           className={`${tw.input} border-yellow-300 bg-amber-50`}
           placeholder="0,00"
           value={descontoGeral}
-          onChange={e => onDescontoChange(e.target.value)}
+          onChange={(e) => onDescontoChange(e.target.value)}
         />
       </div>
 
@@ -379,13 +516,23 @@ const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoC
       {/* Breakdown */}
       <div className="flex flex-col gap-4 pt-2">
         {[
-          { label: "Subtotal dos itens", value: subtotalGeral, cls: "text-slate-600" },
-          { label: "Desconto geral", value: -(parseFloat(descontoGeral) || 0), cls: "text-red-500" },
+          {
+            label: "Subtotal dos itens",
+            value: subtotalGeral,
+            cls: "text-slate-600",
+          },
+          {
+            label: "Desconto geral",
+            value: -(parseFloat(descontoGeral) || 0),
+            cls: "text-red-500",
+          },
         ].map((row) => (
           <div key={row.label} className="flex justify-between items-center">
             <span className="text-xs text-slate-400">{row.label}</span>
             <span className={`text-sm font-semibold ${row.cls}`}>
-              {row.value < 0 ? `- ${formatCurrencyBR(Math.abs(row.value))}` : formatCurrencyBR(row.value)}
+              {row.value < 0
+                ? `- ${formatCurrencyBR(Math.abs(row.value))}`
+                : formatCurrencyBR(row.value)}
             </span>
           </div>
         ))}
@@ -398,15 +545,30 @@ const OrcamentoResumo = ({ subtotalGeral, descontoGeral, totalFinal, onDescontoC
 const Toast = ({ message, type, onClose }) => {
   if (!message) return null;
   const map = {
-    success: { cls: "bg-green-50 border-green-200", text: "text-green-800", icon: <CheckCircle size={16} className="text-green-600 shrink-0" /> },
-    error:   { cls: "bg-red-50 border-red-200",     text: "text-red-800",   icon: <AlertCircle  size={16} className="text-red-600 shrink-0" /> },
+    success: {
+      cls: "bg-green-50 border-green-200",
+      text: "text-green-800",
+      icon: <CheckCircle size={16} className="text-green-600 shrink-0" />,
+    },
+    error: {
+      cls: "bg-red-50 border-red-200",
+      text: "text-red-800",
+      icon: <AlertCircle size={16} className="text-red-600 shrink-0" />,
+    },
   };
   const c = map[type] || map.success;
   return (
-    <div className={`fixed top-6 right-6 z-[9999] flex items-center gap-2.5 px-4 py-3.5 rounded-xl border shadow-2xl animate-[slideIn_0.2s_ease] ${c.cls}`}>
+    <div
+      className={`fixed top-6 right-6 z-[9999] flex items-center gap-2.5 px-4 py-3.5 rounded-xl border shadow-2xl animate-[slideIn_0.2s_ease] ${c.cls}`}
+    >
       {c.icon}
       <span className={`text-sm font-semibold ${c.text}`}>{message}</span>
-      <button onClick={onClose} className={`ml-2 bg-transparent border-none cursor-pointer text-base leading-none ${c.text}`}>×</button>
+      <button
+        onClick={onClose}
+        className={`ml-2 bg-transparent border-none cursor-pointer text-base leading-none ${c.text}`}
+      >
+        ×
+      </button>
     </div>
   );
 };
@@ -448,39 +610,57 @@ export default function OrcamentoPage() {
   // Carrega clientes, pedidos e produtos ao montar
   useEffect(() => {
     Api.get("/clientes")
-      .then(res => setClientes(Array.isArray(res.data) ? res.data : []))
+      .then((res) => setClientes(Array.isArray(res.data) ? res.data : []))
       .catch(() => setClientes([]));
 
     Api.get("/pedidos")
-      .then(res => {
+      .then((res) => {
         const lista = Array.isArray(res.data) ? res.data : [];
-        setPedidos(lista.map(p => ({
-          id: p.id,
-          clienteId: p.cliente?.id || "",
-          clienteNome: p.cliente?.nome || "",
-          produtosDesc: p.servico?.nome || p.produtos?.map(i => i.nomeProduto).join(", ") || "",
-        })));
+        setPedidos(
+          lista.map((p) => ({
+            id: p.id,
+            clienteId: p.cliente?.id || "",
+            clienteNome: p.cliente?.nome || "",
+            produtosDesc:
+              p.servico?.nome ||
+              p.produtos?.map((i) => i.nomeProduto).join(", ") ||
+              "",
+          })),
+        );
       })
       .catch(() => setPedidos([]));
 
     Api.get("/estoques")
-      .then(res => {
+      .then((res) => {
         const lista = Array.isArray(res.data) ? res.data : [];
-        setProdutos(lista.map(e => ({ id: e.produto?.id, nome: e.produto?.nome, preco: e.produto?.preco ?? "" })).filter(p => p.id && p.nome));
+        setProdutos(
+          lista
+            .map((e) => ({
+              id: e.produto?.id,
+              nome: e.produto?.nome,
+              preco: e.produto?.preco ?? "",
+            }))
+            .filter((p) => p.id && p.nome),
+        );
       })
       .catch(() => setProdutos([]));
   }, []);
 
   // Cálculos derivados
   const subtotalGeral = useMemo(() => calcularSubtotalGeral(itens), [itens]);
-  const totalFinal = useMemo(() => calcularTotalFinal(subtotalGeral, descontoGeral), [subtotalGeral, descontoGeral]);
+  const totalFinal = useMemo(
+    () => calcularTotalFinal(subtotalGeral, descontoGeral),
+    [subtotalGeral, descontoGeral],
+  );
 
   // Quando os pedidos carregam, sincroniza cliente se já há pedido selecionado
   useEffect(() => {
     if (!pedidos.length || !dadosGerais.pedido_id) return;
-    const pedido = pedidos.find(p => String(p.id) === String(dadosGerais.pedido_id));
+    const pedido = pedidos.find(
+      (p) => String(p.id) === String(dadosGerais.pedido_id),
+    );
     if (pedido) {
-      setDadosGerais(prev => ({
+      setDadosGerais((prev) => ({
         ...prev,
         cliente_id: String(pedido.clienteId || ""),
         cliente_nome: pedido.clienteNome || "",
@@ -490,67 +670,101 @@ export default function OrcamentoPage() {
   }, [pedidos]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Ao trocar o pedido, atualiza número do orçamento e cliente automaticamente
-  const handleDadosChange = useCallback((field, value) => {
-    setDadosGerais(prev => {
-      const updates = { ...prev, [field]: value };
-      if (field === "pedido_id") {
-        updates.numero_orcamento = gerarNumeroOrcamento(value);
-        const pedido = pedidos.find(p => String(p.id) === String(value));
-        if (pedido?.clienteId) updates.cliente_id = String(pedido.clienteId);
-        updates.cliente_nome = pedido?.clienteNome || "";
-      }
-      return updates;
-    });
-    if (errors[field]) setErrors(prev => { const e = { ...prev }; delete e[field]; return e; });
-  }, [errors, pedidos]);
+  const handleDadosChange = useCallback(
+    (field, value) => {
+      setDadosGerais((prev) => {
+        const updates = { ...prev, [field]: value };
+        if (field === "pedido_id") {
+          updates.numero_orcamento = gerarNumeroOrcamento(value);
+          const pedido = pedidos.find((p) => String(p.id) === String(value));
+          if (pedido?.clienteId) updates.cliente_id = String(pedido.clienteId);
+          updates.cliente_nome = pedido?.clienteNome || "";
+        }
+        return updates;
+      });
+      if (errors[field])
+        setErrors((prev) => {
+          const e = { ...prev };
+          delete e[field];
+          return e;
+        });
+    },
+    [errors, pedidos],
+  );
 
   // Adiciona item vazio
   const handleAddItem = useCallback(() => {
-    setItens(prev => [...prev, criarItemVazio(prev.length + 1)]);
+    setItens((prev) => [...prev, criarItemVazio(prev.length + 1)]);
   }, []);
 
   // Remove item e reordena
   const handleRemoveItem = useCallback((id) => {
-    setItens(prev => prev.filter(item => item.id !== id).map((item, i) => ({ ...item, ordem: i + 1 })));
-    setItemErrors(prev => { const e = { ...prev }; delete e[id]; return e; });
+    setItens((prev) =>
+      prev
+        .filter((item) => item.id !== id)
+        .map((item, i) => ({ ...item, ordem: i + 1 })),
+    );
+    setItemErrors((prev) => {
+      const e = { ...prev };
+      delete e[id];
+      return e;
+    });
   }, []);
 
   // Atualiza campo de um item e limpa o erro do campo
-  const handleItemChange = useCallback((id, field, value) => {
-    setItens(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
-    if (itemErrors[id]?.[field]) {
-      setItemErrors(prev => {
-        const e = { ...prev };
-        if (e[id]) { delete e[id][field]; if (!Object.keys(e[id]).length) delete e[id]; }
-        return e;
-      });
-    }
-  }, [itemErrors]);
+  const handleItemChange = useCallback(
+    (id, field, value) => {
+      setItens((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, [field]: value } : item,
+        ),
+      );
+      if (itemErrors[id]?.[field]) {
+        setItemErrors((prev) => {
+          const e = { ...prev };
+          if (e[id]) {
+            delete e[id][field];
+            if (!Object.keys(e[id]).length) delete e[id];
+          }
+          return e;
+        });
+      }
+    },
+    [itemErrors],
+  );
 
   // Ao selecionar produto, preenche descrição e preço automaticamente
-  const handleItemProductSelect = useCallback((id, produtoId) => {
-    const produto = produtos.find(p => String(p.id) === String(produtoId));
-    setItens(prev => prev.map(item =>
-      item.id === id
-        ? {
-            ...item,
-            produto_id: produtoId,
-            descricao: produto ? produto.nome : item.descricao,
-            preco_unitario: produto ? String(produto.preco) : item.preco_unitario,
-          }
-        : item
-    ));
-  }, [produtos]);
+  const handleItemProductSelect = useCallback(
+    (id, produtoId) => {
+      const produto = produtos.find((p) => String(p.id) === String(produtoId));
+      setItens((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                produto_id: produtoId,
+                descricao: produto ? produto.nome : item.descricao,
+                preco_unitario: produto
+                  ? String(produto.preco)
+                  : item.preco_unitario,
+              }
+            : item,
+        ),
+      );
+    },
+    [produtos],
+  );
 
   // Valida campos obrigatórios e retorna true se tudo ok
   const validar = useCallback(() => {
     const newErrors = {};
     if (!dadosGerais.cliente_id) newErrors.cliente_id = "Cliente é obrigatório";
     if (!dadosGerais.pedido_id) newErrors.pedido_id = "Pedido é obrigatório";
-    if (!dadosGerais.data_orcamento) newErrors.data_orcamento = "Data é obrigatória";
+    if (!dadosGerais.data_orcamento)
+      newErrors.data_orcamento = "Data é obrigatória";
 
     const newItemErrors = {};
-    itens.forEach(item => {
+    itens.forEach((item) => {
       if (!item.descricao.trim()) {
         newItemErrors[item.id] = { descricao: "Descrição obrigatória" };
       }
@@ -558,7 +772,10 @@ export default function OrcamentoPage() {
 
     setErrors(newErrors);
     setItemErrors(newItemErrors);
-    return Object.keys(newErrors).length === 0 && Object.keys(newItemErrors).length === 0;
+    return (
+      Object.keys(newErrors).length === 0 &&
+      Object.keys(newItemErrors).length === 0
+    );
   }, [dadosGerais, itens]);
 
   // Salva rascunho localmente
@@ -571,11 +788,20 @@ export default function OrcamentoPage() {
   // Valida, monta payload e gera a planilha
   const handleSaveAndDownload = useCallback(() => {
     if (!validar()) {
-      setToast({ message: "Corrija os campos obrigatórios antes de gerar a planilha.", type: "error" });
+      setToast({
+        message: "Corrija os campos obrigatórios antes de gerar a planilha.",
+        type: "error",
+      });
       setTimeout(() => setToast(null), 4000);
       return;
     }
-    const payload = { ...dadosGerais, itens, valor_subtotal: subtotalGeral, valor_desconto: parseFloat(descontoGeral) || 0, valor_total: totalFinal };
+    const payload = {
+      ...dadosGerais,
+      itens,
+      valor_subtotal: subtotalGeral,
+      valor_desconto: parseFloat(descontoGeral) || 0,
+      valor_total: totalFinal,
+    };
     console.log("Payload (geração de planilha):", payload);
     setLastSaved(new Date());
     setToast({ message: "Planilha gerada com sucesso!", type: "success" });
@@ -583,7 +809,15 @@ export default function OrcamentoPage() {
       setToast(null);
       navigate("/Pedidos");
     }, 2000);
-  }, [validar, dadosGerais, itens, subtotalGeral, descontoGeral, totalFinal, navigate]);
+  }, [
+    validar,
+    dadosGerais,
+    itens,
+    subtotalGeral,
+    descontoGeral,
+    totalFinal,
+    navigate,
+  ]);
 
   return (
     <>
@@ -600,7 +834,10 @@ export default function OrcamentoPage() {
 
         <div className="flex-1 flex flex-col w-full items-center">
           <div className="w-full">
-            <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+            <Header
+              toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+              sidebarOpen={sidebarOpen}
+            />
           </div>
 
           <div className="pt-20 lg:pt-20" />
@@ -620,11 +857,28 @@ export default function OrcamentoPage() {
             <OrcamentoHeader />
 
             {/* Layout duas colunas */}
-            <div className="grid gap-8 items-start" style={{ gridTemplateColumns: "1fr 320px" }}>
+            <div
+              className="grid gap-8 items-start"
+              style={{ gridTemplateColumns: "1fr 320px" }}
+            >
               {/* Coluna Principal */}
               <div className="flex flex-col gap-8">
-                <OrcamentoInformacoes dados={dadosGerais} onChange={handleDadosChange} errors={errors} clientes={clientes} pedidos={pedidos} />
-                <OrcamentoItens itens={itens} onAdd={handleAddItem} onRemove={handleRemoveItem} onChange={handleItemChange} onProductSelect={handleItemProductSelect} errors={itemErrors} produtos={produtos} />
+                <OrcamentoInformacoes
+                  dados={dadosGerais}
+                  onChange={handleDadosChange}
+                  errors={errors}
+                  clientes={clientes}
+                  pedidos={pedidos}
+                />
+                <OrcamentoItens
+                  itens={itens}
+                  onAdd={handleAddItem}
+                  onRemove={handleRemoveItem}
+                  onChange={handleItemChange}
+                  onProductSelect={handleItemProductSelect}
+                  errors={itemErrors}
+                  produtos={produtos}
+                />
               </div>
 
               {/* Sidebar: Resumo */}
@@ -650,7 +904,10 @@ export default function OrcamentoPage() {
                 <button onClick={handleSaveDraft} className={tw.btnSecondary}>
                   Salvar Rascunho
                 </button>
-                <button onClick={handleSaveAndDownload} className={`${tw.btnPrimary} flex items-center gap-2`}>
+                <button
+                  onClick={handleSaveAndDownload}
+                  className={`${tw.btnPrimary} flex items-center gap-2`}
+                >
                   <Download size={15} />
                   Salvar e Baixar Planilha
                 </button>
@@ -660,7 +917,13 @@ export default function OrcamentoPage() {
         </div>
       </div>
 
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </>
   );
 }

@@ -1,11 +1,21 @@
 import React from "react";
 import { Filter, Check } from "lucide-react";
 
-const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange }) => {
+const FilterDropdown = ({
+  isOpen,
+  onClose,
+  selectedFilters,
+  onFilterChange,
+}) => {
   const filterOptions = {
     situacao: {
       title: "Situação do Estoque",
-      options: ["Disponível", "Abaixo do normal", "Fora de estoque", "Reservado"],
+      options: [
+        "Disponível",
+        "Abaixo do normal",
+        "Fora de estoque",
+        "Reservado",
+      ],
     },
     tipo: {
       title: "Status do Produto",
