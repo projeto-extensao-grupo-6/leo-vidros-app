@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Edit, Save, Plus, Trash2 } from "lucide-react";
 import Api from "../../../api/client/Api";
 import { onlyLetters } from "../../../utils/masks";
-import Button from "../../../components/button/Button";
+import Button from "../../../components/ui/Button/Button.component";
 import SuccessModal from "../../../components/overlay/Modal/SuccessModal";
 
 const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
