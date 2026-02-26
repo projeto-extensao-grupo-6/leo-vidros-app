@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Calendar, Clock, X, Save } from "lucide-react";
 
-const AgendamentoModal = ({ isOpen, onClose, onSave, servicoId }) => {
+const AgendamentoModal = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     dataAgendamento: "",
     horaAgendamento: "",

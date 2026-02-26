@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react"; // Fragment importado
+import PropTypes from "prop-types"; // PropTypes importado
 import {
   ShoppingCart,
   ChevronDown,
   Plus,
-  X,
   AlertCircle,
   User,
   Package,
@@ -14,7 +14,6 @@ import {
   cpfMask,
   phoneMask,
   onlyLetters,
-  removeMask,
 } from "../../../utils/masks";
 
 const usePedidoAPI = () => {
@@ -71,7 +70,6 @@ const usePedidoAPI = () => {
 };
 
 const DEFAULT_FORM_DATA = {
-  // Etapa 1 - Cliente
   tipoCliente: "nenhum",
   clienteId: "",
   clienteNome: "",
@@ -85,11 +83,7 @@ const DEFAULT_FORM_DATA = {
   clienteUf: "",
   clienteCep: "",
   clienteComplemento: "",
-
-  // Etapa 2 - Produtos
   produtos: [],
-
-  // Etapa 3 - Dados do Pedido
   descricao: "",
   formaPagamento: "Pix",
   data: new Date().toISOString().split("T")[0],
@@ -141,7 +135,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
     const { name, value } = e.target;
     let maskedValue = value;
 
-    // Aplicar máscaras específicas
     if (name === "clienteCpf") {
       maskedValue = cpfMask(value);
     } else if (name === "clienteTelefone") {
@@ -178,9 +171,9 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleClienteExistenteChange = (e) => {
-    const clienteId = e.target.value;
+    const clienteIdValue = e.target.value;
     const clienteSelecionado = clientesExistentes.find(
-      (c) => String(c.id) === String(clienteId),
+      (c) => String(c.id) === String(clienteIdValue),
     );
 
     if (clienteSelecionado) {
@@ -206,16 +199,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
         ...prev,
         clienteId: "",
         clienteNome: "",
-        clienteCpf: "",
-        clienteEmail: "",
-        clienteTelefone: "",
-        clienteRua: "",
-        clienteNumero: "",
-        clienteBairro: "",
-        clienteCidade: "",
-        clienteUf: "",
-        clienteCep: "",
-        clienteComplemento: "",
       }));
     }
     setError(null);
@@ -308,7 +291,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           return false;
         }
       }
-      // Quando tipoCliente === "nenhum", não há validação necessária
     }
 
     if (currentStep === 1) {
@@ -347,10 +329,9 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
     setError(null);
 
     try {
-      let clienteId = formData.clienteId;
-      let clienteNome = formData.clienteNome;
+      let clienteIdFinal = formData.clienteId;
+      let clienteNomeFinal = formData.clienteNome;
 
-      // Se for cliente novo com dados completos, cadastrar primeiro
       if (formData.tipoCliente === "novo") {
         const novoCliente = await cadastrarCliente({
           nome: formData.clienteNome,
@@ -358,14 +339,13 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           email: formData.clienteEmail,
           telefone: formData.clienteTelefone,
         });
-        clienteId = novoCliente.id;
-        clienteNome = novoCliente.nome;
+        clienteIdFinal = novoCliente.id;
+        clienteNomeFinal = novoCliente.nome;
       }
 
-      // Preparar dados do pedido
       const pedidoData = {
-        clienteId: clienteId || null,
-        clienteNome: clienteNome,
+        clienteId: clienteIdFinal || null,
+        clienteNome: clienteNomeFinal,
         produtos: formData.produtos.map((p) => ({
           produtoId: p.produtoId,
           quantidade: p.quantidade,
@@ -409,7 +389,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
         className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[10000vh] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center px-8 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="bg-[#eeeeee] p-2.5 rounded-lg">
@@ -421,11 +400,10 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           </div>
         </div>
 
-        {/* Stepper */}
         <div className="px-8 pt-6 pb-4">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
-              <React.Fragment key={step.id}>
+              <Fragment key={step.id}>
                 <div className="flex flex-col items-center flex-1 gap-2">
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
@@ -454,12 +432,11 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                     }`}
                   />
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         </div>
 
-        {/* Error Alert */}
         <div className="flex justify-center w-full px-8">
           {error && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 mb-4">
@@ -472,9 +449,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
 
-        {/* Conteúdo */}
         <div className="flex flex-col px-8 py-4">
-          {/* Etapa 0 - Cliente */}
           {currentStep === 0 && (
             <div className="flex flex-col gap-4">
               <div className="text-left">
@@ -490,13 +465,11 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => handleTipoClienteChange("nenhum")}
-                  className={`px-10 py-5 rounded-md border transition-all
-                                        flex items-center justify-center gap-2 cursor-pointer
-                                        shadow-sm hover:shadow-md ${
-                                          formData.tipoCliente === "nenhum"
-                                            ? "border-[#007EA7] bg-blue-50"
-                                            : "border-gray-200 bg-white hover:border-gray-300"
-                                        }`}
+                  className={`px-10 py-5 rounded-md border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md ${
+                    formData.tipoCliente === "nenhum"
+                      ? "border-[#007EA7] bg-blue-50"
+                      : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
                 >
                   <User className="w-5 h-5 mx-auto mb-1 text-[#007EA7]" />
                   <p className="text-md font-semibold text-gray-900">
@@ -507,13 +480,11 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => handleTipoClienteChange("existente")}
-                  className={`px-10 py-5 rounded-md border transition-all
-                                        flex items-center justify-center gap-2 cursor-pointer
-                                        shadow-sm hover:shadow-md ${
-                                          formData.tipoCliente === "existente"
-                                            ? "border-[#007EA7] bg-blue-50"
-                                            : "border-gray-200 bg-white hover:border-gray-300"
-                                        }`}
+                  className={`px-10 py-5 rounded-md border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md ${
+                    formData.tipoCliente === "existente"
+                      ? "border-[#007EA7] bg-blue-50"
+                      : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
                 >
                   <User className="w-5 h-5 mx-auto mb-1 text-[#007EA7]" />
                   <p className="text-md font-semibold text-gray-900">
@@ -524,13 +495,11 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 <button
                   type="button"
                   onClick={() => handleTipoClienteChange("novo")}
-                  className={`px-10 py-5 rounded-md border transition-all
-                                        flex items-center justify-center gap-2 cursor-pointer
-                                        shadow-sm hover:shadow-md ${
-                                          formData.tipoCliente === "novo"
-                                            ? "border-[#007EA7] bg-blue-50"
-                                            : "border-gray-200 bg-white hover:border-gray-300"
-                                        }`}
+                  className={`px-10 py-5 rounded-md border transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow-md ${
+                    formData.tipoCliente === "novo"
+                      ? "border-[#007EA7] bg-blue-50"
+                      : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
                 >
                   <Plus className="w-5 h-5 mx-auto mb-1 text-[#007EA7]" />
                   <p className="text-md font-semibold text-gray-900">
@@ -649,7 +618,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 1 - Produtos */}
           {currentStep === 1 && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
@@ -678,7 +646,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                     Nenhum produto adicionado:
                   </p>
                   <p className="text-md text-gray-500 mt-1">
-                    Clique em "Adicionar Produto" para começar
+                    Clique em &quot;Adicionar Produto&quot; para começar
                   </p>
                 </div>
               ) : (
@@ -777,7 +745,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 2 - Pagamento */}
           {currentStep === 2 && (
             <div className="flex flex-col gap-3">
               <div className="text-left">
@@ -856,7 +823,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
           )}
 
-          {/* Etapa 3 - Revisão */}
           {currentStep === 3 && (
             <div className="flex flex-col gap-3">
               <div className="text-left">
@@ -868,7 +834,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 </p>
               </div>
 
-              {/* Cliente */}
               <div className="flex flex-row gap-3 items-center justify-start bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <User className="w-5 h-5 text-[#007EA7]" />
@@ -898,7 +863,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Produtos */}
               <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <Package className="w-5 h-5 text-[#007EA7]" />
@@ -934,7 +898,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               </div>
 
-              {/* Pagamento */}
               <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                 <div className="flex items-center gap-2 mb-3">
                   <ShoppingCart className="w-5 h-5 text-[#007EA7]" />
@@ -967,7 +930,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="px-8 py-4 border-t bg-gray-50 flex justify-between">
           <button
             type="button"
@@ -1021,6 +983,13 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       </div>
     </div>
   );
+};
+
+// Validação de PropTypes adicionada
+NovoPedidoModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
 };
 
 export default NovoPedidoModal;

@@ -200,7 +200,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
   const [clienteInfo, setClienteInfo] = useState(null);
 
   const fetchFuncionariosDisponiveis = useCallback(
-    async (data, inicio, fim, tipoValue) => {
+    async (data, inicio, fim) => {
       if (!data || !inicio || !fim) {
         setFuncionariosOptions([]);
         return;

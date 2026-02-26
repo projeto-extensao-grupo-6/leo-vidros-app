@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "../contexts/ProtectedRoute.jsx";
+import ProtectedRoute from "../context/ProtectedRoute.jsx";
 import Login from "../pages/login/login.jsx";
 import Cadastro from "../pages/cadastro/cadastro.jsx";
 import PaginaInicial from "../pages/pagina-inicial/PaginaInicial.jsx";

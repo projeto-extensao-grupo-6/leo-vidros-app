@@ -341,23 +341,15 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
 
       const servicoAtualizado = PedidosService.mapearParaFrontend(result.data);
 
-      // 2️⃣ Normaliza a etapa que veio do backend
       const etapaRawDoBackend =
         servicoAtualizado.etapaOriginal ||
         servicoAtualizado.etapa ||
         "PENDENTE";
       const etapaCalculada = encontrarEtapaCorrespondente(etapaRawDoBackend);
 
-      // 3️⃣ Pega a etapa ORIGINAL que veio no objeto servico (antes de qualquer mudança)
-      const etapaOriginalRaw =
-        servico.etapaOriginal || servico.etapa || "PENDENTE";
-      const etapaAtualFrontend = encontrarEtapaCorrespondente(etapaOriginalRaw);
-
-      // 4️⃣ Verifica se houve mudança de etapa
       const houveAlteracaoDeEtapa = etapaCalculada !== etapaAnterior;
 
       if (houveAlteracaoDeEtapa) {
-        // 5️⃣ Atualiza a etapa no backend se necessário
         const etapaParaBackend = etapaCalculada;
 
         const pedidoData = {
@@ -422,11 +414,8 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
         };
 
         await Api.put(`/pedidos/${servico.id}`, pedidoData);
-      } else {
-        // Etapa não mudou, nenhuma atualização necessária
       }
 
-      // 6️⃣ SEMPRE recarrega os dados finais do backend após qualquer operação
       const resultFinal = await PedidosService.buscarPorId(servico.id);
       if (resultFinal.success) {
         const servicoFinal = PedidosService.mapearParaFrontend(
@@ -438,7 +427,6 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
 
         const etapaInfo = ETAPAS_SERVICO.find((e) => e.valor === etapaFinal);
 
-        // 7️⃣ Atualiza o estado local
         setFormData({
           clienteNome: servicoFinal.clienteNome || "",
           data: servicoFinal.data || "",
@@ -452,7 +440,6 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
         });
         setEtapaAnterior(etapaFinal);
 
-        // 8️⃣ Notifica o componente pai
         if (onSuccess) {
           await onSuccess({
             ...servicoFinal,
@@ -462,7 +449,6 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
         }
       }
 
-      // 9️⃣ Fecha os modais
       setMostrarEditarAgendamento(false);
       setAgendamentoSelecionado(null);
     } catch (error) {
@@ -888,7 +874,7 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
                     servico.servico.agendamentos.length > 0 ? (
                       <div className="space-y-4">
                         {servico.servico.agendamentos.map(
-                          (agendamento, index) => (
+                          (agendamento) => (
                             <div
                               key={agendamento.id}
                               className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow"

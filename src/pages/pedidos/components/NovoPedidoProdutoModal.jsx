@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react"; // Importado Fragment
+import PropTypes from "prop-types"; // Importado PropTypes
 import {
   ShoppingCart,
   ChevronDown,
   Plus,
-  X,
   AlertCircle,
   User,
   Package,
@@ -14,7 +14,6 @@ import {
   cpfMask,
   phoneMask,
   onlyLetters,
-  removeMask,
 } from "../../../utils/masks";
 import SuccessModal from "../../../components/overlay/Modal/SuccessModal";
 import {
@@ -50,7 +49,7 @@ const usePedidoAPI = () => {
         cpf: "",
         email: "",
         telefone: "",
-        status: "Avulso", // Status especial para clientes avulsos
+        status: "Avulso",
         enderecos: [
           {
             rua: "",
@@ -113,18 +112,13 @@ const usePedidoAPI = () => {
 };
 
 const DEFAULT_FORM_DATA = {
-  // Etapa 1 - Cliente
   tipoCliente: "nenhum",
   clienteId: "",
   clienteNome: "",
   clienteCpf: "",
   clienteEmail: "",
   clienteTelefone: "",
-
-  // Etapa 2 - Produtos
   produtos: [],
-
-  // Etapa 3 - Dados do Pedido
   descricao: "",
   formaPagamento: "Pix",
   data: new Date().toISOString().split("T")[0],
@@ -170,7 +164,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
         buscarProdutos(),
       ]);
 
-      // Filtrar clientes avulsos da lista de seleção
       const clientesFiltrados = Array.isArray(clientes)
         ? clientes.filter((c) => c.status !== "Avulso")
         : [];
@@ -179,7 +172,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       setProdutosDisponiveis(Array.isArray(produtos) ? produtos : []);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
-      // Set empty arrays as fallback
       setClientesExistentes([]);
       setProdutosDisponiveis([]);
     }
@@ -189,7 +181,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
     const { name, value } = e.target;
     let maskedValue = value;
 
-    // Aplicar máscaras específicas
     if (name === "clienteCpf") {
       maskedValue = cpfMask(value);
     } else if (name === "clienteTelefone") {
@@ -219,9 +210,9 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleClienteExistenteChange = (e) => {
-    const clienteId = e.target.value;
+    const clienteIdValue = e.target.value;
     const clienteSelecionado = clientesExistentes.find(
-      (c) => String(c.id) === String(clienteId),
+      (c) => String(c.id) === String(clienteIdValue),
     );
 
     if (clienteSelecionado) {
@@ -311,10 +302,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
     );
   };
 
-  /**
-   * Valida a etapa atual usando o schema Zod correspondente.
-   * O Zod centraliza todas as regras — sem duplicação de if/else.
-   */
   const validateStep = () => {
     setError(null);
 
@@ -342,10 +329,8 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
     setError(null);
 
     try {
-      let clienteId = formData.clienteId;
       let clienteData = null;
 
-      // Se for cliente novo, cadastrar primeiro e obter o ID
       if (formData.tipoCliente === "novo") {
         const novoCliente = await cadastrarCliente({
           nome: formData.clienteNome,
@@ -366,88 +351,17 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           ],
         });
 
-        clienteId = novoCliente.id;
-        clienteData = {
-          id: novoCliente.id,
-          nome: novoCliente.nome,
-          cpf: novoCliente.cpf || "",
-          email: novoCliente.email || "",
-          telefone: novoCliente.telefone || "",
-          status: novoCliente.status || "Ativo",
-          enderecos: novoCliente.enderecos || [
-            {
-              id: 0,
-              rua: "",
-              complemento: "",
-              cep: "",
-              cidade: "",
-              bairro: "",
-              uf: "",
-              pais: "Brasil",
-              numero: 0,
-            },
-          ],
-        };
+        clienteData = novoCliente;
       } else if (formData.tipoCliente === "existente") {
-        // Buscar dados completos do cliente selecionado
-        const clienteSelecionado = clientesExistentes.find(
+        clienteData = clientesExistentes.find(
           (c) => String(c.id) === String(formData.clienteId),
         );
-
-        if (clienteSelecionado) {
-          clienteData = {
-            id: clienteSelecionado.id,
-            nome: clienteSelecionado.nome,
-            cpf: clienteSelecionado.cpf || "",
-            email: clienteSelecionado.email || "",
-            telefone: clienteSelecionado.telefone || "",
-            status: clienteSelecionado.status || "Ativo",
-            enderecos: clienteSelecionado.enderecos || [
-              {
-                id: 0,
-                rua: "",
-                complemento: "",
-                cep: "",
-                cidade: "",
-                bairro: "",
-                uf: "",
-                pais: "Brasil",
-                numero: 0,
-              },
-            ],
-          };
-        }
       } else {
-        // Para tipoCliente "nenhum", criar cliente avulso (não aparece na lista de clientes)
-        const clienteBasico = await cadastrarClienteAvulso(
+        clienteData = await cadastrarClienteAvulso(
           formData.clienteNome,
         );
-
-        clienteId = clienteBasico.id;
-        clienteData = {
-          id: clienteBasico.id,
-          nome: clienteBasico.nome,
-          cpf: "",
-          email: "",
-          telefone: "",
-          status: "Avulso",
-          enderecos: [
-            {
-              id: 0,
-              rua: "",
-              complemento: "",
-              cep: "",
-              cidade: "",
-              bairro: "",
-              uf: "",
-              pais: "Brasil",
-              numero: 0,
-            },
-          ],
-        };
       }
 
-      // Preparar dados do pedido no formato correto
       const pedidoData = {
         pedido: {
           valorTotal: calcularValorTotal(),
@@ -470,7 +384,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
 
       const pedidoSalvo = await salvarPedido(pedidoData);
 
-      // Exibe modal de sucesso e aguarda antes de fechar
       setShowSuccessModal(true);
 
       setTimeout(() => {
@@ -521,7 +434,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
           <div className="px-8 pt-6 pb-4">
             <div className="flex items-center justify-between">
               {steps.map((step, index) => (
-                <React.Fragment key={step.id}>
+                <Fragment key={step.id}>
                   <div className="flex flex-col items-center flex-1 gap-2">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
@@ -550,7 +463,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                       }`}
                     />
                   )}
-                </React.Fragment>
+                </Fragment>
               ))}
             </div>
           </div>
@@ -775,7 +688,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                       Nenhum produto adicionado:
                     </p>
                     <p className="text-md text-gray-500 mt-1">
-                      Clique em "Adicionar Produto" para começar
+                      Clique em &quot;Adicionar Produto&quot; para começar
                     </p>
                   </div>
                 ) : (
@@ -971,7 +884,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                   </p>
                 </div>
 
-                {/* Cliente */}
                 <div className="flex flex-row gap-3 items-center justify-start bg-gray-50 rounded-md p-4 border">
                   <div className="flex items-center gap-2 mb-3">
                     <User className="w-5 h-5 text-[#007EA7]" />
@@ -1001,7 +913,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                {/* Produtos */}
                 <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                   <div className="flex items-center gap-2 mb-3">
                     <Package className="w-5 h-5 text-[#007EA7]" />
@@ -1022,8 +933,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                             </u>
 
                             <p className="text-gray-600">
-                              {produto.quantidade}x R${" "}
-                              {produto.preco.toFixed(2)}
+                              {produto.quantidade}x R$ {produto.preco.toFixed(2)}
                             </p>
                           </li>
                         </div>
@@ -1040,7 +950,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                {/* Pagamento */}
                 <div className="flex flex-col gap-3 bg-gray-50 rounded-md p-4 border">
                   <div className="flex items-center gap-2 mb-3">
                     <ShoppingCart className="w-5 h-5 text-[#007EA7]" />
@@ -1073,7 +982,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             )}
           </div>
 
-          {/* Footer */}
           <div className="px-8 py-4 border-t bg-gray-50 flex justify-between">
             <button
               type="button"
@@ -1127,7 +1035,6 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
       </div>
 
-      {/* Modal de Sucesso - FORA do modal principal */}
       {showSuccessModal && (
         <SuccessModal
           title="Pedido Criado!"
@@ -1138,6 +1045,13 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       )}
     </>
   );
+};
+
+// Validação de Props
+NovoPedidoModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSuccess: PropTypes.func,
 };
 
 export default NovoPedidoModal;

@@ -1,13 +1,11 @@
 import React from "react";
+import Button from "../ui/Button/Button.component";
+import { ArrowLeft } from "lucide-react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
@@ -53,23 +51,22 @@ class ErrorBoundary extends React.Component {
             </div>
             <div className="flex flex-col gap-1 text-center">
               <h1 className="text-2xl font-medium text-neutral-800">
-                Something went wrong
+                Algo deu Errado
               </h1>
               <p className="text-neutral-600 text-base w w-8/12 mx-auto">
-                We encountered an unexpected error while processing your
-                request.
+                Encontramos um erro inesperado ao processar sua solicitação.
               </p>
             </div>
             <div className="flex justify-center items-center mt-6">
-              <button
+              <Button
                 onClick={() => {
                   window.location.href = "/";
                 }}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded flex items-center gap-2 transition-colors duration-200 shadow-sm"
+                variant="contained"                color="primary"
+                startIcon={<ArrowLeft size={18} color="#000000" />}
               >
-                <Icon name="ArrowLeft" size={18} color="#fff" />
-                Back
-              </button>
+                Voltar
+              </Button>
             </div>
           </div>
         </div>

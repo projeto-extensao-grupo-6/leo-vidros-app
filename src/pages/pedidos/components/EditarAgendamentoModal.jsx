@@ -8,7 +8,6 @@ import {
   MapPin,
   Users,
   Package,
-  FileText,
   AlertCircle,
 } from "lucide-react";
 import agendamentosService from "../../../api/services/agendamentosService";
@@ -88,20 +87,6 @@ const EditarAgendamentoModal = ({
         return "bg-gray-100 text-gray-700 border border-gray-300";
     }
   };
-
-  const getStatusIcon = (statusNome) => {
-    switch (statusNome?.toUpperCase()) {
-      case "PENDENTE":
-        return "🟡";
-      case "EM ANDAMENTO":
-        return "🔵";
-      case "CONCLUÍDO":
-        return "🟢";
-      default:
-        return "⚪";
-    }
-  };
-
   const handleSave = async () => {
     if (
       !formData.dataAgendamento ||

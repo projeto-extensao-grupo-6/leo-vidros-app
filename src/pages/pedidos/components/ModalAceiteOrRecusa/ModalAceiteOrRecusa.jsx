@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
+import PropTypes from "prop-types"; // Importação adicionada
 
 export default function ModalConfirmacao({
   aberto,
@@ -24,7 +25,7 @@ export default function ModalConfirmacao({
     },
   };
 
-  const estilo = estilos[tipo];
+  const estilo = estilos[tipo] || estilos.aprovar;
 
   return (
     <AnimatePresence>
@@ -70,7 +71,7 @@ export default function ModalConfirmacao({
                 <p className="text-md text-gray-600">{mensagem}</p>
               </div>
             </div>
-            <br></br>
+            
             <div className="flex gap-3 justify-end mt-8">
               <button
                 onClick={onCancelar}
@@ -91,3 +92,15 @@ export default function ModalConfirmacao({
     </AnimatePresence>
   );
 }
+
+// Validação de Props adicionada
+ModalConfirmacao.propTypes = {
+  aberto: PropTypes.bool.isRequired,
+  tipo: PropTypes.oneOf(["aprovar", "recusar"]),
+  titulo: PropTypes.string.isRequired,
+  mensagem: PropTypes.string.isRequired,
+  textoBotaoConfirmar: PropTypes.string.isRequired,
+  textoBotaoCancelar: PropTypes.string,
+  onConfirmar: PropTypes.func.isRequired,
+  onCancelar: PropTypes.func.isRequired,
+};

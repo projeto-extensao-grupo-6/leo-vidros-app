@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../../utils/cn";
@@ -10,7 +11,6 @@ const MultipleSelectCheckmarks = React.forwardRef(
       className,
       options = [],
       value = [],
-      defaultValue = [],
       placeholder = "Selecione opções",
       disabled = false,
       required = false,
@@ -129,9 +129,9 @@ const MultipleSelectCheckmarks = React.forwardRef(
           <label
             htmlFor={selectId}
             className={cn(
-              "block text-sm font-medium leading-none mb-2",
+              "mb-2 block text-sm leading-none font-medium",
               error ? "text-destructive" : "text-foreground",
-              disabled && "opacity-70 cursor-not-allowed",
+              disabled && "cursor-not-allowed opacity-70",
             )}
           >
             {label}
@@ -144,7 +144,7 @@ const MultipleSelectCheckmarks = React.forwardRef(
             id={selectId}
             type="button"
             className={cn(
-              "flex h-10 w-full items-center justify-between rounded-md border border-input bg-white text-black px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+              "border-input ring-offset-background placeholder:text-muted-foreground focus:ring-ring flex h-10 w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm text-black focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-destructive focus:ring-destructive",
               !hasValue && "text-muted-foreground",
             )}
@@ -156,9 +156,9 @@ const MultipleSelectCheckmarks = React.forwardRef(
           >
             <span className="truncate">{getSelectedDisplay()}</span>
 
-            <div className="flex items-center gap-1 ml-2">
+            <div className="ml-2 flex items-center gap-1">
               {loading && (
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -216,11 +216,11 @@ const MultipleSelectCheckmarks = React.forwardRef(
 
           {/* Dropdown */}
           {isOpen && (
-            <div className="absolute z-50 w-full mt-1 bg-white text-black border border-border rounded-md shadow-md">
+            <div className="border-border absolute z-50 mt-1 w-full rounded-md border bg-white text-black shadow-md">
               {searchable && (
-                <div className="p-2 border-b">
+                <div className="border-b p-2">
                   <div className="relative">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Search className="text-muted-foreground absolute top-2.5 left-2 h-4 w-4" />
                     <Input
                       placeholder="Buscar opções..."
                       value={searchTerm}
@@ -232,17 +232,17 @@ const MultipleSelectCheckmarks = React.forwardRef(
                 </div>
               )}
 
-              <div className="py-1 max-h-60 overflow-auto">
+              <div className="max-h-60 overflow-auto py-1">
                 {showSelectAll && filteredOptions?.length > 0 && (
                   <div
                     className={cn(
-                      "flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-sm font-medium border-b hover:bg-accent hover:text-accent-foreground",
+                      "hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 border-b px-3 py-2 text-sm font-medium select-none",
                     )}
                     onClick={handleSelectAll}
                   >
                     <div
                       className={cn(
-                        "flex h-4 w-4 items-center justify-center rounded border border-primary",
+                        "border-primary flex h-4 w-4 items-center justify-center rounded border",
                         isAllSelected() && "bg-primary text-primary-foreground",
                       )}
                     >
@@ -253,7 +253,7 @@ const MultipleSelectCheckmarks = React.forwardRef(
                 )}
 
                 {filteredOptions?.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground px-3 py-2 text-sm">
                     {searchTerm
                       ? "Nenhuma opção encontrada"
                       : "Nenhuma opção disponível"}
@@ -263,7 +263,7 @@ const MultipleSelectCheckmarks = React.forwardRef(
                     <div
                       key={option?.value}
                       className={cn(
-                        "flex cursor-pointer select-none items-center gap-2 px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                        "hover:bg-accent hover:text-accent-foreground flex cursor-pointer items-center gap-2 px-3 py-2 text-sm outline-none select-none",
                         option?.disabled && "pointer-events-none opacity-50",
                       )}
                       onClick={() =>
@@ -272,7 +272,7 @@ const MultipleSelectCheckmarks = React.forwardRef(
                     >
                       <div
                         className={cn(
-                          "flex h-4 w-4 items-center justify-center rounded border border-primary shrink-0",
+                          "border-primary flex h-4 w-4 shrink-0 items-center justify-center rounded border",
                           isSelected(option?.value) &&
                             "bg-primary text-primary-foreground",
                         )}
@@ -281,10 +281,10 @@ const MultipleSelectCheckmarks = React.forwardRef(
                           <Check className="h-3 w-3" />
                         )}
                       </div>
-                      <div className="flex-1 flex flex-col">
+                      <div className="flex flex-1 flex-col">
                         <span>{option?.label}</span>
                         {option?.description && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             {option?.description}
                           </span>
                         )}
@@ -297,9 +297,9 @@ const MultipleSelectCheckmarks = React.forwardRef(
           )}
         </div>
         {description && !error && (
-          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{description}</p>
         )}
-        {error && <p className="text-sm text-destructive mt-1">{error}</p>}
+        {error && <p className="text-destructive mt-1 text-sm">{error}</p>}
       </div>
     );
   },

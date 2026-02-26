@@ -1,6 +1,5 @@
 import Api from "../client/Api";
 import BaseService from "../client/BaseService";
-import PedidosService from "./pedidosService";
 
 /**
  * Serviço para integração com API de Serviços do backend Spring

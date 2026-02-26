@@ -1,4 +1,3 @@
-import React from "react";
 import PropTypes from "prop-types";
 import StepConnector from "@mui/material/StepConnector";
 import { Check } from "lucide-react"; // Corrigido para importação nomeada e PascalCase

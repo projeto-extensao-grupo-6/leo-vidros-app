@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../../utils/cn";
@@ -10,7 +11,6 @@ const Select = React.forwardRef(
       className,
       options = [],
       value,
-      defaultValue,
       placeholder = "Selecione uma opção",
       multiple = false,
       disabled = false,

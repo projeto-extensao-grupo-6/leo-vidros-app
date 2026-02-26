@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Edit, Save, Plus, Trash2 } from "lucide-react";
 import Api from "../../../api/client/Api";
 import { onlyLetters } from "../../../utils/masks";
+import Button from "../../../components/button/Button";
 import SuccessModal from "../../../components/overlay/Modal/SuccessModal";
 
 const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
@@ -249,13 +250,14 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                   Produtos
                 </label>
                 {modoEdicao && (
-                  <button
+                  <Button
                     type="button"
                     onClick={handleAdicionarProduto}
+                    startIcon={<Plus />}
                     className="px-3 py-2 bg-[#007EA7] text-white rounded-md hover:bg-[#006891] transition-colors flex items-center gap-1 text-md font-semibold cursor-pointer"
                   >
                     Adicionar
-                  </button>
+                  </Button>
                 )}
               </div>
 
@@ -322,13 +324,13 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                     </div>
                     {modoEdicao && (
                       <div className="col-span-2 flex flex-col justify-end">
-                        <button
+                        <Button
                           type="button"
                           onClick={() => handleRemoverProduto(index)}
                           className="w-full px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
