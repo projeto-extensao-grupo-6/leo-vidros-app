@@ -1,268 +1,196 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowRightLeft, ChevronDown, Hash, AlertCircle } from 'lucide-react';
-import Api from '../../../../api/client/Api';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { ArrowRightLeft, ChevronDown, Hash, AlertCircle } from "lucide-react";
+import Api from "../../../../api/client/Api";
+import { useNavigate } from "react-router-dom";
 
 const EntradaSaidaEstoque = ({ isOpen, onClose, itemIds, estoque }) => {
-    const navigate = useNavigate();
-    const [tipoMovimento, setTipoMovimento] = useState('entrada');
-    const [quantidade, setQuantidade] = useState(1);
-    const [itemsInfo, setItemsInfo] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
-    const [currentItemIndex, setCurrentItemIndex] = useState(0);
-    const [processedItems, setProcessedItems] = useState([]);
+  const navigate = useNavigate();
+  const [tipoMovimento, setTipoMovimento] = useState("entrada");
+  const [quantidade, setQuantidade] = useState(1);
+  const [itemsInfo, setItemsInfo] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const [processedItems, setProcessedItems] = useState([]);
 
-    useEffect(() => {
-        if (isOpen && itemIds.length > 0) {
-            // Carregar todos os itens selecionados
-            const items = itemIds.map(id => {
-                const item = estoque.find(item => item.id === id);
-                if (item) {
-                    return { 
-                        id: item.id, 
-                        nome: item.produto.nome, 
-                        unidade: item.detalhes?.unidadeMedida || 'Unidade',
-                        localizacao: item.localizacao || 'localizacao_20f384d35f5f'
-                    };
-                }
-                return null;
-            }).filter(Boolean);
-
-            setItemsInfo(items);
-            setCurrentItemIndex(0);
-            setProcessedItems([]);
-            setTipoMovimento('entrada');
-            setQuantidade(1);
-            setError('');
-            setSuccess(false);
-        } else if (!isOpen) {
-            setItemsInfo([]);
-            setCurrentItemIndex(0);
-            setProcessedItems([]);
-            setError('');
-            setSuccess(false);
-        }
-    }, [isOpen, itemIds, estoque]);
-
-    const handleSaveClick = async () => {
-        setError('');
-        setLoading(true);
-
-        try {
-            const endpoint = tipoMovimento === 'entrada' ? '/estoques/entrada' : '/estoques/saida';
-            
-            const item = itemsInfo[currentItemIndex];
-            const requestBody = {
-                produtoId: item.id,
-                localizacao: item.localizacao,
-                quantidadeTotal: parseInt(quantidade, 10) || 0,
-                dataHora: new Date().toISOString()
+  useEffect(() => {
+    if (isOpen && itemIds.length > 0) {
+      const items = itemIds
+        .map((id) => {
+          const item = estoque.find((e) => e.id === id);
+          if (item) {
+            return {
+              id: item.id,
+              nome: item.produto?.nome || "Produto sem nome",
+              unidade: item.detalhes?.unidadeMedida || "Unidade",
+              localizacao: item.localizacao || "localizacao_padrao",
             };
+          }
+          return null;
+        })
+        .filter(Boolean);
 
-            await Api.post(endpoint, requestBody);
-            
-            // Adicionar item processado à lista
-            setProcessedItems(prev => [...prev, item.nome]);
-            
-            // Verificar se há mais itens para processar
-            if (currentItemIndex < itemsInfo.length - 1) {
-                // Avançar para o próximo item
-                setCurrentItemIndex(prev => prev + 1);
-                setQuantidade(1); // Resetar quantidade para o próximo item
-                setSuccess(true);
-                
-                setTimeout(() => {
-                    setSuccess(false);
-                }, 1500);
-            } else {
-                // Todos os itens foram processados
-                setSuccess(true);
-                
-                setTimeout(() => {
-                    onClose();
-                    navigate(0); 
-                }, 1500);
-            }
+      setItemsInfo(items);
+      setCurrentItemIndex(0);
+      setProcessedItems([]);
+      setTipoMovimento("entrada");
+      setQuantidade(1);
+      setError("");
+      setSuccess(false);
+    } else if (!isOpen) {
+      setItemsInfo([]);
+      setCurrentItemIndex(0);
+      setProcessedItems([]);
+      setError("");
+      setSuccess(false);
+    }
+  }, [isOpen, itemIds, estoque]);
 
-        } catch (err) {
-            const errorMessage = err.response?.data?.message || err.message || 'Erro ao registrar movimento';
-            setError(errorMessage);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const handleSaveClick = async () => {
+    setError("");
+    setLoading(true);
 
-    const handleModalContentClick = (e) => {
-        e.stopPropagation();
-    };
+    try {
+      const endpoint = tipoMovimento === "entrada" ? "/estoques/entrada" : "/estoques/saida";
+      const item = itemsInfo[currentItemIndex];
+      
+      const requestBody = {
+        produtoId: item.id,
+        localizacao: item.localizacao,
+        quantidadeTotal: parseInt(quantidade, 10) || 0,
+        dataHora: new Date().toISOString(),
+      };
 
-    if (!isOpen || itemIds.length === 0) return null;
+      await Api.post(endpoint, requestBody);
 
-    const unidadeMedida = itemsInfo.length > 0 ? itemsInfo[0].unidade : 'Unidade';
+      setProcessedItems((prev) => [...prev, item.nome]);
 
-    return (
-        <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={onClose}
-        >
-            <div
-                className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-auto max-h-[90vh] flex flex-col"
-                onClick={handleModalContentClick}
-            >
-                <div className="flex items-center justify-between p-5 border-b border-gray-200">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-blue-100 p-2 rounded">
-                            <ArrowRightLeft className="w-5 h-5 text-blue-700" />
-                        </div>
-                        <h2 className="text-lg font-semibold text-gray-900">Registrar Movimento de Estoque</h2>
-                    </div>
-                </div>
+      if (currentItemIndex < itemsInfo.length - 1) {
+        setCurrentItemIndex((prev) => prev + 1);
+        setQuantidade(1);
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 1500);
+      } else {
+        setSuccess(true);
+        setTimeout(() => {
+          onClose();
+          navigate(0); // Recarrega a página para atualizar o estoque
+        }, 1500);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || "Erro ao registrar movimento");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                <div className="p-6 space-y-5 overflow-y-auto">
-                    {/* Produto Selecionado - Design Melhorado */}
-                    <div className='p-4 bg-linear-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-lg'>
-                       <div className='flex items-center justify-between mb-3'>
-                           <p className='text-xs font-semibold text-blue-900 uppercase tracking-wide'>
-                                Produto Atual ({currentItemIndex + 1}/{itemsInfo.length})
-                           </p>
-                           {itemsInfo.length > 1 && (
-                               <span className='text-xs text-blue-700 font-medium'>
-                                   {processedItems.length} processado(s)
-                               </span>
-                           )}
-                       </div>
-                       <div className='flex items-center gap-3 text-sm bg-white/80 px-4 py-3 rounded-lg shadow-sm'>
-                            <div className='w-2.5 h-2.5 bg-blue-600 rounded-full shrink-0'></div>
-                            <span className='font-bold text-gray-900 text-base'>{itemsInfo[currentItemIndex]?.nome || 'Carregando...'}</span>
-                       </div>
-                       {processedItems.length > 0 && (
-                           <div className='mt-3 pt-3 border-t border-blue-200'>
-                               <p className='text-xs text-green-700 font-medium mb-2'>✓ Itens processados:</p>
-                               <div className='space-y-1'>
-                                   {processedItems.map((nome, idx) => (
-                                       <p key={idx} className='text-xs text-green-600 pl-4'>• {nome}</p>
-                                   ))}
-                               </div>
-                           </div>
-                       )}
-                    </div>
+  if (!isOpen || itemIds.length === 0) return null;
 
-                    {/* Mensagem de Erro */}
-                    {error && (
-                        <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg flex items-start gap-3 shadow-sm">
-                            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                            <div>
-                                <p className="text-sm font-semibold text-red-900 mb-1">Erro ao processar</p>
-                                <p className="text-sm text-red-700">{error}</p>
-                            </div>
-                        </div>
-                    )}
+  const unidadeMedida = itemsInfo[currentItemIndex]?.unidade || "Unidade";
 
-                    {/* Mensagem de Sucesso */}
-                    {success && (
-                        <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg shadow-sm">
-                            <p className="text-sm font-semibold text-green-900 flex items-center gap-2">
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                                </svg>
-                                Movimento registrado com sucesso!
-                            </p>
-                        </div>
-                    )}
-                    <br />
-                    {/* Tipo de Movimento - Design Melhorado */}
-                    <div className="space-y-2">
-                        <label htmlFor="tipoMovimento" className="block text-sm font-semibold text-gray-900">
-                            Tipo de Movimento
-                        </label>
-                        <div className='relative group'>
-                            <select
-                                id="tipoMovimento"
-                                className="w-full border-2 border-gray-200 rounded-lg pl-11 pr-10 py-3 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white transition-all hover:border-gray-300 disabled:bg-gray-50 disabled:cursor-not-allowed font-medium"
-                                value={tipoMovimento}
-                                onChange={(e) => setTipoMovimento(e.target.value)}
-                                disabled={loading}
-                            >
-                                <option value="entrada"> Entrada</option>
-                                <option value="saida">Saída</option>
-                                <option value="reserva"> Reserva</option>
-                            </select>
-                            <ArrowRightLeft className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-600 pointer-events-none" />
-                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                        </div>
-                    </div>
-                    <br />
-                    {/* Quantidade - Design Melhorado */}
-                    <div className="space-y-2">
-                        <label htmlFor="quantidade" className="block text-sm font-semibold text-gray-900">
-                            Quantidade
-                            <span className="ml-2 text-xs font-normal text-gray-500">({unidadeMedida})</span>
-                        </label>
-                        <div className='relative'>
-                            <input
-                                type="number"
-                                id="quantidade"
-                                min="1"
-                                className="w-full border-2 border-gray-200 rounded-lg pl-11 pr-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all hover:border-gray-300 disabled:bg-gray-50 disabled:cursor-not-allowed font-medium"
-                                placeholder="Digite a quantidade"
-                                value={quantidade}
-                                onChange={(e) => setQuantidade(e.target.value)}
-                                disabled={loading}
-                            />
-                            <Hash className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-600 pointer-events-none" />
-                        </div>
-                        {quantidade > 0 && (
-                            <p className="text-xs text-gray-500 flex items-center gap-1.5 ml-1">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
-                                </svg>
-                                Total: {tipoMovimento} de {quantidade} {quantidade > 1 ? unidadeMedida + 's' : unidadeMedida}
-                            </p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Botões de Ação - Design Melhorado */}
-                <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 mt-auto">
-                    <button
-                        onClick={onClose}
-                        disabled={loading}
-                        className="px-5 py-2.5 text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                    >
-                        Cancelar
-                    </button>
-                    <button
-                        onClick={handleSaveClick}
-                        disabled={loading || quantidade <= 0 || success}
-                        className="px-5 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-md hover:shadow-lg"
-                    >
-                        {loading ? (
-                            <>
-                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                Processando...
-                            </>
-                        ) : currentItemIndex < itemsInfo.length - 1 ? (
-                            <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Salvar e Próximo
-                            </>
-                        ) : (
-                            <>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Salvar e Finalizar
-                            </>
-                        )}
-                    </button>
-                </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div 
+        className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-lg bg-white shadow-xl" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-gray-200 p-5">
+          <div className="flex items-center gap-2">
+            <div className="rounded bg-blue-100 p-2">
+              <ArrowRightLeft className="h-5 w-5 text-blue-700" />
             </div>
+            <h2 className="text-lg font-semibold text-gray-900">Movimentar Estoque</h2>
+          </div>
         </div>
-    );
+
+        <div className="space-y-5 overflow-y-auto p-6">
+          {/* Status do Processamento */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">
+              Item {currentItemIndex + 1} de {itemsInfo.length}
+            </p>
+            <div className="rounded-lg bg-white/80 px-4 py-3 shadow-sm">
+              <span className="text-base font-bold text-gray-900">
+                {itemsInfo[currentItemIndex]?.nome}
+              </span>
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-3 rounded-r-lg border-l-4 border-red-500 bg-red-50 p-4 shadow-sm">
+              <AlertCircle className="mt-0.5 h-5 w-5 text-red-600" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-r-lg border-l-4 border-green-500 bg-green-50 p-4 shadow-sm">
+              <p className="flex items-center gap-2 text-sm font-semibold text-green-900">
+                ✓ Movimento registrado!
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-900">Tipo</label>
+              <select
+                className="w-full rounded-lg border-2 border-gray-200 bg-white py-3 pl-3 pr-10 text-sm font-medium outline-none focus:border-blue-500"
+                value={tipoMovimento}
+                onChange={(e) => setTipoMovimento(e.target.value)}
+                disabled={loading}
+              >
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-gray-900">
+                Quantidade ({unidadeMedida})
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="1"
+                  className="w-full rounded-lg border-2 border-gray-200 py-3 pl-11 pr-4 text-sm font-medium outline-none focus:border-blue-500"
+                  value={quantidade}
+                  onChange={(e) => setQuantidade(e.target.value)}
+                  disabled={loading}
+                />
+                <Hash className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+          <button
+            onClick={onClose}
+            className="rounded-lg border-2 border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSaveClick}
+            disabled={loading || quantidade <= 0 || success}
+            className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Processando..." : currentItemIndex < itemsInfo.length - 1 ? "Próximo Item" : "Finalizar"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+EntradaSaidaEstoque.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  itemIds: PropTypes.array.isRequired,
+  estoque: PropTypes.array.isRequired,
 };
 
 export default EntradaSaidaEstoque;

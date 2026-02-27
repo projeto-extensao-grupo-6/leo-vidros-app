@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IMaskInput } from "react-imask";
@@ -7,7 +7,7 @@ import { User, X, Save } from "lucide-react";
 import { clienteSchema } from "../../../lib/schemas";
 import FormField from "../../../components/ui/Form/FormField";
 
-//  Valores padrão do formulário 
+//  Valores padrão do formulário
 const DEFAULT_VALUES = {
   nome: "",
   cpf: "",
@@ -23,7 +23,7 @@ const DEFAULT_VALUES = {
   uf: "",
 };
 
-//  Classes comuns de input 
+//  Classes comuns de input
 const INPUT_CLASS =
   "w-full px-4 py-2 border rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] border-gray-300 bg-white";
 const INPUT_ERROR_CLASS =
@@ -40,7 +40,7 @@ export default function ClienteFormModal({
   const [cepApiError, setCepApiError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  //  React Hook Form 
+  //  React Hook Form
   const {
     register,
     handleSubmit,
@@ -83,7 +83,7 @@ export default function ClienteFormModal({
     setCepApiError("");
   }, [open, modoEdicao, clienteInicial, reset]);
 
-  //  Lookup de CEP via ViaCEP 
+  //  Lookup de CEP via ViaCEP
   const buscarCep = async (cepMasked) => {
     const cepLimpo = cepMasked.replace(/\D/g, "");
     if (cepLimpo.length !== 8) return;
@@ -99,10 +99,13 @@ export default function ClienteFormModal({
         setCepApiError("CEP nao encontrado");
         return;
       }
-      if (data.logradouro) setValue("rua", data.logradouro, { shouldValidate: true });
-      if (data.bairro)     setValue("bairro", data.bairro,  { shouldValidate: true });
-      if (data.localidade) setValue("cidade", data.localidade, { shouldValidate: true });
-      if (data.uf)         setValue("uf", data.uf, { shouldValidate: true });
+      if (data.logradouro)
+        setValue("rua", data.logradouro, { shouldValidate: true });
+      if (data.bairro)
+        setValue("bairro", data.bairro, { shouldValidate: true });
+      if (data.localidade)
+        setValue("cidade", data.localidade, { shouldValidate: true });
+      if (data.uf) setValue("uf", data.uf, { shouldValidate: true });
     } catch {
       setCepApiError("Erro ao buscar CEP");
     } finally {
@@ -110,7 +113,7 @@ export default function ClienteFormModal({
     }
   };
 
-  //  Submit 
+  //  Submit
   // Zod ja remove mascaras via .transform()  data aqui ja tem digitos puros
   const onFormSubmit = async (data) => {
     setSubmitting(true);
@@ -184,13 +187,13 @@ export default function ClienteFormModal({
           noValidate
         >
           <div className="flex flex-col gap-9 px-6 py-4 space-y-6 flex-1 overflow-y-auto">
-
             {/* Informacoes Basicas */}
             <section className="flex flex-col gap-5">
-              <h3 className="text-lg font-bold text-gray-700">Informacoes Basicas</h3>
+              <h3 className="text-lg font-bold text-gray-700">
+                Informacoes Basicas
+              </h3>
 
               <div className="grid grid-cols-2 gap-4">
-
                 <FormField
                   id="nome"
                   label="Nome"
@@ -216,7 +219,12 @@ export default function ClienteFormModal({
                   />
                 </FormField>
 
-                <FormField id="contato" label="Telefone" required error={errors.contato}>
+                <FormField
+                  id="contato"
+                  label="Telefone"
+                  required
+                  error={errors.contato}
+                >
                   <Controller
                     name="contato"
                     control={control}
@@ -226,7 +234,9 @@ export default function ClienteFormModal({
                         mask="(00) 00000-0000"
                         placeholder="Ex: (11) 91234-5678"
                         onAccept={(value) => field.onChange(value)}
-                        className={errors.contato ? INPUT_ERROR_CLASS : INPUT_CLASS}
+                        className={
+                          errors.contato ? INPUT_ERROR_CLASS : INPUT_CLASS
+                        }
                       />
                     )}
                   />
@@ -249,12 +259,14 @@ export default function ClienteFormModal({
               <h3 className="text-lg font-bold text-gray-700">Endereco</h3>
 
               <div className="grid grid-cols-2 gap-4">
-
                 <FormField
                   id="cep"
                   label="CEP"
                   required
-                  error={errors.cep || (cepApiError ? { message: cepApiError } : undefined)}
+                  error={
+                    errors.cep ||
+                    (cepApiError ? { message: cepApiError } : undefined)
+                  }
                 >
                   <div className="relative">
                     <Controller
@@ -269,7 +281,9 @@ export default function ClienteFormModal({
                             field.onChange(value);
                             buscarCep(value);
                           }}
-                          className={errors.cep ? INPUT_ERROR_CLASS : INPUT_CLASS}
+                          className={
+                            errors.cep ? INPUT_ERROR_CLASS : INPUT_CLASS
+                          }
                         />
                       )}
                     />
@@ -338,9 +352,13 @@ export default function ClienteFormModal({
                     type="checkbox"
                     checked={statusAtual === "Ativo"}
                     onChange={(e) =>
-                      setValue("status", e.target.checked ? "Ativo" : "Inativo", {
-                        shouldValidate: true,
-                      })
+                      setValue(
+                        "status",
+                        e.target.checked ? "Ativo" : "Inativo",
+                        {
+                          shouldValidate: true,
+                        },
+                      )
                     }
                     className="sr-only peer"
                   />
@@ -368,7 +386,11 @@ export default function ClienteFormModal({
               className="px-6 py-2.5 bg-[#007EA7] text-white rounded-md cursor-pointer hover:bg-[#006891] transition-colors flex items-center gap-2 font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
-              {submitting ? "Salvando..." : modoEdicao ? "Salvar Alteracoes" : "Criar Cliente"}
+              {submitting
+                ? "Salvando..."
+                : modoEdicao
+                  ? "Salvar Alteracoes"
+                  : "Criar Cliente"}
             </button>
           </div>
         </form>

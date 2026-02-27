@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
 
 export function useModal(keys) {
   const initialRef = useRef(Object.fromEntries(keys.map((k) => [k, false])));
@@ -18,10 +18,10 @@ export function useModal(keys) {
 
   useEffect(() => {
     const handler = (e) => {
-      if (e.key === 'Escape') closeAll();
+      if (e.key === "Escape") closeAll();
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [closeAll]);
 
   return { modal, open, close, closeAll };

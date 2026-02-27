@@ -1,14 +1,13 @@
-import * as React from 'react';
-import Backdrop from '@mui/material/Backdrop';
-import CircularProgress from '@mui/material/CircularProgress';
-import Button from '@mui/material/Button';
+import * as React from "react";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export default function SimpleBackdrop() {
   const [open] = React.useState(false);
   return (
     <div>
       <Backdrop
-        sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+        sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
         open={open}
       >
         <CircularProgress color="inherit" />

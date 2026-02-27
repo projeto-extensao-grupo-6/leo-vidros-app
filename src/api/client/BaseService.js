@@ -1,5 +1,4 @@
 class BaseService {
-
   constructor(api) {
     this.api = api;
   }
@@ -19,7 +18,7 @@ class BaseService {
         error:
           error.response?.data?.message ??
           error.message ??
-          'Erro na requisição',
+          "Erro na requisição",
         status: error.response?.status,
       };
     }

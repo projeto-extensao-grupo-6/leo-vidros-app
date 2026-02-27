@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useState, useEffect } from "react";
 import { Package, ChevronDown, Plus, X, AlertCircle } from "lucide-react";
-import Api from "../../../../api/client/Api"; 
+import Api from "../../../../api/client/Api";
 
 const useProductAPI = () => {
-
   const salvarProduto = async (produtoData) => {
     try {
       const response = await Api.post(`/produtos`, {
@@ -17,13 +17,15 @@ const useProductAPI = () => {
           nivelMaximo: parseInt(produtoData.nivelMaximo) || 0,
         },
         atributos: produtoData.atributos.filter(
-          (attr) => attr.tipo && attr.valor
+          (attr) => attr.tipo && attr.valor,
         ),
       });
       console.log(response.data);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || "Erro ao salvar produto");
+      throw new Error(
+        error.response?.data?.message || "Erro ao salvar produto",
+      );
     }
   };
 
@@ -33,12 +35,14 @@ const useProductAPI = () => {
         produtoId: produtoId,
         localizacao: estoqueData.localizacao,
         quantidadeTotal: parseInt(estoqueData.qtdTotal) || 0,
-        dataHora: new Date().toISOString()
+        dataHora: new Date().toISOString(),
       });
 
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.message || "Erro ao registrar entrada no estoque");
+      throw new Error(
+        error.response?.data?.message || "Erro ao registrar entrada no estoque",
+      );
     }
   };
 
@@ -64,7 +68,7 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const isEditing = item !== null;
-  
+
   const { salvarProduto, registrarEntradaEstoque } = useProductAPI();
 
   const steps = [
@@ -109,14 +113,14 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
     setFormData((prev) => ({
       ...prev,
       atributos: prev.atributos.map((attr, i) =>
-        i === index ? { ...attr, [field]: value } : attr
+        i === index ? { ...attr, [field]: value } : attr,
       ),
     }));
   };
 
   const validateStep = () => {
     setError(null);
-    
+
     if (currentStep === 0) {
       if (!formData.nome.trim()) {
         setError("Nome do produto é obrigatório");
@@ -127,37 +131,37 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
         return false;
       }
     }
-    
+
     if (currentStep === 2) {
       const min = parseInt(formData.nivelMinimo) || 0;
       const max = parseInt(formData.nivelMaximo) || 0;
-      
+
       if (max > 0 && min > max) {
         setError("Nível mínimo não pode ser maior que o nível máximo");
         return false;
       }
     }
-    
+
     if (currentStep === 3) {
       if (formData.qtdTotal > 0 && !formData.localizacao.trim()) {
         setError("Localização é obrigatória quando há quantidade em estoque");
         return false;
       }
     }
-    
+
     return true;
   };
 
   const handleSave = async () => {
     if (!validateStep()) return;
-    
+
     setLoading(true);
     setError(null);
 
     try {
       // 1. Salvar o produto (etapas 0, 1, 2)
       const produtoSalvo = await salvarProduto(formData);
-      
+
       // 2. Se há quantidade em estoque, registrar entrada (etapa 3)
       if (formData.qtdTotal > 0 && formData.localizacao.trim()) {
         await registrarEntradaEstoque(produtoSalvo.id, formData);
@@ -168,7 +172,6 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
         onSuccess(produtoSalvo);
       }
       onClose();
-      
     } catch (err) {
       setError(err.message || "Erro ao salvar produto");
     } finally {
@@ -222,7 +225,9 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
                   </div>
                   <span
                     className={`text-xs mt-3 text-center ${
-                      index <= currentStep ? "text-gray-900 font-semibold" : "text-gray-500"
+                      index <= currentStep
+                        ? "text-gray-900 font-semibold"
+                        : "text-gray-500"
                     }`}
                   >
                     {step.name}
@@ -361,12 +366,17 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
               {formData.atributos.length === 0 ? (
                 <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
                   <Plus className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600">Clique em "Adicionar" para criar atributos</p>
+                  <p className="text-sm text-gray-600">
+                    Clique em "Adicionar" para criar atributos
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {formData.atributos.map((attr, index) => (
-                    <div key={index} className="flex gap-4 p-4 bg-gray-50 rounded-lg border">
+                    <div
+                      key={index}
+                      className="flex gap-4 p-4 bg-gray-50 rounded-lg border"
+                    >
                       <div className="flex-1">
                         <label className="block text-xs font-medium text-gray-700 mb-2 text-left">
                           Tipo
@@ -414,7 +424,9 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-left">
-                <h3 className="text-base font-semibold text-gray-900">Métricas de Estoque</h3>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Métricas de Estoque
+                </h3>
                 <p className="text-sm text-gray-500 mt-1">
                   Defina limites de estoque
                 </p>
@@ -458,7 +470,9 @@ const NovoProdutoModal = ({ isOpen, onClose, onSuccess, item = null }) => {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-left">
-                <h3 className="text-base font-semibold text-gray-900">Estoque Inicial</h3>
+                <h3 className="text-base font-semibold text-gray-900">
+                  Estoque Inicial
+                </h3>
                 <p className="text-sm text-gray-500 mt-1">
                   Configure o estoque inicial (opcional)
                 </p>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,7 +9,12 @@ import {
   Typography,
 } from "@mui/material";
 
-export default function DeleteFuncionario({ open, setOpen, funcionario, deletarFuncionario }) {
+export default function DeleteFuncionario({
+  open,
+  setOpen,
+  funcionario,
+  deletarFuncionario,
+}) {
   const [confirmNome, setConfirmNome] = useState("");
 
   useEffect(() => {
@@ -26,11 +31,21 @@ export default function DeleteFuncionario({ open, setOpen, funcionario, deletarF
   };
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: "20px" } }}>
+    <Dialog
+      open={open}
+      onClose={() => setOpen(false)}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{ sx: { borderRadius: "20px" } }}
+    >
       <DialogTitle>Confirmar Exclusão</DialogTitle>
       <DialogContent>
-        <Typography mb={2}>Deseja realmente excluir este funcionário?</Typography>
-        {funcionario && <Typography mb={1}>Nome: {funcionario.nome}</Typography>}
+        <Typography mb={2}>
+          Deseja realmente excluir este funcionário?
+        </Typography>
+        {funcionario && (
+          <Typography mb={1}>Nome: {funcionario.nome}</Typography>
+        )}
         <TextField
           fullWidth
           label="Digite o nome completo para confirmar"

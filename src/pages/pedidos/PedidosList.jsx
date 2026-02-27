@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useModal } from '../../hooks/useModal';
 import { usePagination } from '../../hooks/usePagination';
 import { useNavigate } from 'react-router-dom';
@@ -14,15 +14,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 
 const ITEMS_PER_PAGE = 5;
 
-const NOVO_FORM_PEDIDO = () => ({
-    produtosDesc: "",
-    descricao: "",
-    dataCompra: new Date().toISOString().slice(0, 10),
-    formaPagamento: "Pix",
-    itensCount: 1,
-    valorTotal: 0,
-    status: "Ativo",
-});
+// Removido NOVO_FORM_PEDIDO pois não estava sendo usado
 
 function StatusBadge({ status }) {
     const styles = {
@@ -46,7 +38,6 @@ const formatPedidoId = (id) => {
 export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoRegistroHandled, statusFilter, paymentFilter }) {
     const navigate = useNavigate();
 
-    // ─── TanStack Query ────────────────────────────────────────────
     const {
         data: pedidos = [],
         isLoading: loading,
@@ -58,11 +49,10 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     const deletarMutation = useDeletarPedido();
 
     const { modal, open: openModal, closeAll: fecharTodos } = useModal(['confirm', 'view', 'form', 'novo', 'editar']);
-    const [mode, setMode] = useState("new");
+    
+    // Removidos os estados mode, form e errors que não eram utilizados
     const [current, setCurrent] = useState(null);
     const [targetId, setTargetId] = useState(null);
-    const [form, setForm] = useState(NOVO_FORM_PEDIDO());
-    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (triggerNovoRegistro) {
@@ -89,6 +79,10 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
         prev: anterior,
     } = usePagination(listaFiltrada, ITEMS_PER_PAGE);
 
+    // CÁLCULO DE START E END PARA RESOLVER O ERRO
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    const end = start + pagina.length;
+
     const abrirEditar = (item) => {
         setCurrent(item);
         openModal('editar');
@@ -108,12 +102,11 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
     };
 
     const handleNovoPedidoSuccess = () => {
-        // TanStack Query invalida o cache automaticamente via onSuccess do hook
         setPage(1);
     };
 
     const handleEditarPedidoSuccess = () => {
-        // TanStack Query invalida o cache automaticamente via onSuccess do hook
+        // TanStack Query cuida do refetch
     };
 
     return (
@@ -145,7 +138,6 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
 
                 {!loading && !isError && pagina.map((item) => (
                     <article key={item.id} className={`flex flex-col gap-4 rounded-lg border p-5 w-full shadow-sm transition-all hover:shadow-md ${item.status === 'Finalizado' ? "bg-gray-50 border-gray-200 opacity-60" : "bg-white border-slate-200"}`}>
-                        {/* HEADER DO CARD */}
                         <header className="flex items-center justify-between pb-2 border-b border-slate-100">
                             <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-md ${item.status === 'Finalizado' ? 'text-gray-400 bg-gray-200' : 'text-slate-400 bg-slate-100'}`}>
@@ -175,7 +167,6 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                         </header>
 
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
-                            
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>
                                     {item.itensCount} {item.itensCount === 1 ? 'item' : 'itens'}
@@ -190,42 +181,36 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                                     {item.formaPagamento}
                                 </span>
                             </div>
-
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Produtos</span>
                                 <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.produtosDesc}>
                                     {item.produtosDesc}
                                 </span>
                             </div>
-
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Descrição</span>
                                 <p className={`text-md line-clamp-2 leading-snug w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-600'}`} title={item.descricao}>
                                     {item.descricao || '-'}
                                 </p>
                             </div>
-
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Cliente</span>
                                 <span className={`text-md font-medium truncate w-full text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`} title={item.clienteNome}>
                                     {item.clienteNome}
                                 </span>
                             </div>
-
-
                             <div className="md:col-span-2 flex flex-col items-start justify-start gap-1">
                                 <span className={`text-md font-bold ${item.status === 'Finalizado' ? 'text-gray-400' : 'text-slate-500'}`}>Data da Compra</span>
                                 <span className={`text-md font-medium text-left ${item.status === 'Finalizado' ? 'text-gray-500' : 'text-slate-700'}`}>
                                     {formatDate(item.dataCompra)}
                                 </span>
                             </div>
-
                         </div>
                     </article>
                 ))}
             </div>
 
-            {/* Paginação */}
+            {/* Paginação corrigida */}
             {!loading && !isError && listaFiltrada.length > 0 && (
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
                     <div className="text-sm text-slate-500">
@@ -242,7 +227,6 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, onNovoReg
                 </div>
             )}
 
-            {/* MODAL CONFIRMAÇÃO */}
             {modal.confirm && (
                 <div className="fixed inset-0 z-[9999] grid place-items-center bg-black/40 px-4 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) fecharTodos(); }}>
                     <div className="flex flex-col gap-4 w-full max-w-md bg-white rounded-xl shadow-2xl p-6 animate-scaleIn">

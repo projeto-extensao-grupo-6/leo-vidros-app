@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import { Search, Edit, Trash2, CalendarDays } from "lucide-react";
@@ -43,16 +43,23 @@ export default function Funcionarios() {
 
   useEffect(() => {
     fetchFuncionarios();
-  }, []); 
+  }, []);
 
-  const funcionariosFiltrados = Array.isArray(funcionarios) ? funcionarios.filter((f) =>
-    f.nome && f.nome.toLowerCase().includes(busca.toLowerCase())
-  ) : [];
+  const funcionariosFiltrados = Array.isArray(funcionarios)
+    ? funcionarios.filter(
+        (f) => f.nome && f.nome.toLowerCase().includes(busca.toLowerCase()),
+      )
+    : [];
 
   const indexUltimo = pagina * limitePorPagina;
   const indexPrimeiro = indexUltimo - limitePorPagina;
-  const funcionariosPagina = funcionariosFiltrados.slice(indexPrimeiro, indexUltimo);
-  const totalPaginas = Math.ceil(funcionariosFiltrados.length / limitePorPagina);
+  const funcionariosPagina = funcionariosFiltrados.slice(
+    indexPrimeiro,
+    indexUltimo,
+  );
+  const totalPaginas = Math.ceil(
+    funcionariosFiltrados.length / limitePorPagina,
+  );
 
   const abrirModalCriar = () => {
     setModoEdicao(false);
@@ -80,7 +87,10 @@ export default function Funcionarios() {
     try {
       if (modoEdicao && funcionarioSelecionado) {
         const funcAtualizado = { ...funcionarioSelecionado, ...novoFunc };
-        await Api.put(`/funcionarios/${funcionarioSelecionado.id}`, funcAtualizado);
+        await Api.put(
+          `/funcionarios/${funcionarioSelecionado.id}`,
+          funcAtualizado,
+        );
       } else {
         await Api.post("/funcionarios", novoFunc);
       }
@@ -114,7 +124,7 @@ export default function Funcionarios() {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selecionados.slice(0, selectedIndex),
-        selecionados.slice(selectedIndex + 1)
+        selecionados.slice(selectedIndex + 1),
       );
     }
 
@@ -224,15 +234,27 @@ export default function Funcionarios() {
                             <input
                               type="checkbox"
                               checked={isItemSelected}
-                              onChange={(event) => handleSelectClick(event, f.id)}
+                              onChange={(event) =>
+                                handleSelectClick(event, f.id)
+                              }
                               className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                           </div>
-                          <div className="py-3 w-[20%] pl-2 text-sm text-gray-900 truncate">{f.nome}</div>
-                          <div className="py-3 w-[15%] text-sm text-gray-600 truncate">{f.telefone}</div>
-                          <div className="py-3 w-[15%] text-sm text-gray-600 truncate">{f.funcao}</div>
-                          <div className="py-3 w-[12%] text-sm text-gray-600 truncate">{f.escala || "N/A"}</div>
-                          <div className="py-3 w-[12%] text-sm text-gray-600 truncate">{f.contrato}</div>
+                          <div className="py-3 w-[20%] pl-2 text-sm text-gray-900 truncate">
+                            {f.nome}
+                          </div>
+                          <div className="py-3 w-[15%] text-sm text-gray-600 truncate">
+                            {f.telefone}
+                          </div>
+                          <div className="py-3 w-[15%] text-sm text-gray-600 truncate">
+                            {f.funcao}
+                          </div>
+                          <div className="py-3 w-[12%] text-sm text-gray-600 truncate">
+                            {f.escala || "N/A"}
+                          </div>
+                          <div className="py-3 w-[12%] text-sm text-gray-600 truncate">
+                            {f.contrato}
+                          </div>
                           <div className="py-3 w-[10%] text-center">
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
@@ -301,7 +323,9 @@ export default function Funcionarios() {
                     Anterior
                   </button>
                   <button
-                    onClick={() => setPagina((prev) => Math.min(prev + 1, totalPaginas))}
+                    onClick={() =>
+                      setPagina((prev) => Math.min(prev + 1, totalPaginas))
+                    }
                     disabled={pagina === totalPaginas}
                     className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >

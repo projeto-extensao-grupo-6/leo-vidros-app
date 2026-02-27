@@ -7,15 +7,12 @@ import { format, parseISO } from "date-fns";
  */
 export const getEventDate = (event) => {
   if (!event) return null;
-  
-  const rawDate = 
-    event.eventDate || 
-    event.dataAgendamento || 
-    event.date || 
-    event.start;
-  
+
+  const rawDate =
+    event.eventDate || event.dataAgendamento || event.date || event.start;
+
   if (!rawDate) return null;
-  
+
   try {
     // Se já contém T, é ISO, senão adiciona para normalizar
     const isoDate = rawDate.includes("T") ? rawDate : `${rawDate}T00:00:00`;
@@ -46,14 +43,14 @@ export const safe = (value, fallback = "—") => {
  */
 export const getBadgeColor = (type) => {
   const value = type?.value || type;
-  
+
   const colorMap = {
     SERVICO: "bg-blue-50 text-blue-700 border-blue-200",
     ORCAMENTO: "bg-amber-50 text-amber-700 border-amber-200",
     MANUTENCAO: "bg-green-50 text-green-700 border-green-200",
     URGENTE: "bg-red-50 text-red-700 border-red-200",
   };
-  
+
   return colorMap[value] || "bg-gray-50 text-gray-700 border-gray-200";
 };
 
@@ -64,23 +61,25 @@ export const getBadgeColor = (type) => {
  */
 export const formatAddress = (endereco) => {
   if (!endereco) return "Endereço não informado";
-  
+
   const parts = [];
-  
+
   if (endereco.rua) parts.push(endereco.rua);
   if (endereco.numero) parts.push(`nº ${endereco.numero}`);
   if (endereco.complemento) parts.push(endereco.complemento);
-  
+
   const linha1 = parts.join(", ");
-  
+
   const partes2 = [];
   if (endereco.bairro) partes2.push(endereco.bairro);
   if (endereco.cidade) partes2.push(endereco.cidade);
   if (endereco.uf) partes2.push(endereco.uf);
-  
+
   const linha2 = partes2.join(" - ");
-  
-  return linha1 && linha2 ? `${linha1} • ${linha2}` : linha1 || linha2 || "Endereço incompleto";
+
+  return linha1 && linha2
+    ? `${linha1} • ${linha2}`
+    : linha1 || linha2 || "Endereço incompleto";
 };
 
 /**
@@ -90,9 +89,9 @@ export const formatAddress = (endereco) => {
  */
 export const getPedidoLabel = (pedido) => {
   if (!pedido) return "Nenhum pedido vinculado";
-  
+
   if (typeof pedido === "string") return pedido;
-  
+
   return (
     pedido.label ||
     pedido.descricao ||
@@ -108,12 +107,12 @@ export const getPedidoLabel = (pedido) => {
  */
 export const getInitials = (nome) => {
   if (!nome) return "?";
-  
+
   const parts = String(nome).trim().split(" ");
   if (parts.length === 1) {
     return parts[0].charAt(0).toUpperCase();
   }
-  
+
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 };
 
@@ -124,19 +123,19 @@ export const getInitials = (nome) => {
  */
 export const groupEventsByDate = (events) => {
   if (!events || !Array.isArray(events)) return {};
-  
+
   const grouped = {};
-  
+
   events.forEach((event) => {
     const dateKey = getEventDate(event);
     if (!dateKey) return;
-    
+
     if (!grouped[dateKey]) {
       grouped[dateKey] = [];
     }
     grouped[dateKey].push(event);
   });
-  
+
   return grouped;
 };
 

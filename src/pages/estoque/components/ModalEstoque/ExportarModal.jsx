@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { EtlApi } from "../../../../api/client/Api"; // Ajuste o caminho conforme a sua estrutura de pastas
 import Swal from "sweetalert2";
@@ -12,32 +12,30 @@ const ExportarModal = ({ isOpen, onClose }) => {
     try {
       setIsExporting(true);
 
-      const response = await EtlApi.get('/excel/export/estoque', {
-        responseType: 'blob',
+      const response = await EtlApi.get("/excel/export/estoque", {
+        responseType: "blob",
       });
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', 'relatorio_estoque.xlsx');
-      
+      link.setAttribute("download", "relatorio_estoque.xlsx");
+
       document.body.appendChild(link);
 
       link.click();
-      
+
       link.remove();
       window.URL.revokeObjectURL(url);
-      
 
       onClose();
-
     } catch (error) {
       console.error("Erro ao exportar planilha:", error);
       Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Não foi possível exportar o estoque. Tente novamente mais tarde.',
-        confirmButtonColor: '#007EA7'
+        icon: "error",
+        title: "Oops...",
+        text: "Não foi possível exportar o estoque. Tente novamente mais tarde.",
+        confirmButtonColor: "#007EA7",
       });
     } finally {
       setIsExporting(false);

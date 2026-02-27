@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Phone,
@@ -19,8 +19,16 @@ const getFuncionarioInicial = () => ({
   status: true,
 });
 
-export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario, salvarFuncionario }) {
-  const [novoFuncionario, setNovoFuncionario] = useState(getFuncionarioInicial());
+export default function FuncionarioForm({
+  open,
+  setOpen,
+  modoEdicao,
+  funcionario,
+  salvarFuncionario,
+}) {
+  const [novoFuncionario, setNovoFuncionario] = useState(
+    getFuncionarioInicial(),
+  );
 
   useEffect(() => {
     if (modoEdicao && funcionario) {
@@ -96,12 +104,17 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden"
+        >
           <div className="flex flex-col gap-9 px-6 py-4 space-y-6 flex-1 overflow-y-auto">
             {/* Informações Básicas */}
             <div className="flex flex-col gap-5 space-y-4">
-              <h3 className="flex items-start text-lg font-bold text-gray-700">Informações Básicas</h3>
-              
+              <h3 className="flex items-start text-lg font-bold text-gray-700">
+                Informações Básicas
+              </h3>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="flex items-start text-sm font-medium text-gray-700">
@@ -128,7 +141,9 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
                     name="telefone"
                     placeholder="Ex: (11) 91234-5678"
                     value={novoFuncionario.telefone}
-                    onAccept={(value) => handleChange({ target: { name: 'telefone', value } })}
+                    onAccept={(value) =>
+                      handleChange({ target: { name: "telefone", value } })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7]"
                   />
                 </div>
@@ -183,8 +198,10 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
 
             {/* Status */}
             <div className="flex flex-col gap-3 space-y-4">
-              <h3 className="flex items-start text-md font-semibold text-gray-700">Status do Contrato</h3>
-              
+              <h3 className="flex items-start text-md font-semibold text-gray-700">
+                Status do Contrato
+              </h3>
+
               <div className="flex items-center gap-3">
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -196,7 +213,8 @@ export default function FuncionarioForm({ open, setOpen, modoEdicao, funcionario
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#007EA7]"></div>
                 </label>
                 <span className="text-sm font-medium text-gray-700">
-                  Funcionário ativo (Status: {novoFuncionario.status ? "Ativo" : "Inativo"})
+                  Funcionário ativo (Status:{" "}
+                  {novoFuncionario.status ? "Ativo" : "Inativo"})
                 </span>
               </div>
             </div>

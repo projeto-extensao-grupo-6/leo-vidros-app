@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 
 /**
  * Hook para gerenciar notificações de agendamentos próximos
@@ -10,12 +10,12 @@ export const useAgendamentoNotifications = (agendamentos = []) => {
 
   const checkUpcomingAgendamentos = useCallback(() => {
     const now = new Date();
-    const currentDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const currentDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
     const currentTimeMinutes = now.getHours() * 60 + now.getMinutes();
 
     // Filtrar agendamentos de hoje
-    const todayAgendamentos = agendamentos.filter(agendamento => {
-      const agendamentoDate = agendamento.dataAgendamento?.split('T')[0];
+    const todayAgendamentos = agendamentos.filter((agendamento) => {
+      const agendamentoDate = agendamento.dataAgendamento?.split("T")[0];
       return agendamentoDate === currentDate;
     });
 
@@ -28,29 +28,33 @@ export const useAgendamentoNotifications = (agendamentos = []) => {
 
       // Pular se o status já é "EM ANDAMENTO" ou "CONCLUÍDO"
       const statusNome = agendamento.statusAgendamento?.nome?.toUpperCase();
-      if (statusNome === 'EM ANDAMENTO' || statusNome === 'CONCLUÍDO' || statusNome === 'CANCELADO') {
+      if (
+        statusNome === "EM ANDAMENTO" ||
+        statusNome === "CONCLUÍDO" ||
+        statusNome === "CANCELADO"
+      ) {
         continue;
       }
 
       // Calcular minutos até o início
       const [startHours, startMinutes] = agendamento.inicioAgendamento
         ?.substring(0, 5)
-        .split(':')
+        .split(":")
         .map(Number) || [0, 0];
-      
+
       const agendamentoTimeMinutes = startHours * 60 + startMinutes;
       const minutesUntilStart = agendamentoTimeMinutes - currentTimeMinutes;
 
       // Notificar se falta 5 minutos ou menos, ou se já começou (mas não passou mais de 30 minutos)
       if (minutesUntilStart <= 5 && minutesUntilStart >= -30) {
         setCurrentNotification(agendamento);
-        setNotifiedAgendamentos(prev => new Set([...prev, agendamento.id]));
-        
+        setNotifiedAgendamentos((prev) => new Set([...prev, agendamento.id]));
+
         // Auto-fechar após 60 segundos
         setTimeout(() => {
           setCurrentNotification(null);
         }, 60000);
-        
+
         break; // Mostrar apenas uma notificação por vez
       }
     }
@@ -80,6 +84,6 @@ export const useAgendamentoNotifications = (agendamentos = []) => {
   return {
     currentNotification,
     dismissNotification,
-    resetNotifications
+    resetNotifications,
   };
 };

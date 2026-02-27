@@ -1,7 +1,7 @@
-import Api from '../client/Api';
-import BaseService from '../client/BaseService';
+import Api from "../client/Api";
+import BaseService from "../client/BaseService";
 
-const BASE = '/dashboard';
+const BASE = "/dashboard";
 
 /**
  * Service do painel de indicadores — estende BaseService.
@@ -43,7 +43,11 @@ class DashboardService extends BaseService {
   async getQtdServicosHoje() {
     const result = await this.get(`${BASE}/qtd-servicos-hoje`);
     if (!result.success) {
-      return { success: false, data: { qtdServicosHoje: 0 }, error: result.error };
+      return {
+        success: false,
+        data: { qtdServicosHoje: 0 },
+        error: result.error,
+      };
     }
     if (result.data?.qtdServicosHoje == null) {
       return { ...result, data: { ...result.data, qtdServicosHoje: 0 } };
@@ -76,7 +80,8 @@ export const getAgendamentosFuturos = async () => {
   const r = await dashboardService.getAgendamentosFuturos();
   return r.success ? r : { ...r, data: [] };
 };
-export const getTaxaOcupacaoServicos = () => dashboardService.getTaxaOcupacaoServicos();
+export const getTaxaOcupacaoServicos = () =>
+  dashboardService.getTaxaOcupacaoServicos();
 export const getQtdServicosHoje = () => dashboardService.getQtdServicosHoje();
 
 export { dashboardService };

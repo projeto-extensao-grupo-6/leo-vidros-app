@@ -1,9 +1,13 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { format, addDays, startOfWeek, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "../../../utils/cn";
 import { Clock } from "lucide-react";
-import { normalizeStatus, statusColors, tipoColors } from "../../../utils/agendamentoStatus";
+import {
+  normalizeStatus,
+  statusColors,
+  tipoColors,
+} from "../../../utils/agendamentoStatus";
 
 const timeSlots = Array.from({ length: 25 }, (_, i) => {
   const hour = Math.floor(i / 2) + 7;
@@ -42,12 +46,15 @@ export default function WeeklyCalendar({
         if (matchingSlot && grid[dateKey][matchingSlot]) {
           grid[dateKey][matchingSlot].push(apt);
         } else {
-          const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+          const toMin = (t) => {
+            const [h, m] = t.split(":").map(Number);
+            return h * 60 + m;
+          };
           const tMin = toMin(time);
           const closestSlot = timeSlots.reduce((prev, curr) =>
             Math.abs(toMin(curr) - tMin) < Math.abs(toMin(prev) - tMin)
               ? curr
-              : prev
+              : prev,
           );
           if (grid[dateKey][closestSlot]) {
             grid[dateKey][closestSlot].push(apt);
@@ -94,7 +101,6 @@ export default function WeeklyCalendar({
     ? ((nowHours - 7) * 60 + nowMinutes) * PX_PER_MIN
     : -1;
 
-
   const currentTimeLabel = `${String(nowHours).padStart(2, "0")}:${String(nowMinutes).padStart(2, "0")}`;
 
   const getStatusName = (apt) => {
@@ -128,7 +134,7 @@ export default function WeeklyCalendar({
               key={day.toISOString()}
               className={cn(
                 "flex-1 py-3 px-2 text-center border-r border-gray-200 last:border-r-0",
-                isToday && "bg-blue-50/50"
+                isToday && "bg-blue-50/50",
               )}
             >
               <div className="text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -139,7 +145,7 @@ export default function WeeklyCalendar({
                   "text-lg font-bold mt-1 transition-colors",
                   isToday
                     ? "w-9 h-9 mx-auto rounded-full bg-[#007EA7] text-white flex items-center justify-center shadow-md"
-                    : "text-gray-800"
+                    : "text-gray-800",
                 )}
               >
                 {format(day, "d")}
@@ -190,7 +196,7 @@ export default function WeeklyCalendar({
                 key={day.toISOString()}
                 className={cn(
                   "flex-1 border-r border-gray-200 last:border-r-0",
-                  isToday && "bg-blue-50/30"
+                  isToday && "bg-blue-50/30",
                 )}
               >
                 {timeSlots.map((time) => {
@@ -202,7 +208,7 @@ export default function WeeklyCalendar({
                       key={time}
                       className={cn(
                         "h-20 border-b border-gray-100 relative cursor-pointer transition-colors",
-                        slotAppointments.length === 0 && "hover:bg-gray-50"
+                        slotAppointments.length === 0 && "hover:bg-gray-50",
                       )}
                       onClick={() => {
                         if (slotAppointments.length === 0 && onSlotClick) {
@@ -213,7 +219,8 @@ export default function WeeklyCalendar({
                       {slotAppointments.map((apt) => {
                         const statusName = getStatusName(apt);
                         const colors =
-                          statusColors[normalizeStatus(statusName)] || statusColors.PENDENTE;
+                          statusColors[normalizeStatus(statusName)] ||
+                          statusColors.PENDENTE;
                         const tipoColor =
                           tipoColors[apt.tipoAgendamento] || tipoColors.SERVICO;
 
@@ -224,7 +231,7 @@ export default function WeeklyCalendar({
                               "absolute inset-x-1 top-1 bottom-1 rounded-lg border-l-4 p-2 cursor-pointer overflow-hidden",
                               colors.bg,
                               colors.border,
-                              "hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+                              "hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5",
                             )}
                             onClick={(e) => {
                               e.stopPropagation();

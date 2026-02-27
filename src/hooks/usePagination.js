@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from "react";
 
 export function usePagination(items, itemsPerPage) {
   const [page, setPage] = useState(1);
@@ -10,7 +10,7 @@ export function usePagination(items, itemsPerPage) {
 
   const paginated = useMemo(
     () => items.slice(startIndex, startIndex + itemsPerPage),
-    [items, startIndex, itemsPerPage]
+    [items, startIndex, itemsPerPage],
   );
 
   useEffect(() => {

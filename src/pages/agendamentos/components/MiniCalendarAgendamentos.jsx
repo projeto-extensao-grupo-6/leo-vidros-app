@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   format,
   startOfMonth,
@@ -20,9 +20,7 @@ export default function MiniCalendarAgendamentos({
   onDateSelect,
   agendamentoDates = [],
 }) {
-  const [viewMonth, setViewMonth] = useState(
-    currentDate || new Date()
-  );
+  const [viewMonth, setViewMonth] = useState(currentDate || new Date());
 
   const monthStart = startOfMonth(viewMonth);
   const monthEnd = endOfMonth(viewMonth);
@@ -43,11 +41,11 @@ export default function MiniCalendarAgendamentos({
 
   const prevMonth = () =>
     setViewMonth(
-      new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1)
+      new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1),
     );
   const nextMonth = () =>
     setViewMonth(
-      new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1)
+      new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1),
     );
 
   return (
@@ -90,7 +88,7 @@ export default function MiniCalendarAgendamentos({
           const isDateToday = isToday(day);
           const isSelected = selectedDate && isSameDay(day, selectedDate);
           const hasAgendamentos = agendamentoDates.includes(
-            format(day, "yyyy-MM-dd")
+            format(day, "yyyy-MM-dd"),
           );
 
           return (
@@ -100,9 +98,14 @@ export default function MiniCalendarAgendamentos({
               className={cn(
                 "w-8 h-8 text-xs rounded-full flex items-center justify-center relative transition-all duration-150 cursor-pointer",
                 !isCurrentMonth && "text-gray-300",
-                isCurrentMonth && !isSelected && !isDateToday && "text-gray-700 hover:bg-gray-100",
-                isDateToday && !isSelected && "bg-[#007EA7]/10 text-[#007EA7] font-bold",
-                isSelected && "bg-[#007EA7] text-white font-bold shadow-md"
+                isCurrentMonth &&
+                  !isSelected &&
+                  !isDateToday &&
+                  "text-gray-700 hover:bg-gray-100",
+                isDateToday &&
+                  !isSelected &&
+                  "bg-[#007EA7]/10 text-[#007EA7] font-bold",
+                isSelected && "bg-[#007EA7] text-white font-bold shadow-md",
               )}
             >
               {format(day, "d")}

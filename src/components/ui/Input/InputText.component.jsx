@@ -16,7 +16,7 @@ const InputText = React.forwardRef(function InputText(
     className = "",
     ...props
   },
-  ref
+  ref,
 ) {
   return (
     <div className="mb-4">

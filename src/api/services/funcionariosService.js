@@ -1,5 +1,5 @@
-import Api from '../client/Api';
-import BaseService from '../client/BaseService';
+import Api from "../client/Api";
+import BaseService from "../client/BaseService";
 
 class FuncionariosService extends BaseService {
   constructor() {
@@ -7,7 +7,7 @@ class FuncionariosService extends BaseService {
   }
 
   getAll() {
-    return this.get('/funcionarios');
+    return this.get("/funcionarios");
   }
 
   getById(id) {
@@ -15,7 +15,7 @@ class FuncionariosService extends BaseService {
   }
 
   create(funcionario) {
-    return this.post('/funcionarios', funcionario);
+    return this.post("/funcionarios", funcionario);
   }
 
   update(id, funcionario) {
@@ -33,17 +33,21 @@ class FuncionariosService extends BaseService {
   }
 
   getDisponiveis(data, inicio, fim) {
-    return this.get('/funcionarios/disponiveis', {
+    return this.get("/funcionarios/disponiveis", {
       params: { data, inicio, fim },
     });
   }
 
   removerDeAgendamento(agendamentoId, funcionarioId) {
-    return super.delete(`/agendamentos/${agendamentoId}/funcionarios/${funcionarioId}`);
+    return super.delete(
+      `/agendamentos/${agendamentoId}/funcionarios/${funcionarioId}`,
+    );
   }
 
   adicionarAoAgendamento(agendamentoId, funcionarioId) {
-    return this.post(`/agendamentos/${agendamentoId}/funcionarios/${funcionarioId}`);
+    return this.post(
+      `/agendamentos/${agendamentoId}/funcionarios/${funcionarioId}`,
+    );
   }
 }
 

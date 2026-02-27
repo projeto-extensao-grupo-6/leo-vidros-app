@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Calendar, Clock, X, RefreshCw, XCircle, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onIniciar, onClose }) => {
+const AgendamentoNotification = ({
+  agendamento,
+  onReagendar,
+  onCancelar,
+  onIniciar,
+  onClose,
+}) => {
   const [loading, setLoading] = useState(false);
 
   if (!agendamento) return null;
@@ -36,19 +42,22 @@ const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onInici
 
   const getTimeUntilStart = () => {
     const now = new Date();
-    const [hours, minutes] = agendamento.inicioAgendamento.substring(0, 5).split(':').map(Number);
+    const [hours, minutes] = agendamento.inicioAgendamento
+      .substring(0, 5)
+      .split(":")
+      .map(Number);
     const agendamentoTime = new Date();
     agendamentoTime.setHours(hours, minutes, 0, 0);
-    
+
     const diffMs = agendamentoTime - now;
     const diffMinutes = Math.floor(diffMs / 60000);
-    
+
     if (diffMinutes < 0) {
       return "Agendamento em andamento";
     } else if (diffMinutes === 0) {
       return "Começa agora!";
     } else {
-      return `Começa em ${diffMinutes} minuto${diffMinutes > 1 ? 's' : ''}`;
+      return `Começa em ${diffMinutes} minuto${diffMinutes > 1 ? "s" : ""}`;
     }
   };
 
@@ -69,7 +78,9 @@ const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onInici
                 <Calendar className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-sm">Agendamento Próximo</h3>
+                <h3 className="text-white font-bold text-sm">
+                  Agendamento Próximo
+                </h3>
                 <p className="text-orange-100 text-xs">{getTimeUntilStart()}</p>
               </div>
             </div>
@@ -89,14 +100,18 @@ const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onInici
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg font-bold text-gray-900">
-                    #{String(agendamento.id).padStart(3, '0')}
+                    #{String(agendamento.id).padStart(3, "0")}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                    agendamento.tipoAgendamento === 'ORCAMENTO' 
-                      ? 'bg-yellow-100 text-yellow-700' 
-                      : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {agendamento.tipoAgendamento === 'ORCAMENTO' ? 'Orçamento' : 'Serviço'}
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      agendamento.tipoAgendamento === "ORCAMENTO"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {agendamento.tipoAgendamento === "ORCAMENTO"
+                      ? "Orçamento"
+                      : "Serviço"}
                   </span>
                 </div>
 
@@ -109,13 +124,15 @@ const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onInici
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Clock className="w-4 h-4" />
                   <span>
-                    {agendamento.inicioAgendamento?.substring(0, 5)} - {agendamento.fimAgendamento?.substring(0, 5)}
+                    {agendamento.inicioAgendamento?.substring(0, 5)} -{" "}
+                    {agendamento.fimAgendamento?.substring(0, 5)}
                   </span>
                 </div>
 
                 {agendamento.endereco && (
                   <p className="text-xs text-gray-500 mt-2">
-                    📍 {agendamento.endereco.rua}, {agendamento.endereco.numero} - {agendamento.endereco.bairro}
+                    📍 {agendamento.endereco.rua}, {agendamento.endereco.numero}{" "}
+                    - {agendamento.endereco.bairro}
                   </p>
                 )}
               </div>
@@ -128,7 +145,7 @@ const AgendamentoNotification = ({ agendamento, onReagendar, onCancelar, onInici
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Play className="w-4 h-4" />
-                  {loading ? 'Processando...' : 'Marcar como Em Andamento'}
+                  {loading ? "Processando..." : "Marcar como Em Andamento"}
                 </button>
 
                 <div className="grid grid-cols-2 gap-2">

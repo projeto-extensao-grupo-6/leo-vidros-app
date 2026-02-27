@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import TaskCreateModal from "../../components/ui/misc/TaskCreateModal";
 import AgendamentoNotification from "../../components/ui/misc/AgendamentoNotification";
 import MiniCalendar from "./components/MiniCalendar";
@@ -26,7 +26,8 @@ const CalendarDashboard = () => {
   const [agendamentoToReagendar, setAgendamentoToReagendar] = useState(null);
 
   // Hook de notificações
-  const { currentNotification, dismissNotification, resetNotifications } = useAgendamentoNotifications(tasks);
+  const { currentNotification, dismissNotification, resetNotifications } =
+    useAgendamentoNotifications(tasks);
 
   const fetchAgendamentos = async () => {
     try {
@@ -38,17 +39,21 @@ const CalendarDashboard = () => {
         const dataFormatada = agendamento.dataAgendamento;
 
         // Usar os horários originais da API (formato HH:mm:ss -> HH:mm)
-        const startTime = agendamento.inicioAgendamento?.substring(0, 5) || "00:00";
+        const startTime =
+          agendamento.inicioAgendamento?.substring(0, 5) || "00:00";
         const endTime = agendamento.fimAgendamento?.substring(0, 5) || "00:00";
 
         // Criar título completo para o modal usando código + nome do serviço
         let fullTitle = "Agendamento";
-        let calendarTitle = `#${String(agendamento.id).padStart(3, '0')}`; // Título curto para o calendário
-        
+        let calendarTitle = `#${String(agendamento.id).padStart(3, "0")}`; // Título curto para o calendário
+
         if (agendamento.servico) {
           const codigo = agendamento.servico.codigo || "";
           const nome = agendamento.servico.nome || "";
-          fullTitle = `${codigo} ${nome}`.trim() || agendamento.tipoAgendamento || "Agendamento";
+          fullTitle =
+            `${codigo} ${nome}`.trim() ||
+            agendamento.tipoAgendamento ||
+            "Agendamento";
           // Se tem código de serviço, usar no calendário
           if (codigo) {
             calendarTitle = codigo;
@@ -108,7 +113,7 @@ const CalendarDashboard = () => {
     }
 
     setModalInitialData({
-      eventDate: formattedDate,           
+      eventDate: formattedDate,
       startTime: data?.startTime || "",
       endTime: data?.endTime || "",
       tipoAgendamento: data?.tipoAgendamento || "",
@@ -123,13 +128,13 @@ const CalendarDashboard = () => {
     const newTask = {
       id: Date.now(),
       ...taskData,
-      title: taskData?.category || "Agendamento", 
+      title: taskData?.category || "Agendamento",
       date: taskData.eventDate,
       startTime: taskData.startTime,
       endTime: taskData.endTime,
       createdAt: new Date().toISOString(),
-      backgroundColor: taskData.backgroundColor || "#3B82F6", 
-      color: taskData.backgroundColor, 
+      backgroundColor: taskData.backgroundColor || "#3B82F6",
+      color: taskData.backgroundColor,
     };
     const updatedTasks = [...tasks, newTask];
     setTasks(updatedTasks);
@@ -154,20 +159,21 @@ const CalendarDashboard = () => {
   const handleCancelarFromNotification = async (agendamento) => {
     try {
       const confirmar = window.confirm(
-        `Tem certeza que deseja cancelar o agendamento #${String(agendamento.id).padStart(3, '0')}?`
+        `Tem certeza que deseja cancelar o agendamento #${String(agendamento.id).padStart(3, "0")}?`,
       );
-      
+
       if (!confirmar) return;
 
       const deleteResult = await agendamentosService.delete(agendamento.id);
-      if (!deleteResult.success) throw new Error(deleteResult.error || 'Erro ao cancelar agendamento');
+      if (!deleteResult.success)
+        throw new Error(deleteResult.error || "Erro ao cancelar agendamento");
       dismissNotification();
       fetchAgendamentos();
-      
-      alert('Agendamento cancelado com sucesso!');
+
+      alert("Agendamento cancelado com sucesso!");
     } catch (error) {
-      console.error('Erro ao cancelar agendamento:', error);
-      alert('Erro ao cancelar agendamento. Tente novamente.');
+      console.error("Erro ao cancelar agendamento:", error);
+      alert("Erro ao cancelar agendamento. Tente novamente.");
     }
   };
 
@@ -180,20 +186,24 @@ const CalendarDashboard = () => {
         fimAgendamento: agendamento.fimAgendamento,
         statusAgendamento: {
           tipo: "AGENDAMENTO",
-          nome: "EM ANDAMENTO"
+          nome: "EM ANDAMENTO",
         },
-        observacao: agendamento.observacao || ""
+        observacao: agendamento.observacao || "",
       };
 
-      const updateResult = await agendamentosService.update(agendamento.id, agendamentoData);
-      if (!updateResult.success) throw new Error(updateResult.error || 'Erro ao atualizar agendamento');
+      const updateResult = await agendamentosService.update(
+        agendamento.id,
+        agendamentoData,
+      );
+      if (!updateResult.success)
+        throw new Error(updateResult.error || "Erro ao atualizar agendamento");
       dismissNotification();
       fetchAgendamentos();
-      
+
       alert('Agendamento marcado como "Em Andamento"!');
     } catch (error) {
-      console.error('Erro ao atualizar agendamento:', error);
-      alert('Erro ao atualizar agendamento. Tente novamente.');
+      console.error("Erro ao atualizar agendamento:", error);
+      alert("Erro ao atualizar agendamento. Tente novamente.");
     }
   };
 
@@ -207,7 +217,7 @@ const CalendarDashboard = () => {
     <>
       <Header toggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      
+
       <div className="bg-background h-full pt-15">
         <div className="h-[calc(100vh-80px)] flex">
           {/* Main Calendar View */}
@@ -220,15 +230,15 @@ const CalendarDashboard = () => {
               </div>
             </div>
 
-          <div className="flex-1 overflow-hidden">
-            <CalendarView
-              selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
-              onEventCreate={handleEventCreate}
-              events={tasks}
-              onEventDeleted={handleEventDeleted}
-            />
-          </div>
+            <div className="flex-1 overflow-hidden">
+              <CalendarView
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                onEventCreate={handleEventCreate}
+                events={tasks}
+                onEventDeleted={handleEventDeleted}
+              />
+            </div>
           </div>
 
           {/* Right Panel */}

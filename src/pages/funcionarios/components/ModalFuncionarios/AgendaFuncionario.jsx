@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   X,
   Calendar,
@@ -11,9 +11,16 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
-import { useAgendaFuncionario, useRemoverFuncionarioDeAgendamento } from "../../../../hooks";
+import {
+  useAgendaFuncionario,
+  useRemoverFuncionarioDeAgendamento,
+} from "../../../../hooks";
 import Swal from "sweetalert2";
-import { normalizeStatus, getStatusColor, TIPO_COLORS } from "../../../../utils/agendamentoStatus";
+import {
+  normalizeStatus,
+  getStatusColor,
+  TIPO_COLORS,
+} from "../../../../utils/agendamentoStatus";
 
 function formatDate(dateStr) {
   if (!dateStr) return "—";
@@ -65,8 +72,16 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
       return { dataInicio: formatISO(monday), dataFim: formatISO(sunday) };
     }
     // mês
-    const first = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const last = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    const first = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1,
+    );
+    const last = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    );
     return { dataInicio: formatISO(first), dataFim: formatISO(last) };
   }, [viewMode, currentDate]);
 
@@ -96,7 +111,9 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
       Swal.fire({
         icon: "error",
         title: "Erro ao remover",
-        text: err?.message || "Não foi possível remover o funcionário deste agendamento.",
+        text:
+          err?.message ||
+          "Não foi possível remover o funcionário deste agendamento.",
       });
       setConfirmRemove(null);
     },
@@ -105,9 +122,13 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
   // Ordenar por data e horário
   const agendaOrdenada = useMemo(() => {
     return [...agenda].sort((a, b) => {
-      const dateComp = (a.dataAgendamento || "").localeCompare(b.dataAgendamento || "");
+      const dateComp = (a.dataAgendamento || "").localeCompare(
+        b.dataAgendamento || "",
+      );
       if (dateComp !== 0) return dateComp;
-      return (a.inicioAgendamento || "").localeCompare(b.inicioAgendamento || "");
+      return (a.inicioAgendamento || "").localeCompare(
+        b.inicioAgendamento || "",
+      );
     });
   }, [agenda]);
 
@@ -115,7 +136,7 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
   const totalPaginas = Math.ceil(agendaOrdenada.length / ITEMS_PER_PAGE);
   const agendaPaginada = agendaOrdenada.slice(
     (pagina - 1) * ITEMS_PER_PAGE,
-    pagina * ITEMS_PER_PAGE
+    pagina * ITEMS_PER_PAGE,
   );
 
   const navegarPeriodo = (direcao) => {
@@ -256,7 +277,8 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
           {/* Badge com total */}
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#007EA7]/10 text-[#007EA7]">
-              {agendaOrdenada.length} agendamento{agendaOrdenada.length !== 1 ? "s" : ""}
+              {agendaOrdenada.length} agendamento
+              {agendaOrdenada.length !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
@@ -320,10 +342,15 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
                   </thead>
                   <tbody>
                     {agendaPaginada.map((item) => {
-                      const statusClass = getStatusColor(item.statusAgendamento);
+                      const statusClass = getStatusColor(
+                        item.statusAgendamento,
+                      );
                       const tipoClass =
-                        TIPO_COLORS[item.tipoAgendamento] || "bg-gray-100 text-gray-800";
-                      const normalizedSt = normalizeStatus(item.statusAgendamento);
+                        TIPO_COLORS[item.tipoAgendamento] ||
+                        "bg-gray-100 text-gray-800";
+                      const normalizedSt = normalizeStatus(
+                        item.statusAgendamento,
+                      );
                       const isCancelado = normalizedSt === "CANCELADO";
                       const isConcluido = normalizedSt === "CONCLUIDO";
 
@@ -381,8 +408,8 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
                               {item.tipoAgendamento === "SERVICO"
                                 ? "Serviço"
                                 : item.tipoAgendamento === "ORCAMENTO"
-                                ? "Orçamento"
-                                : item.tipoAgendamento || "—"}
+                                  ? "Orçamento"
+                                  : item.tipoAgendamento || "—"}
                             </span>
                           </td>
                           <td className="py-3 px-3 text-center">
@@ -417,8 +444,8 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
                 <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
                   <span>
                     Mostrando {(pagina - 1) * ITEMS_PER_PAGE + 1} a{" "}
-                    {Math.min(pagina * ITEMS_PER_PAGE, agendaOrdenada.length)} de{" "}
-                    {agendaOrdenada.length}
+                    {Math.min(pagina * ITEMS_PER_PAGE, agendaOrdenada.length)}{" "}
+                    de {agendaOrdenada.length}
                   </span>
                   <div className="flex gap-2">
                     <button
@@ -429,7 +456,9 @@ export default function AgendaFuncionario({ open, setOpen, funcionario }) {
                       Anterior
                     </button>
                     <button
-                      onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                      onClick={() =>
+                        setPagina((p) => Math.min(totalPaginas, p + 1))
+                      }
                       disabled={pagina === totalPaginas}
                       className="px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                     >

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Icon from './AppIcon';
-import Button from '../Button/Button.component';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import Icon from "./AppIcon";
+import Button from "../Button/Button.component";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -11,50 +11,50 @@ const Header = () => {
 
   const navigationItems = [
     {
-      label: 'Dashboard',
-      path: '/calendar-dashboard',
-      icon: 'Calendar',
-      tooltip: 'View and manage calendars'
+      label: "Dashboard",
+      path: "/calendar-dashboard",
+      icon: "Calendar",
+      tooltip: "View and manage calendars",
     },
     {
-      label: 'Create Event',
-      path: '/event-creation-and-management',
-      icon: 'Plus',
-      tooltip: 'Create new events and meetings'
+      label: "Create Event",
+      path: "/event-creation-and-management",
+      icon: "Plus",
+      tooltip: "Create new events and meetings",
     },
     {
-      label: 'Search Events',
-      path: '/event-search-and-filtering',
-      icon: 'Search',
-      tooltip: 'Find and filter events'
-    }
+      label: "Search Events",
+      path: "/event-search-and-filtering",
+      icon: "Search",
+      tooltip: "Find and filter events",
+    },
   ];
 
   const notifications = [
     {
       id: 1,
-      type: 'conflict',
-      title: 'Schedule Conflict',
-      message: 'Meeting with John overlaps with Team Standup',
-      time: '2 min ago',
-      urgent: true
+      type: "conflict",
+      title: "Schedule Conflict",
+      message: "Meeting with John overlaps with Team Standup",
+      time: "2 min ago",
+      urgent: true,
     },
     {
       id: 2,
-      type: 'rsvp',
-      title: 'RSVP Response',
-      message: 'Sarah accepted your meeting invitation',
-      time: '15 min ago',
-      urgent: false
+      type: "rsvp",
+      title: "RSVP Response",
+      message: "Sarah accepted your meeting invitation",
+      time: "15 min ago",
+      urgent: false,
     },
     {
       id: 3,
-      type: 'reminder',
-      title: 'Meeting Reminder',
-      message: 'Quarterly Review starts in 30 minutes',
-      time: '30 min ago',
-      urgent: false
-    }
+      type: "reminder",
+      title: "Meeting Reminder",
+      message: "Quarterly Review starts in 30 minutes",
+      time: "30 min ago",
+      urgent: false,
+    },
   ];
 
   const handleNavigation = (path) => {
@@ -73,10 +73,10 @@ const Header = () => {
 
   const handleLogout = () => {
     // Redirecionar para login (implementar lógica de logout conforme necessário)
-    navigate('/Login');
+    navigate("/Login");
   };
 
-  const urgentNotifications = notifications?.filter(n => n?.urgent)?.length;
+  const urgentNotifications = notifications?.filter((n) => n?.urgent)?.length;
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-surface border-b border-hairline z-header">
@@ -87,7 +87,9 @@ const Header = () => {
             <div className="w-8 h-8 bg-primary rounded-modern flex items-center justify-center">
               <Icon name="Calendar" size={20} color="white" />
             </div>
-            <h1 className="text-xl font-semibold text-text-primary">Calendar Pro</h1>
+            <h1 className="text-xl font-semibold text-text-primary">
+              Calendar Pro
+            </h1>
           </div>
         </div>
 
@@ -101,8 +103,8 @@ const Header = () => {
                 onClick={() => handleNavigation(item?.path)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-modern transition-micro hover-scale ${
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-muted'
+                    ? "bg-primary text-primary-foreground"
+                    : "text-text-secondary hover:text-text-primary hover:bg-muted"
                 }`}
                 title={item?.tooltip}
               >
@@ -140,20 +142,26 @@ const Header = () => {
             {isNotificationOpen && (
               <div className="absolute right-0 top-full mt-2 w-80 bg-popover border border-hairline rounded-modern shadow-soft z-dropdown">
                 <div className="p-4 border-b border-hairline">
-                  <h3 className="font-semibold text-text-primary">Notifications</h3>
+                  <h3 className="font-semibold text-text-primary">
+                    Notifications
+                  </h3>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
                   {notifications?.map((notification) => (
                     <div
                       key={notification?.id}
                       className={`p-4 border-b border-hairline hover:bg-muted transition-micro cursor-pointer ${
-                        notification?.urgent ? 'bg-error/5' : ''
+                        notification?.urgent ? "bg-error/5" : ""
                       }`}
                     >
                       <div className="flex items-start space-x-3">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${
-                          notification?.urgent ? 'bg-error' : 'bg-muted-foreground'
-                        }`}></div>
+                        <div
+                          className={`w-2 h-2 rounded-full mt-2 ${
+                            notification?.urgent
+                              ? "bg-error"
+                              : "bg-muted-foreground"
+                          }`}
+                        ></div>
                         <div className="flex-1">
                           <h4 className="font-medium text-text-primary text-sm">
                             {notification?.title}
@@ -189,10 +197,16 @@ const Header = () => {
                 <Icon name="User" size={16} color="white" />
               </div>
               <div className="hidden lg:block text-left">
-                <div className="text-sm font-medium text-text-primary">John Smith</div>
+                <div className="text-sm font-medium text-text-primary">
+                  John Smith
+                </div>
                 <div className="text-xs text-text-secondary">Administrator</div>
               </div>
-              <Icon name="ChevronDown" size={16} className="text-text-secondary" />
+              <Icon
+                name="ChevronDown"
+                size={16}
+                className="text-text-secondary"
+              />
             </Button>
 
             {isProfileOpen && (
@@ -203,8 +217,12 @@ const Header = () => {
                       <Icon name="User" size={20} color="white" />
                     </div>
                     <div>
-                      <div className="font-medium text-text-primary">John Smith</div>
-                      <div className="text-sm text-text-secondary">john.smith@company.com</div>
+                      <div className="font-medium text-text-primary">
+                        John Smith
+                      </div>
+                      <div className="text-sm text-text-secondary">
+                        john.smith@company.com
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -254,7 +272,8 @@ const Header = () => {
                 onClick={() => handleNavigation(item?.path)}
                 className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-modern transition-micro ${
                   isActive
-                    ? 'text-primary' :'text-text-secondary hover:text-text-primary'
+                    ? "text-primary"
+                    : "text-text-secondary hover:text-text-primary"
                 }`}
               >
                 <Icon name={item?.icon} size={20} />

@@ -1,8 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Filter, Check } from "lucide-react";
 
-const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode = "pedidos" }) => {
-  
+const FilterDropdown = ({
+  isOpen,
+  onClose,
+  selectedFilters,
+  onFilterChange,
+  mode = "pedidos",
+}) => {
   const [tempFilters, setTempFilters] = useState(selectedFilters);
 
   useEffect(() => {
@@ -17,7 +22,7 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
       options: ["Pix", "Cartão de crédito", "Dinheiro", "Boleto"],
     },
   };
-  
+
   const filterOptionsServicos = {
     situacao: {
       title: "Situação do Serviço",
@@ -25,16 +30,23 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
     },
     etapa: {
       title: "Etapa do Serviço",
-      options: ["Aguardando orçamento", "Orçamento aprovado", "Execução em andamento", "Aguardando peças", "Concluído"],
-    }
+      options: [
+        "Aguardando orçamento",
+        "Orçamento aprovado",
+        "Execução em andamento",
+        "Aguardando peças",
+        "Concluído",
+      ],
+    },
   };
 
-  const filterOptions = mode === "pedidos" ? filterOptionsPedidos : filterOptionsServicos;
+  const filterOptions =
+    mode === "pedidos" ? filterOptionsPedidos : filterOptionsServicos;
 
   const handleToggleFilter = (filterKey, option) => {
     setTempFilters((prev) => {
       const currentSelection = prev[filterKey] || [];
-      
+
       const newSelection = currentSelection.includes(option)
         ? currentSelection.filter((item) => item !== option)
         : [...currentSelection, option];
@@ -63,7 +75,7 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
         <Filter className="w-4 h-4 mr-2" />
         Filtros
       </div>
-      
+
       {Object.keys(filterOptions).map((key) => (
         <div key={key} className="mb-4 last:mb-0 py-2">
           <h3 className="text-sm font-semibold text-gray-800 mb-2">
@@ -71,7 +83,6 @@ const FilterDropdown = ({ isOpen, onClose, selectedFilters, onFilterChange, mode
           </h3>
           <div className="space-y-1">
             {filterOptions[key].options.map((option) => {
-
               const isSelected = (tempFilters[key] || []).includes(option);
               return (
                 <div

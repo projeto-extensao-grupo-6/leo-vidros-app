@@ -1,15 +1,17 @@
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import axios from "axios";
+import Swal from "sweetalert2";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
-const ETL_URL = import.meta.env.VITE_MICROSERVICE_ETL_URL || 'http://localhost:3001/api';
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api";
+const ETL_URL =
+  import.meta.env.VITE_MICROSERVICE_ETL_URL || "http://localhost:3001/api";
 
 // Função para configurar interceptors em qualquer instância (reaproveitamento de código)
 const configureInterceptors = (instance) => {
   instance.interceptors.request.use((config) => {
-    if (config.method === 'post' || config.method === 'put') {
-      if (!config.headers['Content-Type']) {
-        config.headers['Content-Type'] = 'application/json';
+    if (config.method === "post" || config.method === "put") {
+      if (!config.headers["Content-Type"]) {
+        config.headers["Content-Type"] = "application/json";
       }
     }
     return config;
@@ -26,11 +28,11 @@ const configureInterceptors = (instance) => {
       ) {
         const message =
           error.response?.status === 403
-            ? 'Acesso negado. Faça login novamente.'
-            : 'Sessão expirada. Faça login novamente.';
+            ? "Acesso negado. Faça login novamente."
+            : "Sessão expirada. Faça login novamente.";
 
         Swal.fire({
-          icon: 'error',
+          icon: "error",
           text: message,
           timer: 2500,
           showConfirmButton: false,
@@ -39,11 +41,11 @@ const configureInterceptors = (instance) => {
         sessionStorage.clear();
         localStorage.clear();
 
-        setTimeout(() => (window.location.href = '/Login'), 2500);
+        setTimeout(() => (window.location.href = "/Login"), 2500);
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 };
 

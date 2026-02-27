@@ -10,25 +10,24 @@ export const useEventDetails = (initialEvent) => {
 
   useEffect(() => {
     if (!initialEvent?.id) return;
-    
+
     const fetchDetails = async () => {
       setLoading(true);
       setError(null);
       try {
-
         const response = await Api.get(`/Agendamentos/${initialEvent.id}`);
         const apiData = response.data;
-        
+
         // Mesclar dados da API com dados processados do initialEvent
         const mergedDetails = {
-          ...apiData, 
+          ...apiData,
           title: initialEvent.fullTitle || initialEvent.title,
-          startTime: initialEvent.startTime, 
-          endTime: initialEvent.endTime, 
-          date: initialEvent.date, 
-          backgroundColor: initialEvent.backgroundColor 
+          startTime: initialEvent.startTime,
+          endTime: initialEvent.endTime,
+          date: initialEvent.date,
+          backgroundColor: initialEvent.backgroundColor,
         };
-        
+
         setDetails(mergedDetails);
       } catch (err) {
         console.error("❌ Erro ao buscar detalhes:", err);
@@ -51,9 +50,11 @@ export const useDeleteAgendamento = (onSuccess) => {
 
   const deleteAgendamento = async (id) => {
     if (!id) {
-        console.error("❌ Erro: ID inválido ou undefined fornecido para exclusão.");
-        alert("Erro interno: ID do agendamento não encontrado.");
-        return false;
+      console.error(
+        "❌ Erro: ID inválido ou undefined fornecido para exclusão.",
+      );
+      alert("Erro interno: ID do agendamento não encontrado.");
+      return false;
     }
 
     setDeleting(true);
@@ -61,18 +62,18 @@ export const useDeleteAgendamento = (onSuccess) => {
       const response = await Api.delete(`/Agendamentos/${id}`);
 
       if (onSuccess) {
-          onSuccess(id);
+        onSuccess(id);
       }
       return true;
-
     } catch (err) {
       console.error("❌ Erro fatal ao excluir:", err);
       console.error("Detalhes do erro:", err.response?.data);
 
       // Feedback visual para o usuário
-      const msgErro = err.response?.data?.message || "Erro desconhecido ao excluir.";
+      const msgErro =
+        err.response?.data?.message || "Erro desconhecido ao excluir.";
       alert(`Falha ao excluir agendamento: ${msgErro}`);
-      
+
       return false;
     } finally {
       setDeleting(false);
