@@ -5,6 +5,7 @@ import { appRouter } from './router/AppRouter.jsx';
 import { UserProvider, useUser } from './context/UserContext.jsx';
 import { queryClient } from './lib/queryClient.js';
 import { OrcamentoProgressProvider, useOrcamentoProgress } from './context/OrcamentoProgressContext.jsx';
+import { ErrorModalProvider } from './context/ErrorModalContext.jsx';
 import { OrcamentoProgressToast } from './components/feedback/OrcamentoProgressToast/index.js';
 import AgendamentoNotificationLayer from './components/feedback/AgendamentoNotificationLayer/AgendamentoNotificationLayer.jsx';
 
@@ -30,11 +31,13 @@ function AppWithToast() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <OrcamentoProgressProvider>
-          <AppWithToast />
-        </OrcamentoProgressProvider>
-      </UserProvider>
+      <ErrorModalProvider>
+        <UserProvider>
+          <OrcamentoProgressProvider>
+            <AppWithToast />
+          </OrcamentoProgressProvider>
+        </UserProvider>
+      </ErrorModalProvider>
     </QueryClientProvider>
   );
 }
