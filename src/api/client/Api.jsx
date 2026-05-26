@@ -1,6 +1,7 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 import { repairEncoding } from "../../utils/fixEncoding";
+import { publishApiError } from "../../utils/errorModalBus";
 
 const BACKEND_URL =
   import.meta.env.VITE_BACKEND_URL;
@@ -21,14 +22,22 @@ const configureInterceptors = (instance) => {
   instance.interceptors.response.use(
     (response) => {
       const responseType = response.config?.responseType;
+      const isBinary = responseType === "blob" || responseType === "arraybuffer";
 
-      if (responseType !== "blob" && responseType !== "arraybuffer") {
+      if (!isBinary) {
         response.data = repairEncoding(response.data);
+        response.data = unwrapEnvelope(response.data);
       }
 
       return response;
     },
     (error) => {
+      const responseType = error.config?.responseType;
+      const isBinary = responseType === "blob" || responseType === "arraybuffer";
+      if (!isBinary && error.response?.data) {
+        error.response.data = normalizeErrorEnvelope(error.response.data);
+      }
+
       const skipRedirect = error.config?.skipAuthRedirect;
 
       if (
@@ -51,12 +60,41 @@ const configureInterceptors = (instance) => {
         sessionStorage.clear();
 
         setTimeout(() => (window.location.href = "/login"), 2500);
+        return Promise.reject(error);
+      }
+
+      const silent = error.config?.silent === true;
+      const status = error.response?.status;
+      const isAuthRedirect = status === 401 || status === 403;
+
+      if (!silent && !isAuthRedirect) {
+        publishApiError(error);
       }
 
       return Promise.reject(error);
     },
   );
 };
+
+function isApiEnvelope(payload) {
+  return (
+    payload &&
+    typeof payload === "object" &&
+    !Array.isArray(payload) &&
+    typeof payload.success === "boolean"
+  );
+}
+
+function unwrapEnvelope(payload) {
+  if (!isApiEnvelope(payload)) return payload;
+  return payload.success ? payload.data : payload;
+}
+
+function normalizeErrorEnvelope(payload) {
+  if (!isApiEnvelope(payload) || payload.success || !payload.error) return payload;
+  const { code, message, details } = payload.error;
+  return { code, message, details, error: payload.error };
+}
 
 const Api = axios.create({ baseURL: BACKEND_URL, withCredentials: true });
 const EtlApi = axios.create({ baseURL: ETL_URL, withCredentials: true });
