@@ -320,6 +320,10 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
               "ORCAMENTO APROVADO",
               "AGUARDANDO AGENDA DE SERVIÇO/INSTALAÇÃO",
               "AGUARDANDO AGENDA DE SERVICO/INSTALACAO",
+              "ANÁLISE DO ORÇAMENTO",
+              "ANALISE DO ORCAMENTO",
+              "SERVIÇO AGENDADO",
+              "SERVICO AGENDADO",
             ];
 
             etapaValida = etapasAceitasServico.some(

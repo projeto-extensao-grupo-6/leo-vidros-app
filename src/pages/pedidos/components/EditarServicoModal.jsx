@@ -499,7 +499,14 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
   };
 
   const mostrarBotaoAgendarOrcamento = () => {
-    return limparTextoParaComparacao(formData.etapa) === "AGUARDANDO_AGENDA_DE_ORCAMENTO" && !modoEdicao;
+    const etapaNorm = limparTextoParaComparacao(formData.etapa);
+    return (
+      (
+        etapaNorm === "AGUARDANDO_AGENDA_DE_ORCAMENTO" ||
+        etapaNorm === "PENDENTE" ||
+        etapaNorm === "AGUARDANDO_ORCAMENTO"
+      ) && !modoEdicao
+    );
   };
 
   const mostrarBotaoAgendarServico = () => {

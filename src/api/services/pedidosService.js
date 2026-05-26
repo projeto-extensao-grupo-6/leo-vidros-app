@@ -287,7 +287,7 @@ class PedidosService extends BaseService {
     let servicoInfo = null;
     let etapaAtual = "Aguardando orçamento";
     let progressoValor = 1;
-    let progressoTotal = 7;
+    let progressoTotal = 8;
     let temAgendamentoAtivo = false;
 
     let etapaCalculada = "AGUARDANDO AGENDA DE ORÇAMENTO";
@@ -308,13 +308,11 @@ class PedidosService extends BaseService {
       );
       temAgendamentoAtivo = agendamentosAtivos.length > 0;
 
-      // servico.etapa é a fonte autoritativa — mantida pelo backend
+      // pedido INATIVO sempre exibe CONCLUÍDO independente da etapa persistida
       const statusPedidoNome = dadosBackend.status?.nome;
       const statusNormPedido = this.normalizarEtapaOuStatus(statusPedidoNome || "");
       if (statusNormPedido === "INATIVO") {
         etapaCalculada = "CONCLUÍDO";
-      } else {
-        etapaCalculada = etapaNome;
       }
       servicoInfo = {
         id: dadosBackend.servico.id,

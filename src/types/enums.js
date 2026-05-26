@@ -25,6 +25,10 @@ export const StatusPedido = Object.freeze({
   SERVICO_AGENDADO: "SERVIÇO AGENDADO",
   AGENDAMENTO_EM_EXECUCAO: "AGENDAMENTO EM EXECUÇÃO",
   CONCLUIDO: "CONCLUÍDO",
+  // Aliases legados — mantidos para compatibilidade com importadores existentes
+  EM_ABERTO: "EM ABERTO",
+  EM_ANDAMENTO: "AGENDAMENTO EM EXECUÇÃO",
+  CANCELADO: "CANCELADO",
 });
 
 export const StatusSolicitacao = Object.freeze({
