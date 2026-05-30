@@ -85,8 +85,18 @@ const usePedidoAPI = () => {
 
   const buscarProdutos = async () => {
     try {
-      const response = await Api.get(`/produtos`);
-      return response.data;
+      const response = await Api.get(`/estoques`);
+      const lista = Array.isArray(response.data)
+        ? response.data
+        : response.data?.content ?? [];
+      return lista
+        .map((e) => ({
+          id: e.id,
+          nome: e.produto?.nome,
+          preco: e.produto?.preco ?? 0,
+          disponivel: Number(e.quantidadeDisponivel ?? 0),
+        }))
+        .filter((p) => p.nome && p.disponivel > 0);
     } catch (error) {
       throw new Error(
         error.response?.data?.message || "Erro ao buscar produtos",
@@ -265,6 +275,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             produtoId: produtoSelecionado.id,
             nome: produtoSelecionado.nome,
             preco: produtoSelecionado.preco || 0,
+            disponivel: produtoSelecionado.disponivel,
             subtotal:
               (produtoSelecionado.preco || 0) * novosProdutos[index].quantidade,
           };
@@ -317,6 +328,18 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       if (hasIncompleteProduct) {
         setError(
           "Preencha as informações do produto adicionado antes de avançar",
+        );
+        return false;
+      }
+
+      const overStock = formData.produtos.find(
+        (produto) =>
+          produto.disponivel !== undefined &&
+          produto.quantidade > produto.disponivel,
+      );
+      if (overStock) {
+        setError(
+          `Estoque insuficiente para "${overStock.nome}". Disponível: ${overStock.disponivel}, solicitado: ${overStock.quantidade}.`,
         );
         return false;
       }
@@ -683,7 +706,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                             placeholder="Selecione um produto"
                             options={produtosDisponiveis.map((p) => ({
                               value: String(p.id),
-                              label: `${p.nome} - R$ ${p.preco?.toFixed(2)}`,
+                              label: `${p.nome} — R$ ${p.preco?.toFixed(2)} · ${p.disponivel} disp.`,
                             }))}
                             value={produto.produtoId}
                             onChange={(e) =>
@@ -711,6 +734,17 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                               )
                             }
                           />
+                          {produto.disponivel !== undefined && (
+                            <span
+                              className={`text-xs font-semibold ${
+                                produto.quantidade > produto.disponivel
+                                  ? "text-red-600"
+                                  : "text-green-600"
+                              }`}
+                            >
+                              Disp: {produto.disponivel}
+                            </span>
+                          )}
                         </div>
 
                         <div className="w-32 flex flex-col gap-1 items-start justify-center">

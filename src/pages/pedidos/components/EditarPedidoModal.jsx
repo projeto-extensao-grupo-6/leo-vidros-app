@@ -39,9 +39,18 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
 
   useEffect(() => {
     if (isOpen) {
-      Api.get("/produtos?size=200").then((res) => {
+      Api.get("/estoques?size=200").then((res) => {
         const lista = Array.isArray(res.data) ? res.data : res.data?.content ?? [];
-        setProdutosDisponiveis(lista);
+        setProdutosDisponiveis(
+          lista
+            .map((e) => ({
+              id: e.id,
+              nome: e.produto?.nome,
+              preco: e.produto?.preco ?? 0,
+              disponivel: Number(e.quantidadeDisponivel ?? 0),
+            }))
+            .filter((p) => p.nome && p.disponivel > 0),
+        );
       }).catch(() => {});
     }
   }, [isOpen]);
@@ -95,6 +104,7 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
       nome: produto?.nome ?? "",
       preco: parseFloat(produto?.preco ?? 0),
       estoqueId: produto?.id ?? 0,
+      disponivel: produto?.disponivel,
     };
     setFormData((prev) => ({ ...prev, produtos: novosProdutos }));
   };
@@ -284,21 +294,33 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                         </span>
                       )}
                     </div>
-                    <UniversalInput
-                      label="Quantidade"
-                      type="number"
-                      min="1"
-                      value={produto.quantidade}
-                      onChange={(e) =>
-                        handleProdutoChange(
-                          index,
-                          "quantidade",
-                          e.target.value,
-                        )
-                      }
-                      readOnly={!modoEdicao}
-                      wrapperClassName="col-span-2"
-                    />
+                    <div className="col-span-2 flex flex-col gap-1">
+                      <UniversalInput
+                        label="Quantidade"
+                        type="number"
+                        min="1"
+                        value={produto.quantidade}
+                        onChange={(e) =>
+                          handleProdutoChange(
+                            index,
+                            "quantidade",
+                            e.target.value,
+                          )
+                        }
+                        readOnly={!modoEdicao}
+                      />
+                      {modoEdicao && produto.disponivel !== undefined && (
+                        <span
+                          className={`text-xs font-semibold ${
+                            produto.quantidade > produto.disponivel
+                              ? "text-red-600"
+                              : "text-green-600"
+                          }`}
+                        >
+                          Disp: {produto.disponivel}
+                        </span>
+                      )}
+                    </div>
                     <UniversalInput
                       label="Preço Unitário"
                       type="number"
