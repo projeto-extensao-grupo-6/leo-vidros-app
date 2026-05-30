@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Lock, Check, X } from "lucide-react";
+import { useUser } from "../../context/UserContext";
 import { motion } from "framer-motion";
 import UniversalInput from "../../components/ui/Input/UniversalInput";
 import Button from "../../components/ui/Button/Button.component";
@@ -19,18 +20,15 @@ const PasswordRequirement = ({ text, isValid }) => (
 
 export default function NovaSenha() {
   const { idUsuario } = useParams();
+  const { user } = useUser();
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmaSenha, setConfirmaSenha] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [userName, setUserName] = useState("Usu\u00e1rio");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loggedUserName = sessionStorage.getItem("nome");
-    if (loggedUserName) setUserName(loggedUserName);
-  }, [idUsuario]);
+  const userName = user.name || "Usu\u00e1rio";
 
   const is8Chars = novaSenha.length >= 8;
   const isUppercase = /[A-Z]/.test(novaSenha);
