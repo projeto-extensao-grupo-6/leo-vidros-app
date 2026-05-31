@@ -205,13 +205,6 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
           />
 
           <UniversalInput
-            label="Prazo de Instalação"
-            type="date"
-            value={dados.prazo_instalacao}
-            onChange={(e) => onChange("prazo_instalacao", e.target.value)}
-          />
-
-          <UniversalInput
             label="Garantia"
             placeholder="Ex: 12 meses"
             value={dados.garantia}
@@ -219,19 +212,19 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
           />
 
           <UniversalInput
-            as="select"
+            label="Prazo de Instalação"
+            wrapperClassName="col-span-full"
+            placeholder="Ex: 15 dias úteis"
+            value={dados.prazo_instalacao}
+            onChange={(e) => onChange("prazo_instalacao", e.target.value)}
+          />
+
+          <UniversalInput
             label="Forma de Pagamento"
+            wrapperClassName="col-span-full"
+            placeholder="Ex: 50% de entrada e 50% após a finalização do serviço"
             value={dados.forma_pagamento}
             onChange={(e) => onChange("forma_pagamento", e.target.value)}
-            placeholder="Selecione"
-            options={[
-              { value: "BOLETO", label: "Boleto Bancário" },
-              { value: "PIX", label: "PIX" },
-              { value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
-              { value: "TRANSFERENCIA", label: "Transferência Bancária" },
-              { value: "CHEQUE", label: "Cheque" },
-              { value: "DINHEIRO", label: "Dinheiro" },
-            ]}
           />
 
           <UniversalInput
@@ -241,7 +234,7 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
             placeholder="Anotações internas..."
             value={dados.observacoes}
             onChange={(e) => onChange("observacoes", e.target.value)}
-            className="min-h-[88px] resize-y"
+            className="h-[72px] resize-none"
           />
         </div>
       </div>
@@ -457,10 +450,10 @@ export default function OrcamentoPage() {
     pedido_id: pedidoId || "",
     status_id: "RASCUNHO",
     data_orcamento: new Date().toISOString().split("T")[0],
-    prazo_instalacao: "",
+    prazo_instalacao: "15 dias úteis",
     garantia: "",
-    forma_pagamento: "",
-    observacoes: "",
+    forma_pagamento: "50% de entrada e 50% após a finalização do serviço",
+    observacoes: "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
   });
 
   const [itens, setItens] = useState([]);
@@ -536,10 +529,10 @@ export default function OrcamentoPage() {
             pedido_id: String(orc.pedidoId || ""),
             status_id: orc.statusNome || orc.statusId || "RASCUNHO",
             data_orcamento: orc.dataOrcamento?.split("T")[0] || "",
-            prazo_instalacao: orc.prazoInstalacao?.split("T")[0] || "",
+            prazo_instalacao: orc.prazoInstalacao || "15 dias úteis",
             garantia: orc.garantia || "",
-            forma_pagamento: orc.formaPagamento || "",
-            observacoes: orc.observacoes || "",
+            forma_pagamento: orc.formaPagamento || "50% de entrada e 50% após a finalização do serviço",
+            observacoes: orc.observacoes || "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
           });
 
           if (orc.itens && Array.isArray(orc.itens)) {

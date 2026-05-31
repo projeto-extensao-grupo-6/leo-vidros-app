@@ -1,10 +1,29 @@
 import { z } from "zod";
 
+function validarCPF(cpf) {
+  const digits = cpf.replace(/\D/g, "");
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+
+  const calc = (len) =>
+    digits
+      .slice(0, len)
+      .split("")
+      .reduce((sum, d, i) => sum + Number(d) * (len + 1 - i), 0);
+
+  const mod = (n) => ((n * 10) % 11) % 10;
+
+  return (
+    mod(calc(9)) === Number(digits[9]) &&
+    mod(calc(10)) === Number(digits[10])
+  );
+}
+
 const cpfRequired = z
   .string()
   .transform((v) => v.replace(/\D/g, ""))
-  .refine((v) => v.length > 0, { message: "CPF e obrigatorio" })
-  .refine((v) => v.length === 11, { message: "CPF invalido" });
+  .refine((v) => v.length > 0, { message: "CPF é obrigatório" })
+  .refine(validarCPF, { message: "CPF inválido" });
 
 const telefoneRequired = z
   .string()

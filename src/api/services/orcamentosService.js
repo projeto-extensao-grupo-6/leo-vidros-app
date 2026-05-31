@@ -58,44 +58,33 @@ class OrcamentosService extends BaseService {
   }
 
   async baixarPdf(id, numeroOrcamento) {
+    const tentarBaixar = async (url) => {
+      const response = await this.api.get(url, { responseType: "blob" });
+      if (response.status === 202) {
+        return { success: false, regenerating: true };
+      }
+      return { success: true, data: response.data, status: response.status };
+    };
+
     try {
       if (numeroOrcamento) {
         try {
-          const response = await this.api.get(
-            `/orcamentos/numero/${numeroOrcamento}/pdf`,
-            {
-              responseType: "blob",
-            }
-          );
-          return {
-            success: true,
-            data: response.data,
-            status: response.status,
-          };
-        } catch (cacheError) {
-          console.warn(
-            `PDF não está disponível via número ${numeroOrcamento}, tentando por ID...`,
-            cacheError.response?.status
-          );
+          const result = await tentarBaixar(`/orcamentos/numero/${numeroOrcamento}/pdf`);
+          if (result.regenerating) {
+            return { success: false, regenerating: true };
+          }
+          return result;
+        } catch {
+          // fallback para ID
         }
       }
 
-      const response = await this.api.get(`/orcamentos/id/${id}/pdf`, {
-        responseType: "blob",
-      });
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
+      return await tentarBaixar(`/orcamentos/id/${id}/pdf`);
     } catch (error) {
       return {
         success: false,
         data: null,
-        error:
-          error.response?.data?.message ??
-          error.message ??
-          "Erro ao baixar PDF",
+        error: error.response?.data?.message ?? error.message ?? "Erro ao baixar PDF",
         status: error.response?.status,
       };
     }

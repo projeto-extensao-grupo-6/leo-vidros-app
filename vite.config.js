@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from 'path';
+// eslint-disable-next-line no-unused-vars
+/// <reference types="vitest" />
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -32,5 +34,22 @@ export default defineConfig({
       "@radix-ui/react-slot",
       "@radix-ui/react-compose-refs",
     ],
+  },
+
+  build: {
+    esbuild: {
+      drop: ['console', 'debugger'],
+    },
+  },
+
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      include: ['src/lib/**', 'src/utils/**'],
+    },
   },
 });

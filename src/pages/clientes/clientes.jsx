@@ -12,6 +12,8 @@ import Api from "../../api/client/Api";
 import { formatCurrency, formatPhone } from "../../utils/formatters";
 import Button from "../../components/ui/Button/Button.component";
 import UniversalInput from "../../components/ui/Input/UniversalInput";
+import Toast from "../../components/feedback/Toast/Toast";
+import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
 
 const normalizeClienteStatus = (status) => {
   const normalized = String(status ?? "")
@@ -77,11 +79,16 @@ export default function Clientes() {
 
   const [clientes, setClientes] = useState([]);
   const [busca, setBusca] = useState("");
-  const [pagina, setPagina] = useState(1);
+  const [pagina, setPagina] = useState(0); // 0-based para a API
   const limitePorPagina = 5;
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [totalElementos, setTotalElementos] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const [situacao, setSituacao] = useState("Todos");
   const [ordenar, setOrdenar] = useState("recentes");
+
+  const [toast, setToast] = useState(null);
 
   const [openForm, setOpenForm] = useState(false);
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -93,21 +100,28 @@ export default function Clientes() {
 
   const [pedidos, setPedidos] = useState([]);
 
-  const fetchClientes = async () => {
+  const fetchClientes = async (pg = pagina) => {
     try {
-      const response = await Api.get("/clientes");
-      const data = response.data?.content ?? response.data;
+      setLoading(true);
+      const response = await Api.get("/clientes", {
+        params: { page: pg, size: limitePorPagina },
+      });
+      const pageData = response.data;
+      const content = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
       setClientes(
-        Array.isArray(data)
-          ? data.map((cliente) => ({
-              ...cliente,
-              status: normalizeClienteStatus(cliente.status),
-            }))
-          : [],
+        content.map((cliente) => ({
+          ...cliente,
+          status: normalizeClienteStatus(cliente.status),
+        })),
       );
+      setTotalPaginas(pageData?.totalPages ?? 1);
+      setTotalElementos(pageData?.totalElements ?? content.length);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
       setClientes([]);
+      setToast({ type: "error", message: "Erro ao carregar clientes. Tente novamente." });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,13 +133,23 @@ export default function Clientes() {
     } catch (error) {
       console.error("Erro ao buscar pedidos:", error);
       setPedidos([]);
+      setToast({ type: "error", message: "Erro ao carregar pedidos. Tente novamente." });
     }
   };
 
   useEffect(() => {
-    fetchClientes();
+    fetchClientes(pagina);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagina]);
+
+  useEffect(() => {
     fetchPedidos();
   }, []);
+
+  // Ao mudar filtros, voltar para a primeira página
+  useEffect(() => {
+    setPagina(0);
+  }, [busca, situacao, ordenar]);
 
   const clientesFiltrados = useMemo(() => {
     const clientesArray = Array.isArray(clientes) ? clientes : [];
@@ -147,10 +171,10 @@ export default function Clientes() {
     });
   }, [clientes, busca, situacao, ordenar]);
 
-  const indexUltimo = pagina * limitePorPagina;
-  const indexPrimeiro = indexUltimo - limitePorPagina;
-  const clientesPagina = clientesFiltrados.slice(indexPrimeiro, indexUltimo);
-  const totalPaginas = Math.ceil(clientesFiltrados.length / limitePorPagina);
+  // Paginação server-side: clientesPagina já vem da API para a página atual
+  const clientesPagina = clientesFiltrados;
+  const indexPrimeiro = pagina * limitePorPagina;
+  const indexUltimo = indexPrimeiro + clientesPagina.length;
 
   const abrirModalCriar = () => {
     setModoEdicao(false);
@@ -214,6 +238,7 @@ export default function Clientes() {
       } catch (error) {
         console.error("Erro ao editar cliente (PUT):", error);
         setOpenForm(false);
+        setToast({ type: "error", message: "Erro ao editar cliente. Tente novamente." });
       }
     } else {
       try {
@@ -241,6 +266,7 @@ export default function Clientes() {
       } catch (error) {
         console.error("Erro ao criar cliente (POST):", error);
         setOpenForm(false);
+        setToast({ type: "error", message: "Erro ao criar cliente. Tente novamente." });
       }
     }
   };
@@ -346,7 +372,9 @@ export default function Clientes() {
 
                 {/* Linhas da tabela */}
                 <div>
-                  {clientesPagina.length === 0 ? (
+                  {loading ? (
+                    <SkeletonLoader count={limitePorPagina} />
+                  ) : clientesPagina.length === 0 ? (
                     <div className="text-center p-8 text-gray-500">
                       <p>
                         {busca
@@ -435,17 +463,17 @@ export default function Clientes() {
               </div>
 
               {/* Paginação */}
-              {clientesFiltrados.length > 0 && (
+              {totalElementos > 0 && (
                 <div className="mt-6 flex flex-col items-center justify-between gap-4 text-sm text-gray-600 sm:flex-row">
                   <p>
                     Mostrando{" "}
                     <span className="font-medium">
-                      {clientesFiltrados.length > 0 ? indexPrimeiro + 1 : 0}-
-                      {Math.min(indexUltimo, clientesFiltrados.length)}
+                      {totalElementos > 0 ? indexPrimeiro + 1 : 0}-
+                      {indexUltimo}
                     </span>{" "}
                     de{" "}
                     <span className="font-medium">
-                      {clientesFiltrados.length}
+                      {totalElementos}
                     </span>{" "}
                     resultados
                   </p>
@@ -453,8 +481,8 @@ export default function Clientes() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
-                      disabled={pagina === 1}
+                      onClick={() => setPagina((prev) => Math.max(prev - 1, 0))}
+                      disabled={pagina === 0}
                     >
                       Anterior
                     </Button>
@@ -462,9 +490,9 @@ export default function Clientes() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setPagina((prev) => Math.min(prev + 1, totalPaginas))
+                        setPagina((prev) => Math.min(prev + 1, totalPaginas - 1))
                       }
-                      disabled={pagina === totalPaginas}
+                      disabled={pagina >= totalPaginas - 1}
                     >
                       Próximo
                     </Button>
@@ -497,6 +525,14 @@ export default function Clientes() {
         onClose={() => setOpenImportModal(false)}
         onSuccess={handleImportSuccess}
       />
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
