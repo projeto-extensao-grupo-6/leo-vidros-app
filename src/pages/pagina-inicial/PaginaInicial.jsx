@@ -181,7 +181,7 @@ export default function PaginaInicial() {
 
           <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-[3.75rem]">
             {qtdItensCriticos > 0 && (
-              <div className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#ffe08a] bg-[#fff7db] px-5 py-4 shadow-sm">
+              <div className="flex w-full flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border border-[#ffe08a] bg-[#fff7db] px-5 py-4 shadow-sm">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="mt-0.5 h-6 w-6 flex-shrink-0 text-[#856404]" />
                   <p className="text-sm text-[#856404]">

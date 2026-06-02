@@ -530,10 +530,10 @@ export default function Perfil() {
                   </nav>
                 </div>
 
-                <div className="flex-1 p-8 lg:p-12 overflow-y-auto h-full">
+                <div className="flex-1 p-5 sm:p-8 lg:p-12 overflow-y-auto h-full">
                   <div className="w-full h-full">
                     <div className="mb-10">
-                      <h1 className="text-3xl font-bold text-gray-800 mb-2 py-1">
+                      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 py-1">
                         {activeTab === "personal"
                           ? "Dados Pessoais"
                           : "Dados de Endereço"}
@@ -556,7 +556,7 @@ export default function Perfil() {
 
                     <div className="space-y-2">
                       {activeTab === "personal" ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6 border-t border-gray-800">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8 py-6 border-t border-gray-800">
                           <InputField
                             label="Nome"
                             name="nome"
@@ -659,7 +659,7 @@ export default function Perfil() {
                           </div>
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 lg:grid-cols-6 gap-10 py-9">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-10 py-9">
                           <InputField
                             label="Rua (Logradouro)"
                             name="rua"
