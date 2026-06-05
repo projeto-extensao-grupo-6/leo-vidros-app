@@ -9,6 +9,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import Api from "../../../api/client/Api";
+import servicosService from "../../../api/services/servicosService";
 import { cepMask } from "../../../utils/masks";
 import { modalClasses } from "../../../components/ui/modal/modalStyles";
 import UniversalInput from "../Input/UniversalInput";
@@ -609,6 +610,39 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
         .finally(() => setLoadingEstoque(false));
     }
   }, [step, showProdutosStep, estoqueOptions.length]);
+
+  // Pré-carrega os produtos do serviço (fonte única: GET /servicos/{id}/produtos)
+  // ao entrar no step de produtos, em vez de receber via props.
+  useEffect(() => {
+    if (!showProdutosStep || step !== 3) return;
+    if ((formData.produtos || []).length > 0) return;
+
+    const servicoId =
+      formData.pedido?.originalData?.servico?.id ||
+      initialData?.pedido?.originalData?.servico?.id ||
+      null;
+    if (!servicoId) return;
+
+    let cancelled = false;
+    servicosService.listarProdutos(servicoId).then((res) => {
+      if (cancelled || !res.success || !Array.isArray(res.data)) return;
+      const produtos = res.data
+        .filter((sp) => sp.produtoId)
+        .map((sp) => ({
+          id: sp.produtoId,
+          nome: sp.produtoNome || `Produto #${sp.produtoId}`,
+          quantidade: parseFloat(sp.quantidadePlanejada) || 1,
+        }));
+      if (produtos.length > 0) {
+        setFormData((prev) =>
+          (prev.produtos || []).length > 0 ? prev : { ...prev, produtos },
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [step, showProdutosStep, formData.pedido, formData.produtos, initialData]);
 
   useEffect(() => {
     if (isOpen) {
