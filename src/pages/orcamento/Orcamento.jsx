@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import Api from "../../api/client/Api";
 import OrcamentosService from "../../api/services/orcamentosService";
+import servicosService from "../../api/services/servicosService";
 import { useOrcamentoProgress } from "../../context/OrcamentoProgressContext.jsx";
 import {
   Plus,
@@ -101,6 +102,19 @@ const mapearItensDoPedido = (pedido) => {
 
   return [];
 };
+
+// Itens iniciais derivados da fonte única do serviço (servico_produto).
+const mapearItensDoServico = (lista = []) =>
+  lista.map((sp, index) => ({
+    id: `sp-${sp.id ?? sp.produtoId}-${index}`,
+    produto_id: sp.produtoId || "",
+    descricao: sp.produtoNome || "",
+    quantidade: String(sp.quantidadePlanejada ?? ""),
+    preco_unitario: String(sp.precoUnitario ?? ""),
+    desconto: "0",
+    observacao: sp.observacao || "",
+    ordem: index + 1,
+  }));
 
 const SectionCard = ({ title, badge, action, children, className = "" }) => (
   <div className={`${tw.card} ${className}`.trim()}>
@@ -515,6 +529,7 @@ export default function OrcamentoPage() {
             id: p.id,
             clienteId: p.cliente?.id || "",
             clienteNome: p.cliente?.nome || "",
+            servicoId: p.servico?.id || null,
             produtos: Array.isArray(p.produtos) ? p.produtos : [],
             produtosDesc:
               p.servico?.nome ||
@@ -622,6 +637,20 @@ export default function OrcamentoPage() {
     }
   }, [pedidos, dadosGerais.pedido_id]); 
 
+  // Carrega itens iniciais: para serviço, da fonte única (servico_produto);
+  // para pedido de produto puro, dos itens do pedido.
+  const carregarItensDoPedido = useCallback(async (pedido) => {
+    if (!pedido) return [];
+    if (pedido.servicoId) {
+      const res = await servicosService.listarProdutos(pedido.servicoId);
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        return mapearItensDoServico(res.data);
+      }
+      return [];
+    }
+    return mapearItensDoPedido(pedido);
+  }, []);
+
   useEffect(() => {
     if (orcamentoId || !pedidos.length || !dadosGerais.pedido_id || itens.length > 0) {
       return;
@@ -633,11 +662,16 @@ export default function OrcamentoPage() {
 
     if (!pedidoSelecionado) return;
 
-    const itensDoPedido = mapearItensDoPedido(pedidoSelecionado);
-    if (itensDoPedido.length > 0) {
-      setItens(itensDoPedido);
-    }
-  }, [orcamentoId, pedidos, dadosGerais.pedido_id, itens.length]);
+    let cancelled = false;
+    carregarItensDoPedido(pedidoSelecionado).then((itensIniciais) => {
+      if (!cancelled && itensIniciais.length > 0) {
+        setItens(itensIniciais);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [orcamentoId, pedidos, dadosGerais.pedido_id, itens.length, carregarItensDoPedido]);
 
   const handleDadosChange = useCallback(
     (field, value) => {
@@ -659,7 +693,7 @@ export default function OrcamentoPage() {
       });
 
       if (field === "pedido_id") {
-        setItens(mapearItensDoPedido(pedidoSelecionado));
+        carregarItensDoPedido(pedidoSelecionado).then(setItens);
       }
 
       if (errors[field])
@@ -669,7 +703,7 @@ export default function OrcamentoPage() {
           return e;
         });
     },
-    [errors, pedidos],
+    [errors, pedidos, carregarItensDoPedido],
   );
 
   const handleAddItem = useCallback(

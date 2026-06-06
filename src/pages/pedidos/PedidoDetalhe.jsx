@@ -192,11 +192,9 @@ export default function PedidoDetalhe() {
       };
 
       const response = await Api.put(`/pedidos/${id}`, requestBody);
-      console.log("🔄 Resposta do servidor:", response.data);
-      
+
       const mapped = PedidosService.mapearParaFrontend(response.data);
-      console.log("📋 Dados mapeados:", mapped);
-      
+
       setRawPedido(response.data);
       setPedido(mapped);
       
@@ -207,7 +205,6 @@ export default function PedidoDetalhe() {
         observacoes: mapped.observacoes || "",
         produtos: mapped.produtos || [],
       };
-      console.log("💾 Atualizando formData:", newFormData);
       setFormData(newFormData);
 
       setShowSuccessModal(true);

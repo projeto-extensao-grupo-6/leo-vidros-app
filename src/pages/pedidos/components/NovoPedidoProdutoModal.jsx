@@ -265,11 +265,20 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       const novosProdutos = [...prev.produtos];
 
       if (field === "produtoId") {
+        const jaAdicionado = novosProdutos.some(
+          (p, i) => i !== index && String(p.produtoId) === String(value),
+        );
+        if (jaAdicionado) {
+          setError("Produto já adicionado. Ajuste a quantidade na linha existente.");
+          return prev;
+        }
+
         const produtoSelecionado = produtosDisponiveis.find(
           (p) => String(p.id) === String(value),
         );
 
         if (produtoSelecionado) {
+          setError(null);
           novosProdutos[index] = {
             ...novosProdutos[index],
             produtoId: produtoSelecionado.id,
