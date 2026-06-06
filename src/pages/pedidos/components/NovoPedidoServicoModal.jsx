@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import PropTypes from "prop-types";
 import {
   Briefcase,
@@ -6,14 +6,16 @@ import {
   AlertCircle,
   User,
   ClipboardList,
+  MapPin,
 } from "lucide-react";
 import Api from "../../../api/client/Api";
-import { cpfMask, phoneMask, onlyLetters } from "../../../utils/masks";
+import { cpfMask, phoneMask, cepMask, onlyLetters } from "../../../utils/masks";
 import FeedbackModal from "../../../components/feedback/FeedbackModal/FeedbackModal";
 import Button from "../../../components/ui/Button/Button.component";
 import UniversalInput from "../../../components/ui/Input/UniversalInput";
 import {
   pedidoServicoEtapa0Schema,
+  pedidoServicoEnderecoSchema,
   pedidoServicoEtapa2Schema,
   zodFirstError,
 } from "../../../lib/schemas";
@@ -62,10 +64,24 @@ const usePedidoServicoAPI = () => {
   return { cadastrarCliente, salvarServico, buscarClientes };
 };
 
+const DEFAULT_ENDERECO = {
+  cep: "",
+  rua: "",
+  numero: "",
+  complemento: "",
+  bairro: "",
+  cidade: "",
+  uf: "",
+};
+
 const DEFAULT_FORM_DATA = {
   tipoCliente: "",
   clienteId: "",
   clienteNome: "",
+  clienteCpf: "",
+  clienteEmail: "",
+  clienteTelefone: "",
+  endereco: { ...DEFAULT_ENDERECO },
   servicos: [],
   etapa: "PENDENTE",
   prioridade: "Normal",
@@ -80,6 +96,7 @@ const NovoPedidoServicoModal = ({
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [loading, setLoading] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
   const [error, setError] = useState(null);
   const [clientesExistentes, setClientesExistentes] = useState([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -87,11 +104,21 @@ const NovoPedidoServicoModal = ({
   const { cadastrarCliente, salvarServico, buscarClientes } =
     usePedidoServicoAPI();
 
-  const steps = [
-    { id: 0, name: "Cliente" },
-    { id: 1, name: "Servico" },
-    { id: 2, name: "Revisao" },
-  ];
+  // O step de Endereco so existe para cliente novo (cliente existente ja tem endereco).
+  const isNovoCliente = formData.tipoCliente === "novo";
+  const steps = isNovoCliente
+    ? [
+        { id: "cliente", name: "Cliente" },
+        { id: "endereco", name: "Endereco" },
+        { id: "servico", name: "Servico" },
+        { id: "revisao", name: "Revisao" },
+      ]
+    : [
+        { id: "cliente", name: "Cliente" },
+        { id: "servico", name: "Servico" },
+        { id: "revisao", name: "Revisao" },
+      ];
+  const currentStepId = steps[currentStep]?.id;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -127,11 +154,64 @@ const NovoPedidoServicoModal = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    let novoValor = value;
+    if (name === "clienteNome") novoValor = onlyLetters(value);
+    else if (name === "clienteTelefone") novoValor = phoneMask(value);
+    else if (name === "clienteCpf") novoValor = cpfMask(value);
+
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "clienteNome" ? onlyLetters(value) : value,
+      [name]: novoValor,
     }));
     setError(null);
+  };
+
+  const handleEnderecoChange = (e) => {
+    const { name, value } = e.target;
+
+    let novoValor = value;
+    if (name === "numero") novoValor = value.replace(/\D/g, "");
+    else if (name === "uf") novoValor = onlyLetters(value).toUpperCase().slice(0, 2);
+
+    setFormData((prev) => ({
+      ...prev,
+      endereco: { ...prev.endereco, [name]: novoValor },
+    }));
+    setError(null);
+  };
+
+  const handleCepChange = async (e) => {
+    const maskedValue = cepMask(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      endereco: { ...prev.endereco, cep: maskedValue },
+    }));
+    setError(null);
+
+    const cleanCep = maskedValue.replace(/\D/g, "");
+    if (cleanCep.length !== 8) return;
+
+    setLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await response.json();
+      if (!data.erro) {
+        setFormData((prev) => ({
+          ...prev,
+          endereco: {
+            ...prev.endereco,
+            rua: data.logradouro || prev.endereco.rua,
+            bairro: data.bairro || prev.endereco.bairro,
+            cidade: data.localidade || prev.endereco.cidade,
+            uf: data.uf || prev.endereco.uf,
+          },
+        }));
+      }
+    } catch (err) {
+      console.error("Erro ao buscar CEP:", err);
+    } finally {
+      setLoadingCep(false);
+    }
   };
 
   const handleTipoClienteChange = (tipo) => {
@@ -140,6 +220,10 @@ const NovoPedidoServicoModal = ({
       tipoCliente: tipo,
       clienteId: "",
       clienteNome: "",
+      clienteCpf: "",
+      clienteEmail: "",
+      clienteTelefone: "",
+      endereco: { ...DEFAULT_ENDERECO },
     }));
     setError(null);
   };
@@ -181,17 +265,18 @@ const NovoPedidoServicoModal = ({
   const validateStep = () => {
     setError(null);
 
-    if (currentStep === 0 && !formData.tipoCliente) {
+    if (currentStepId === "cliente" && !formData.tipoCliente) {
       setError("Selecione como o cliente sera informado");
       return false;
     }
 
-    const schemas = [
-      pedidoServicoEtapa0Schema,
-      pedidoServicoEtapa2Schema,
-    ];
+    const schemaPorStep = {
+      cliente: pedidoServicoEtapa0Schema,
+      endereco: pedidoServicoEnderecoSchema,
+      servico: pedidoServicoEtapa2Schema,
+    };
 
-    const schema = schemas[currentStep];
+    const schema = schemaPorStep[currentStepId];
     if (!schema) return true;
 
     const result = schema.safeParse(formData);
@@ -218,12 +303,24 @@ const NovoPedidoServicoModal = ({
       let clienteData = null;
 
       if (formData.tipoCliente === "novo") {
+        const { endereco } = formData;
         clienteData = await cadastrarCliente({
           nome: formData.clienteNome,
-          cpf: "",
-          email: "",
-          telefone: "",
-          enderecos: [],
+          cpf: formData.clienteCpf.replace(/\D/g, ""),
+          email: formData.clienteEmail.trim(),
+          telefone: formData.clienteTelefone.replace(/\D/g, ""),
+          enderecos: [
+            {
+              rua: endereco.rua,
+              numero: endereco.numero || "",
+              complemento: endereco.complemento || "",
+              bairro: endereco.bairro || "",
+              cidade: endereco.cidade,
+              cep: endereco.cep.replace(/\D/g, ""),
+              uf: endereco.uf,
+              pais: "Brasil",
+            },
+          ],
         });
       } else {
         clienteData = clientesExistentes.find(
@@ -336,7 +433,7 @@ const NovoPedidoServicoModal = ({
           </div>
 
           <div className={`${modalClasses.body} flex flex-col`}>
-            {currentStep === 0 && (
+            {currentStepId === "cliente" && (
               <div className="flex flex-col gap-4">
                 <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">
@@ -414,12 +511,120 @@ const NovoPedidoServicoModal = ({
                       value={formData.clienteNome}
                       onChange={handleChange}
                     />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <UniversalInput
+                        name="clienteCpf"
+                        label="CPF"
+                        placeholder="000.000.000-00"
+                        value={formData.clienteCpf}
+                        onChange={handleChange}
+                      />
+                      <UniversalInput
+                        name="clienteTelefone"
+                        label="Telefone"
+                        placeholder="(00) 00000-0000"
+                        value={formData.clienteTelefone}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <UniversalInput
+                      name="clienteEmail"
+                      type="email"
+                      label="Email"
+                      placeholder="cliente@email.com"
+                      value={formData.clienteEmail}
+                      onChange={handleChange}
+                    />
                   </div>
                 )}
               </div>
             )}
 
-            {currentStep === 1 && (
+            {currentStepId === "endereco" && (
+              <div className="flex flex-col gap-4">
+                <div className="text-left">
+                  <h3 className="text-base font-semibold text-gray-900">
+                    Endereco do Cliente
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Informe o endereco do novo cliente. O CEP preenche os demais campos automaticamente.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+                  <div className="mb-4 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-[#007EA7]" />
+                    <span className="text-sm font-semibold text-slate-800">
+                      Endereco
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <UniversalInput
+                        name="cep"
+                        label="CEP"
+                        placeholder="00000-000"
+                        value={formData.endereco.cep}
+                        onChange={handleCepChange}
+                        hint={loadingCep ? "Buscando endereco..." : undefined}
+                      />
+                      <UniversalInput
+                        name="numero"
+                        label="Numero"
+                        placeholder="123"
+                        value={formData.endereco.numero}
+                        onChange={handleEnderecoChange}
+                      />
+                    </div>
+
+                    <UniversalInput
+                      name="rua"
+                      label="Rua"
+                      placeholder="Digite a rua"
+                      value={formData.endereco.rua}
+                      onChange={handleEnderecoChange}
+                    />
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <UniversalInput
+                        name="bairro"
+                        label="Bairro"
+                        placeholder="Digite o bairro"
+                        value={formData.endereco.bairro}
+                        onChange={handleEnderecoChange}
+                      />
+                      <UniversalInput
+                        name="complemento"
+                        label="Complemento"
+                        placeholder="Apto, bloco, etc. (opcional)"
+                        value={formData.endereco.complemento}
+                        onChange={handleEnderecoChange}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
+                      <UniversalInput
+                        name="cidade"
+                        label="Cidade"
+                        placeholder="Digite a cidade"
+                        value={formData.endereco.cidade}
+                        onChange={handleEnderecoChange}
+                      />
+                      <UniversalInput
+                        name="uf"
+                        label="UF"
+                        placeholder="UF"
+                        value={formData.endereco.uf}
+                        onChange={handleEnderecoChange}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStepId === "servico" && (
               <div className="flex flex-col gap-4">
                 <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">
@@ -484,7 +689,7 @@ const NovoPedidoServicoModal = ({
               </div>
             )}
 
-            {currentStep === 2 && (
+            {currentStepId === "revisao" && (
               <div className="flex flex-col gap-4">
                 <div className="text-left">
                   <h3 className="text-base font-semibold text-gray-900">
@@ -504,6 +709,34 @@ const NovoPedidoServicoModal = ({
                     <p>
                       <strong>Nome:</strong> {formData.clienteNome || "Nao informado"}
                     </p>
+                    {isNovoCliente && (
+                      <>
+                        <p>
+                          <strong>CPF:</strong> {formData.clienteCpf || "-"}
+                        </p>
+                        <p>
+                          <strong>Email:</strong> {formData.clienteEmail || "-"}
+                        </p>
+                        <p>
+                          <strong>Telefone:</strong> {formData.clienteTelefone || "-"}
+                        </p>
+                        <p>
+                          <strong>Endereco:</strong>{" "}
+                          {[
+                            [formData.endereco.rua, formData.endereco.numero]
+                              .filter(Boolean)
+                              .join(", "),
+                            formData.endereco.bairro,
+                            [formData.endereco.cidade, formData.endereco.uf]
+                              .filter(Boolean)
+                              .join(" - "),
+                            formData.endereco.cep,
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "-"}
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
 

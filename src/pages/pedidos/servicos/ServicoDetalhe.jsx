@@ -684,6 +684,19 @@ export default function PedidoDetalhe() {
       return;
     }
 
+    if (
+      ["ORCAMENTO APROVADO", "ANALISE DO ORCAMENTO"].includes(
+        normalizeStatus(formData.etapaServico),
+      ) &&
+      orcamentosPedido.length === 0
+    ) {
+      setError(
+        "Não há orçamento criado para este pedido. Gere um orçamento antes de avançar a etapa.",
+      );
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setSaving(true);
     setError(null);
     let requestBody = null;
@@ -736,11 +749,7 @@ export default function PedidoDetalhe() {
           : [],
       };
 
-      console.log("🔄 Enviando salvamento:", requestBody);
-
-      const response = await Api.put(`/pedidos/${id}`, requestBody);
-
-      console.log("✅ Resposta da API:", response);
+      await Api.put(`/pedidos/${id}`, requestBody);
 
       // Persiste a lista única de produtos do serviço (servico_produto), sempre.
       if (rawPedido?.servico?.id) {
@@ -998,8 +1007,16 @@ export default function PedidoDetalhe() {
               </div>
             )}
 
-            {/* Stepper */}
-            <Stepper status={formData.etapaServico || pedido.servico?.etapa || pedido.status} />
+            {/* Stepper — usa a etapa efetiva derivada do agendamento ativo (mesma regra do save),
+                evitando exibir etapa legada/desatualizada (ex.: orçamento em andamento aparecendo como etapa 5). */}
+            <Stepper
+              status={
+                (etapaTravadaPorAgendamento && etapaObrigatoriaPorAgendamento) ||
+                formData.etapaServico ||
+                pedido.servico?.etapa ||
+                pedido.status
+              }
+            />
 
             {/* Grid principal */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1455,6 +1472,17 @@ export default function PedidoDetalhe() {
                                               key={item.id}
                                               type="button"
                                               onMouseDown={() => {
+                                                const jaAdicionado = formData.produtos.some(
+                                                  (p, i) =>
+                                                    i !== index &&
+                                                    ((item.produto?.id != null && p.produtoId === item.produto.id) ||
+                                                      p.estoqueId === item.id),
+                                                );
+                                                if (jaAdicionado) {
+                                                  setError("Produto já adicionado. Ajuste a quantidade na linha existente.");
+                                                  setProdutoDropdownOpen((p) => ({ ...p, [index]: false }));
+                                                  return;
+                                                }
                                                 const updated = [...formData.produtos];
                                                 updated[index] = {
                                                   ...updated[index],
@@ -1463,6 +1491,7 @@ export default function PedidoDetalhe() {
                                                   nome,
                                                   preco: item.produto?.preco ?? item.produto?.precoVenda ?? item.preco ?? updated[index].preco ?? 0,
                                                 };
+                                                setError(null);
                                                 setFormData((p) => ({ ...p, produtos: updated }));
                                                 setProdutoDropdownOpen((p) => ({ ...p, [index]: false }));
                                               }}

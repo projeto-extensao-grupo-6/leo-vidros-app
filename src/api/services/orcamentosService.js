@@ -72,11 +72,8 @@ class OrcamentosService extends BaseService {
             data: response.data,
             status: response.status,
           };
-        } catch (cacheError) {
-          console.warn(
-            `PDF não está disponível via número ${numeroOrcamento}, tentando por ID...`,
-            cacheError.response?.status
-          );
+        } catch {
+          // PDF indisponível por número — segue para a busca por ID abaixo.
         }
       }
 
@@ -121,9 +118,6 @@ class OrcamentosService extends BaseService {
         
         tentativa++;
         if (tentativa < maxTentativas) {
-          console.log(
-            `⏳ PDF não pronto ainda... tentativa ${tentativa}/${maxTentativas}`
-          );
           await new Promise((resolve) => setTimeout(resolve, intervalo));
         }
       } catch (error) {
@@ -154,12 +148,6 @@ class OrcamentosService extends BaseService {
       signal: abortController.signal,
     })
       .then(async (response) => {
-        console.log({
-          contentType: response.headers.get("content-type"),
-          cacheControl: response.headers.get("cache-control"),
-          transferEncoding: response.headers.get("transfer-encoding"),
-        });
-        
         if (!response.ok) {
           throw new Error(`SSE request failed: ${response.status}`);
         }
