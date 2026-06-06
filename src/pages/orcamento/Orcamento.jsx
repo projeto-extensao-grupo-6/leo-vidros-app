@@ -73,18 +73,33 @@ const criarItemVazio = (ordem = 1) => ({
 });
 
 const mapearItensDoPedido = (pedido) => {
-  if (!pedido?.produtos?.length) return [];
+  if (pedido?.produtos?.length) {
+    return pedido.produtos.map((produto, index) => ({
+      id: `pedido-${pedido.id}-${produto.id ?? produto.produtoId ?? index}`,
+      produto_id: produto.produtoId || "",
+      descricao: produto.nomeProduto || produto.nome || "",
+      quantidade: String(produto.quantidadeSolicitada ?? produto.quantidade ?? ""),
+      preco_unitario: String(produto.precoUnitarioNegociado ?? produto.preco ?? ""),
+      desconto: "0",
+      observacao: produto.observacao || "",
+      ordem: index + 1,
+    }));
+  }
 
-  return pedido.produtos.map((produto, index) => ({
-    id: `pedido-${pedido.id}-${produto.id ?? produto.produtoId ?? index}`,
-    produto_id: produto.produtoId || "",
-    descricao: produto.nomeProduto || produto.nome || "",
-    quantidade: String(produto.quantidadeSolicitada ?? produto.quantidade ?? ""),
-    preco_unitario: String(produto.precoUnitarioNegociado ?? produto.preco ?? ""),
-    desconto: "0",
-    observacao: produto.observacao || "",
-    ordem: index + 1,
-  }));
+  if (pedido?.servico?.nome) {
+    return [{
+      id: `pedido-${pedido.id}-servico`,
+      produto_id: "",
+      descricao: pedido.servico.descricao || pedido.servico.nome,
+      quantidade: "1",
+      preco_unitario: pedido.servico.precoBase != null ? String(pedido.servico.precoBase) : "",
+      desconto: "0",
+      observacao: "",
+      ordem: 1,
+    }];
+  }
+
+  return [];
 };
 
 const SectionCard = ({ title, badge, action, children, className = "" }) => (
@@ -491,6 +506,13 @@ export default function OrcamentoPage() {
               p.servico?.nome ||
               p.produtos?.map((i) => i.nomeProduto).join(", ") ||
               "",
+            servico: p.servico
+              ? {
+                  nome: p.servico.nome,
+                  descricao: p.servico.descricao,
+                  precoBase: p.servico.precoBase,
+                }
+              : null,
           })),
         );
       })
