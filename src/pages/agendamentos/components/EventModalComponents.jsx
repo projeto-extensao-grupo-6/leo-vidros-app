@@ -322,10 +322,10 @@ export const EventFooter = ({
 
       {canEdit && (
         <Button
-          variant="outline"
+          variant="ghost"
           onClick={onEdit}
           disabled={isLoading}
-          className="w-full border-gray-300 bg-white text-gray-700 hover:bg-gray-50 sm:w-auto"
+          className="w-full sm:w-auto"
           startIcon={<Edit size={16} />}
         >
           Editar Detalhes
@@ -334,10 +334,10 @@ export const EventFooter = ({
 
       {canFinalizar && (
         <Button
-          variant="outline"
+          variant="success"
           onClick={onFinalizar}
           disabled={isLoading}
-          className="w-full border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 sm:w-auto"
+          className="w-full sm:w-auto"
           startIcon={<CheckCircle2 size={16} />}
         >
           Finalizar Execução
@@ -348,7 +348,7 @@ export const EventFooter = ({
         variant="primary"
         onClick={onViewMap}
         disabled={!hasAddress || isLoading}
-        className="w-full bg-[#134074ff] text-white hover:bg-[#0c2e59] sm:w-auto"
+        className="w-full sm:w-auto"
         startIcon={<MapPin size={16} />}
       >
         Ver no Mapa

@@ -95,9 +95,22 @@ const ProdutoSearchSelect = ({
             className="flex items-center justify-between px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 hover:text-[#007EA7] transition-colors"
           >
             <span>{p.nome}</span>
-            <span className="text-gray-400 text-xs ml-2 shrink-0">
-              R$ {Number(p.preco ?? 0).toFixed(2)}
-            </span>
+            <div className="flex items-center gap-2 ml-2 shrink-0">
+              {p.disponivel !== undefined && (
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                    p.disponivel === 0
+                      ? "bg-red-50 text-red-600"
+                      : "bg-green-50 text-green-700"
+                  }`}
+                >
+                  {p.disponivel} disp.
+                </span>
+              )}
+              <span className="text-gray-400 text-xs">
+                R$ {Number(p.preco ?? 0).toFixed(2)}
+              </span>
+            </div>
           </li>
         ))
       )}

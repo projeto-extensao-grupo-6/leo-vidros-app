@@ -272,6 +272,9 @@ const OrcamentoItemRow = ({
     item.desconto,
   );
   const errItem = errors[item.id] || {};
+  const produtoSelecionado = produtos.find((p) => String(p.id) === String(item.produto_id));
+  const disponivel = produtoSelecionado?.disponivel;
+  const isOverStock = disponivel !== undefined && parseFloat(item.quantidade) > disponivel;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -302,7 +305,7 @@ const OrcamentoItemRow = ({
             placeholder="Sem produto vinculado"
             options={produtos.map((p) => ({
               value: p.id,
-              label: p.nome,
+              label: `${p.nome}${p.disponivel !== undefined ? ` · ${p.disponivel} disp.` : ""}`,
             }))}
           />
           <UniversalInput
@@ -316,12 +319,23 @@ const OrcamentoItemRow = ({
         </div>
 
         <div className="mb-7 grid grid-cols-4 gap-6">
-          <UniversalInput
-            label="Quantidade"
-            type="number"
-            value={item.quantidade}
-            onChange={(e) => onChange(item.id, "quantidade", e.target.value)}
-          />
+          <div className="flex flex-col gap-1">
+            <UniversalInput
+              label="Quantidade"
+              type="number"
+              value={item.quantidade}
+              onChange={(e) => onChange(item.id, "quantidade", e.target.value)}
+            />
+            {disponivel !== undefined && (
+              <span
+                className={`text-xs font-semibold ${
+                  isOverStock ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                Disp: {disponivel}
+              </span>
+            )}
+          </div>
           <UniversalInput
             label="Preço Unitário (R$)"
             type="number"
@@ -527,8 +541,9 @@ export default function OrcamentoPage() {
               id: e.produto?.id,
               nome: e.produto?.nome,
               preco: e.produto?.preco ?? "",
+              disponivel: Number(e.quantidadeDisponivel ?? 0),
             }))
-            .filter((p) => p.id && p.nome),
+            .filter((p) => p.id && p.nome && p.disponivel > 0),
         );
       })
       .catch(() => setProdutos([]));
