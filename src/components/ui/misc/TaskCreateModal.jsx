@@ -793,7 +793,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           rua: formData.rua || "",
           numero: formData.numero || null,
           complemento: formData.complemento || null,
-          cep: formData.cep || "",
+          cep: (formData.cep || "").replace(/\D/g, ""),
           cidade: formData.cidade || "",
           bairro: formData.bairro || null,
           uf: formData.uf || "",
