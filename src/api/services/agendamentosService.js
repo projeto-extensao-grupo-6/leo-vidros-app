@@ -25,6 +25,16 @@ class AgendamentosService extends BaseService {
   delete(id) {
     return super.delete(`/agendamentos/${id}`);
   }
+
+  // Conclui um agendamento de SERVIÇO informando a utilização real de cada produto
+  // (dá baixa no estoque e libera o excedente reservado no backend).
+  concluir(id, produtos = []) {
+    return this.put(`/agendamentos/${id}/concluir`, { produtos });
+  }
+
+  listarProdutosServico(servicoId) {
+    return this.get(`/servicos/${servicoId}/produtos`);
+  }
 }
 
 export const agendamentosService = new AgendamentosService();
