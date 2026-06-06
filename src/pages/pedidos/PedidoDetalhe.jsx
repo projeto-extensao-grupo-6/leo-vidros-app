@@ -69,9 +69,21 @@ export default function PedidoDetalhe() {
     setSectionsOpen((prev) => ({ ...prev, [s]: !prev[s] }));
 
   useEffect(() => {
-    Api.get("/produtos?size=200").then((res) => {
+    // Busca /estoques (não /produtos): o id usado em handleProdutoSelect/save é o estoqueId.
+    // Buscar produtos gravava o id do produto como estoqueId e quebrava o update do pedido.
+    // Mantém itens sem filtrar por disponível para não perder a seleção atual ao editar.
+    Api.get("/estoques?size=200").then((res) => {
       const lista = Array.isArray(res.data) ? res.data : res.data?.content ?? [];
-      setProdutosDisponiveis(lista);
+      setProdutosDisponiveis(
+        lista
+          .map((e) => ({
+            id: e.id,
+            nome: e.produto?.nome,
+            preco: e.produto?.preco ?? 0,
+            disponivel: Number(e.quantidadeDisponivel ?? 0),
+          }))
+          .filter((p) => p.nome),
+      );
     }).catch(() => {});
   }, []);
 

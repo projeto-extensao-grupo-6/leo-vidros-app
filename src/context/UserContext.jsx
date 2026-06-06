@@ -49,16 +49,24 @@ export function UserProvider({ children }) {
     });
   }, []);
 
-  const logout = useCallback(() => {
-    sessionStorage.clear();
-    setUser({
-      id: null,
-      name: "",
-      email: "",
-      isAuthenticated: false,
-      photo: null,
-      firstLogin: false,
-    });
+  const logout = useCallback(async () => {
+    // Invalida o cookie de autenticação no servidor. Sem isso, como o Axios envia o cookie
+    // automaticamente (withCredentials), um reload re-autenticaria o usuário via /me.
+    try {
+      await Api.post("/auth/logout", null, { silent: true, skipAuthRedirect: true });
+    } catch {
+      // Mesmo se a chamada falhar (ex.: offline), limpamos o estado local abaixo.
+    } finally {
+      sessionStorage.clear();
+      setUser({
+        id: null,
+        name: "",
+        email: "",
+        isAuthenticated: false,
+        photo: null,
+        firstLogin: false,
+      });
+    }
   }, []);
 
   const updatePhoto = useCallback((base64) => {
