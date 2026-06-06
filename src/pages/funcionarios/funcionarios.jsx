@@ -154,12 +154,12 @@ export default function Funcionarios() {
                 <div className="min-w-[580px]">
                 {/* Cabeçalho da tabela */}
                 <div className="flex items-center bg-gray-50 border-b border-gray-200 mb-2 min-h-12 rounded-t-md text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  <div className="py-3 w-[18%] pl-2">Nome</div>
-                  <div className="py-3 w-[14%]">Telefone</div>
-                  <div className="py-3 w-[14%]">Função</div>
+                  <div className="py-3 w-[24%] md:w-[18%] pl-2">Nome</div>
+                  <div className="py-3 w-[20%] md:w-[14%]">Telefone</div>
+                  <div className="py-3 w-[20%] md:w-[14%]">Função</div>
                   <div className="hidden md:block py-3 w-[12%]">Escala</div>
                   <div className="hidden md:block py-3 w-[12%]">Contrato</div>
-                  <div className="py-3 w-[12%] text-center">Status</div>
+                  <div className="py-3 w-[14%] md:w-[12%] text-center">Status</div>
                   <div className="py-3 w-[22%] text-center">Ações</div>
                 </div>
 
@@ -184,13 +184,13 @@ export default function Funcionarios() {
                           key={f.id}
                           className="flex items-center border-b border-gray-200 hover:bg-gray-50 transition-colors"
                         >
-                          <div className="py-3 w-[18%] pl-2 text-sm text-gray-900 truncate">
+                          <div className="py-3 w-[24%] md:w-[18%] pl-2 text-sm text-gray-900 truncate">
                             {f.nome}
                           </div>
-                          <div className="py-3 w-[14%] text-sm text-gray-600 truncate">
+                          <div className="py-3 w-[20%] md:w-[14%] text-sm text-gray-600 truncate">
                             {f.telefone}
                           </div>
-                          <div className="py-3 w-[14%] text-sm text-gray-600 truncate">
+                          <div className="py-3 w-[20%] md:w-[14%] text-sm text-gray-600 truncate">
                             {f.funcao}
                           </div>
                           <div className="hidden md:block py-3 w-[12%] text-sm text-gray-600 truncate">
@@ -199,7 +199,7 @@ export default function Funcionarios() {
                           <div className="hidden md:block py-3 w-[12%] text-sm text-gray-600 truncate">
                             {f.contrato}
                           </div>
-                          <div className="py-3 w-[12%] text-center">
+                          <div className="py-3 w-[14%] md:w-[12%] text-center">
                             <span
                               className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                                 f.status

@@ -866,7 +866,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
       onClick={onClose}
     >
       <div
-        className={`${modalClasses.panel} flex max-h-[92vh] w-full max-w-4xl flex-col`}
+        className={`${modalClasses.panel} flex max-h-[100dvh] sm:max-h-[92vh] w-full max-w-4xl flex-col sm:rounded-[28px] rounded-none`}
         onClick={(e) => e?.stopPropagation()}
       >
         <div className={modalClasses.header}>
@@ -996,7 +996,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="block pb-2 text-sm font-semibold text-gray-700">
                     Tipo de agendamento <span className="text-red-500">*</span>
@@ -1110,7 +1110,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                 </div>
               )}
 
-              <div className="mt-6 grid grid-cols-2 gap-6">
+              <div className="mt-4 sm:mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div className="flex flex-col">
                   <label className="block pb-2 text-sm font-semibold text-gray-700">
                     Data do evento <span className="text-red-500">*</span>
@@ -1266,7 +1266,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                   </span>
                 </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <div className="mb-2 flex justify-between text-sm font-semibold text-gray-700">
                     <span>
@@ -1296,7 +1296,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                   error={errors?.rua}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <UniversalInput
                   label="Número"
                   value={formData?.numero}
@@ -1312,7 +1312,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                   placeholder="Apto, Bloco..."
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <UniversalInput
                   label="Bairro"
                   value={formData?.bairro}
@@ -1322,7 +1322,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                   placeholder="Bairro"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <UniversalInput
                   label="Cidade"
                   value={formData?.cidade}
