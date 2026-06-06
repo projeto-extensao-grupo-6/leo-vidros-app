@@ -99,35 +99,26 @@ export default function ClienteDetailsModal({
             <p className="animate-pulse font-medium text-gray-500">Carregando histórico...</p>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto">
-            <div className="grid grid-cols-1 gap-4 sm:gap-8 pt-2 sm:pt-4 md:grid-cols-3">
-              <div className="flex flex-col gap-1">
-                <UniversalInput label="Nome" value={cliente.nome || "N/A"} readOnly />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <UniversalInput label="Telefone" value={cliente.telefone || "N/A"} readOnly />
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <UniversalInput label="Email" value={cliente.email || "N/A"} readOnly />
+          <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-3">
+              <UniversalInput label="Nome" value={cliente.nome || "N/A"} readOnly />
+              <UniversalInput label="Telefone" value={cliente.telefone || "N/A"} readOnly />
+              <UniversalInput label="Email" value={cliente.email || "N/A"} readOnly />
+              <div className="md:col-span-3">
+                <UniversalInput
+                  label="Endereço"
+                  value={
+                    endereco && (endereco.rua || endereco.bairro || endereco.cep)
+                      ? `${endereco.rua || ""}${endereco.numero ? ", " + endereco.numero : ""}${endereco.bairro ? " - " + endereco.bairro : ""}${endereco.cidade ? " / " + endereco.cidade : ""}${endereco.uf ? " - " + endereco.uf : ""}`
+                      : "N/A"
+                  }
+                  readOnly
+                />
               </div>
             </div>
 
-            <div className="flex flex-col gap-1 pb-3 sm:pb-6 pt-2 sm:pt-4">
-              <UniversalInput
-                label="Endereço"
-                value={
-                  endereco && (endereco.rua || endereco.bairro || endereco.cep)
-                    ? `${endereco.rua || ""}${endereco.numero ? ", " + endereco.numero : ""}${endereco.bairro ? " - " + endereco.bairro : ""}${endereco.cidade ? " / " + endereco.cidade : ""}${endereco.uf ? " - " + endereco.uf : ""}`
-                    : "N/A"
-                }
-                readOnly
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <h3 className="mb-2 sm:mb-4 text-base sm:text-lg font-bold text-gray-800">Histórico de Serviços</h3>
+            <div className="flex flex-col gap-3">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800">Histórico de Serviços</h3>
               <div className="max-h-[35vh] sm:max-h-[42vh] w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-sm">
                 {servicos && servicos.length > 0 ? (
                   <>

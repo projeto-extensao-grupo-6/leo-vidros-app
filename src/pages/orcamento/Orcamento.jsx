@@ -285,7 +285,7 @@ const OrcamentoItemRow = ({
       </div>
 
       <div className="p-6">
-        <div className="mb-7 grid gap-6" style={{ gridTemplateColumns: "1fr 2fr" }}>
+        <div className="mb-7 grid grid-cols-1 md:grid-cols-3 gap-6">
           <UniversalInput
             as="select"
             label="Produto (opcional)"
@@ -297,17 +297,19 @@ const OrcamentoItemRow = ({
               label: p.nome,
             }))}
           />
-          <UniversalInput
-            label="Descrição"
-            required
-            error={errItem.descricao}
-            placeholder="Descrição do item"
-            value={item.descricao}
-            onChange={(e) => onChange(item.id, "descricao", e.target.value)}
-          />
+          <div className="md:col-span-2">
+            <UniversalInput
+              label="Descrição"
+              required
+              error={errItem.descricao}
+              placeholder="Descrição do item"
+              value={item.descricao}
+              onChange={(e) => onChange(item.id, "descricao", e.target.value)}
+            />
+          </div>
         </div>
 
-        <div className="mb-7 grid grid-cols-4 gap-6">
+        <div className="mb-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <UniversalInput
             label="Quantidade"
             type="number"
@@ -326,15 +328,16 @@ const OrcamentoItemRow = ({
             value={item.desconto}
             onChange={(e) => onChange(item.id, "desconto", e.target.value)}
           />
-          <div className="flex flex-col gap-1">
-            <label className={tw.label}>Subtotal</label>
-            <div className={`${tw.input} ${tw.inputReadOnly} flex items-center font-bold text-[#007EA7]`}>
-              {formatCurrencyBR(subtotal)}
-            </div>
-          </div>
+          <UniversalInput
+            label="Subtotal"
+            value={formatCurrencyBR(subtotal)}
+            readOnly
+            className="font-bold text-[#007EA7] !bg-[#f5fbfe] !text-[#007EA7]"
+          />
         </div>
       </div>
     </div>
+    
   );
 };
 
