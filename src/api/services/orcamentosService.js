@@ -69,19 +69,11 @@ class OrcamentosService extends BaseService {
     try {
       if (numeroOrcamento) {
         try {
-          const response = await this.api.get(
-            `/orcamentos/numero/${numeroOrcamento}/pdf`,
-            {
-              responseType: "blob",
-            }
-          );
-          return {
-            success: true,
-            data: response.data,
-            status: response.status,
-          };
-        } catch {
+          const result = await tentarBaixar(`/orcamentos/numero/${numeroOrcamento}/pdf`);
+          if (result.success || result.regenerating) return result;
           // PDF indisponível por número — segue para a busca por ID abaixo.
+        } catch {
+          // segue para a busca por ID abaixo.
         }
       }
 
