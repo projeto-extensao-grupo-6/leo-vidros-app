@@ -416,7 +416,7 @@ export default function ServicosList({
 
       {/* Rodapé de paginação */}
       {!loading && !error && total > 0 && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+        <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-slate-100 gap-3">
           <div className="text-sm text-slate-500">
             Mostrando{" "}
             <span className="font-medium text-slate-800">{startIndex + 1}</span>{" "}
