@@ -223,7 +223,7 @@ export const pedidoServicoEtapa0Schema = z
           code: z.ZodIssueCode.custom,
           message: "CPF e obrigatorio",
         });
-      } else if (cpfDigitos.length !== 11) {
+      } else if (!validarCPF(cpfDigitos)) {
         ctx.addIssue({
           path: ["clienteCpf"],
           code: z.ZodIssueCode.custom,
