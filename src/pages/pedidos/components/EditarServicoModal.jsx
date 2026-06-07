@@ -145,11 +145,11 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
           ? etapaInfo.progresso
           : servico.progresso?.[0] || 1,
         progressoTotal: 8,
-        valorTotal: servico.valorTotal || 0,
+        valorTotal: parseFloat(servico.valorTotal ?? 0),
         formaPagamento: servico.formaPagamento || "",
         servicoNome: servico.servico?.nome || servico.servicoNome || "",
         servicoCodigo: servico.servico?.codigo || "",
-        precoBase: servico.servico?.precoBase || 0,
+        precoBase: parseFloat(servico.servico?.precoBase ?? 0),
       });
       setEtapaAnterior(etapaParaExibicao);
       setModoEdicao(false);

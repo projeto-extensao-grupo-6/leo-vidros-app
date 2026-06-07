@@ -27,16 +27,12 @@ import { repairEncoding } from "../../utils/fixEncoding";
 import Swal from "sweetalert2";
 
 const ITENS_POR_PAGINA = 6;
-const SIZE_POR_PAGINA = 20; // tamanho da página da API (busca mais itens para filtragem client-side)
 
 export default function Estoque() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [estoque, setEstoque] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [serverPage, setServerPage] = useState(0);
-  const [serverTotalPages, setServerTotalPages] = useState(1);
-  const [serverTotalElements, setServerTotalElements] = useState(0);
   const [toast, setToast] = useState(null);
 
   const [isNovoItemModalOpen, setIsNovoItemModalOpen] = useState(false);
@@ -94,20 +90,19 @@ export default function Estoque() {
     }));
   }, []);
 
-  const fetchEstoque = useCallback(async (pg = 0) => {
+  const fetchEstoque = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // Busca o conjunto completo: busca/filtros/paginação são aplicados client-side sobre todo
+      // o estoque. (A API só pagina por page/size; paginar no servidor faria a busca/filtro
+      // enxergarem apenas a página atual.)
       const response = await Api.get("/estoques", {
-        params: { page: pg, size: SIZE_POR_PAGINA },
+        params: { page: 0, size: 1000 },
       });
       const pageData = response.data;
       const data = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
-
-      setServerTotalPages(pageData?.totalPages ?? 1);
-      setServerTotalElements(pageData?.totalElements ?? data.length);
-      setServerPage(pg);
 
       if (!data || data.length === 0) {
         setEstoque([]);
@@ -127,8 +122,7 @@ export default function Estoque() {
   }, [mapEstoqueFromApi]);
 
   useEffect(() => {
-    fetchEstoque(serverPage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchEstoque();
   }, [fetchEstoque]);
 
   const filteredEstoque = useMemo(() => {
@@ -196,10 +190,10 @@ export default function Estoque() {
 
   const paginationData = {
     items: paginaItems,
-    totalPaginas: serverTotalPages,
-    startIndex: serverPage * SIZE_POR_PAGINA + startIndex,
-    endIndex: serverPage * SIZE_POR_PAGINA + endIndex,
-    total: serverTotalElements || filteredEstoque.length,
+    totalPaginas: totalPaginasLocal,
+    startIndex,
+    endIndex,
+    total: filteredEstoque.length,
   };
 
   useEffect(() => {
@@ -662,33 +656,18 @@ export default function Estoque() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        if (pagina > 1) {
-                          setPagina((p) => p - 1);
-                        } else if (serverPage > 0) {
-                          fetchEstoque(serverPage - 1);
-                          setPagina(Math.ceil(SIZE_POR_PAGINA / ITENS_POR_PAGINA));
-                        }
-                      }}
-                      disabled={pagina === 1 && serverPage === 0}
+                      onClick={() => setPagina((p) => Math.max(1, p - 1))}
+                      disabled={pagina === 1}
                     >
                       Anterior
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => {
-                        if (pagina < totalPaginasLocal) {
-                          setPagina((p) => p + 1);
-                        } else if (serverPage < serverTotalPages - 1) {
-                          fetchEstoque(serverPage + 1);
-                          setPagina(1);
-                        }
-                      }}
-                      disabled={
-                        pagina >= totalPaginasLocal &&
-                        serverPage >= serverTotalPages - 1
+                      onClick={() =>
+                        setPagina((p) => Math.min(totalPaginasLocal, p + 1))
                       }
+                      disabled={pagina >= totalPaginasLocal}
                     >
                       Próximo
                     </Button>

@@ -93,7 +93,7 @@ const usePedidoAPI = () => {
         .map((e) => ({
           id: e.id,
           nome: e.produto?.nome,
-          preco: e.produto?.preco ?? 0,
+          preco: parseFloat(e.produto?.preco ?? 0),
           disponivel: Number(e.quantidadeDisponivel ?? 0),
         }))
         .filter((p) => p.nome && p.disponivel > 0);

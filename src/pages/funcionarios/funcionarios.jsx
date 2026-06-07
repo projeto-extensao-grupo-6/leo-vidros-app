@@ -18,10 +18,8 @@ export default function Funcionarios() {
 
   const [funcionarios, setFuncionarios] = useState([]);
   const [busca, setBusca] = useState("");
-  const [pagina, setPagina] = useState(0); // 0-based para a API
+  const [pagina, setPagina] = useState(0);
   const limitePorPagina = 6;
-  const [totalPaginas, setTotalPaginas] = useState(0);
-  const [totalElementos, setTotalElementos] = useState(0);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
@@ -35,17 +33,17 @@ export default function Funcionarios() {
   const [openAgenda, setOpenAgenda] = useState(false);
   const [funcionarioAgenda, setFuncionarioAgenda] = useState(null);
 
-  const fetchFuncionarios = async (pg = 0) => {
+  const fetchFuncionarios = async () => {
     try {
       setLoading(true);
+      // Busca o conjunto completo: a busca é aplicada client-side sobre todos os funcionários.
+      // (A API só pagina por page/size; paginar no servidor faria a busca enxergar só a página atual.)
       const response = await Api.get("/funcionarios", {
-        params: { page: pg, size: limitePorPagina },
+        params: { page: 0, size: 1000 },
       });
       const pageData = response.data;
       const data = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
       setFuncionarios(Array.isArray(data) ? data : []);
-      setTotalPaginas(pageData?.totalPages ?? 1);
-      setTotalElementos(pageData?.totalElements ?? data.length);
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);
       setFuncionarios([]);
@@ -56,8 +54,8 @@ export default function Funcionarios() {
   };
 
   useEffect(() => {
-    fetchFuncionarios(pagina);
-  }, [pagina]);
+    fetchFuncionarios();
+  }, []);
 
   // Ao mudar busca, voltar para a primeira página
   useEffect(() => {
@@ -73,9 +71,14 @@ export default function Funcionarios() {
       : [],
   [funcionarios, busca]);
 
-  // Paginação server-side: itens já vêm da API para a página atual
-  const funcionariosPagina = funcionariosFiltrados;
+  // Paginação client-side sobre o conjunto filtrado completo.
+  const totalElementos = funcionariosFiltrados.length;
+  const totalPaginas = Math.max(1, Math.ceil(totalElementos / limitePorPagina));
   const indexPrimeiro = pagina * limitePorPagina;
+  const funcionariosPagina = funcionariosFiltrados.slice(
+    indexPrimeiro,
+    indexPrimeiro + limitePorPagina,
+  );
   const indexUltimo = indexPrimeiro + funcionariosPagina.length;
 
   const abrirModalCriar = () => {
@@ -111,7 +114,7 @@ export default function Funcionarios() {
       } else {
         await Api.post("/funcionarios", novoFunc);
       }
-      fetchFuncionarios(pagina);
+      fetchFuncionarios();
     } catch (error) {
       console.error("Erro ao salvar funcionário:", error);
       setToast({ type: "error", message: "Erro ao salvar funcionário. Tente novamente." });

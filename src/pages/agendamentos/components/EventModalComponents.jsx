@@ -156,7 +156,7 @@ export const EventInfo = ({
           <span className="flex w-max items-center gap-1.5 rounded-md bg-green-50 px-2.5 py-1 text-xs font-bold whitespace-nowrap text-green-700">
             <Tag size={12} />
             <span className="text-sm font-bold text-green-700">
-              R$ {servico.precoBase?.toFixed(2)}
+              R$ {parseFloat(servico.precoBase ?? 0).toFixed(2)}
             </span>
           </span>
         </div>

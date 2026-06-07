@@ -31,7 +31,13 @@ export function UserProvider({ children }) {
         });
       })
       .catch(() => {
-        setUser({ id: null, name: "", email: "", isAuthenticated: false, photo: null, firstLogin: false });
+        // Não sobrescreve um login que já ocorreu enquanto o /me inicial ainda estava pendente
+        // (corrida na tela de login). Só reseta se ainda não estiver autenticado.
+        setUser((prev) =>
+          prev.isAuthenticated
+            ? prev
+            : { id: null, name: "", email: "", isAuthenticated: false, photo: null, firstLogin: false },
+        );
       })
       .finally(() => setIsLoading(false));
   }, []);

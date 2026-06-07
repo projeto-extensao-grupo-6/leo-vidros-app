@@ -49,7 +49,9 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
               preco: e.produto?.preco ?? 0,
               disponivel: Number(e.quantidadeDisponivel ?? 0),
             }))
-            .filter((p) => p.nome && p.disponivel > 0),
+            // Mantém itens sem estoque: um pedido em edição pode referenciar um produto cujo
+            // estoque caiu a 0; filtrá-lo faria o select perder a seleção atual daquela linha.
+            .filter((p) => p.nome),
         );
       }).catch(() => {});
     }

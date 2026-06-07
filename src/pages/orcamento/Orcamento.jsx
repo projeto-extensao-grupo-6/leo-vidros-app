@@ -558,7 +558,10 @@ export default function OrcamentoPage() {
               preco: e.produto?.preco ?? "",
               disponivel: Number(e.quantidadeDisponivel ?? 0),
             }))
-            .filter((p) => p.id && p.nome && p.disponivel > 0),
+            // Mantém produtos sem estoque na lista: ao editar um orçamento existente, um item
+            // cujo produto ficou sem estoque continua selecionável (senão o select perde a seleção).
+            // Orçamento não dá baixa em estoque.
+            .filter((p) => p.id && p.nome),
         );
       })
       .catch(() => setProdutos([]));
@@ -581,10 +584,12 @@ export default function OrcamentoPage() {
             pedido_id: String(orc.pedidoId || ""),
             status_id: orc.statusNome || orc.statusId || "RASCUNHO",
             data_orcamento: orc.dataOrcamento?.split("T")[0] || "",
-            prazo_instalacao: orc.prazoInstalacao || "15 dias úteis",
-            garantia: orc.garantia || "",
-            forma_pagamento: orc.formaPagamento || "50% de entrada e 50% após a finalização do serviço",
-            observacoes: orc.observacoes || "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
+            // ?? em vez de ||: só aplica o default quando o campo é null/undefined. Strings vazias
+            // gravadas intencionalmente em orçamentos existentes são preservadas (não sobrescritas).
+            prazo_instalacao: orc.prazoInstalacao ?? "15 dias úteis",
+            garantia: orc.garantia ?? "",
+            forma_pagamento: orc.formaPagamento ?? "50% de entrada e 50% após a finalização do serviço",
+            observacoes: orc.observacoes ?? "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
           });
 
           if (orc.itens && Array.isArray(orc.itens)) {

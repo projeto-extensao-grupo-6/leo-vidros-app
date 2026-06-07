@@ -79,10 +79,8 @@ export default function Clientes() {
 
   const [clientes, setClientes] = useState([]);
   const [busca, setBusca] = useState("");
-  const [pagina, setPagina] = useState(0); // 0-based para a API
+  const [pagina, setPagina] = useState(0);
   const limitePorPagina = 5;
-  const [totalPaginas, setTotalPaginas] = useState(0);
-  const [totalElementos, setTotalElementos] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const [situacao, setSituacao] = useState("Todos");
@@ -100,11 +98,14 @@ export default function Clientes() {
 
   const [pedidos, setPedidos] = useState([]);
 
-  const fetchClientes = async (pg = pagina) => {
+  const fetchClientes = async () => {
     try {
       setLoading(true);
+      // Busca o conjunto completo: a busca/filtro/ordenação são aplicadas client-side sobre
+      // todos os clientes. (A API só pagina por page/size, sem parâmetros de busca, então
+      // paginar no servidor faria a busca enxergar apenas a página atual.)
       const response = await Api.get("/clientes", {
-        params: { page: pg, size: limitePorPagina },
+        params: { page: 0, size: 1000 },
       });
       const pageData = response.data;
       const content = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
@@ -114,8 +115,6 @@ export default function Clientes() {
           status: normalizeClienteStatus(cliente.status),
         })),
       );
-      setTotalPaginas(pageData?.totalPages ?? 1);
-      setTotalElementos(pageData?.totalElements ?? content.length);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
       setClientes([]);
@@ -138,9 +137,8 @@ export default function Clientes() {
   };
 
   useEffect(() => {
-    fetchClientes(pagina);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagina]);
+    fetchClientes();
+  }, []);
 
   useEffect(() => {
     fetchPedidos();
@@ -171,9 +169,14 @@ export default function Clientes() {
     });
   }, [clientes, busca, situacao, ordenar]);
 
-  // Paginação server-side: clientesPagina já vem da API para a página atual
-  const clientesPagina = clientesFiltrados;
+  // Paginação client-side sobre o conjunto filtrado completo.
+  const totalElementos = clientesFiltrados.length;
+  const totalPaginas = Math.max(1, Math.ceil(totalElementos / limitePorPagina));
   const indexPrimeiro = pagina * limitePorPagina;
+  const clientesPagina = clientesFiltrados.slice(
+    indexPrimeiro,
+    indexPrimeiro + limitePorPagina,
+  );
   const indexUltimo = indexPrimeiro + clientesPagina.length;
 
   const abrirModalCriar = () => {

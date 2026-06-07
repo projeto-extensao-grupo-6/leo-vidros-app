@@ -3,11 +3,10 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import path from 'path';
-// eslint-disable-next-line no-unused-vars
 /// <reference types="vitest" />
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -36,11 +35,9 @@ export default defineConfig({
     ],
   },
 
-  build: {
-    esbuild: {
-      drop: ['console', 'debugger'],
-    },
-  },
+  // Remove console/debugger apenas no build de produção (esbuild precisa ser top-level;
+  // sob build.esbuild o Vite ignora). Em dev mantém os logs para depuração.
+  esbuild: command === 'build' ? { drop: ['console', 'debugger'] } : {},
 
   test: {
     globals: true,
@@ -52,4 +49,4 @@ export default defineConfig({
       include: ['src/lib/**', 'src/utils/**'],
     },
   },
-});
+}));
