@@ -181,7 +181,7 @@ export default function ClienteFormModal({
   return (
     <div className={modalClasses.overlay} onClick={handleClose}>
       <div
-        className={`${modalClasses.panel} flex max-h-[92vh] max-w-4xl flex-col`}
+        className={`${modalClasses.panel} flex max-h-[100dvh] sm:max-h-[92vh] max-w-4xl flex-col sm:rounded-[28px] rounded-none sm:m-0 m-0`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={modalClasses.header}>
@@ -215,7 +215,7 @@ export default function ClienteFormModal({
                 Informações Básicas
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <UniversalInput
                   label="Nome"
                   required
@@ -274,7 +274,7 @@ export default function ClienteFormModal({
                 Endereço
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <UniversalInput
                   label="CEP"
                   required={!clienteEhAvulso}

@@ -525,11 +525,11 @@ export default function Agendamentos() {
               {/* Right Panel */}
               <div
                 className={cn(
-                  "order-2 hidden w-full shrink-0 flex-col bg-gray-50/50 transition-all duration-300 lg:order-none lg:flex",
+                  "order-2 flex w-full shrink-0 flex-col bg-gray-50/50 transition-all duration-300 lg:order-none",
                   shouldShowMiniCalendar
                     ? "border-t border-gray-200 lg:w-[300px] lg:border-l lg:border-t-0 xl:w-[340px]"
                     : isUpcomingEventsCollapsed
-                      ? "lg:w-0 lg:border-l-0"
+                      ? "hidden lg:flex lg:w-0 lg:border-l-0"
                       : "border-t border-gray-200 lg:w-[300px] lg:border-l lg:border-t-0 xl:w-[340px]",
                 )}
               >

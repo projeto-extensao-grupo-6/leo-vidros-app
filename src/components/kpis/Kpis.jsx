@@ -46,7 +46,7 @@ export default function Kpis({ stats = [], gridClassName }) {
             </div>
 
             <div className="mt-2 flex flex-col items-center justify-center gap-4">
-              <h2 className={`text-3xl font-bold tracking-tight ${stat.valueClassName || "text-gray-900"}`}>
+              <h2 className={`text-2xl sm:text-3xl font-bold tracking-tight ${stat.valueClassName || "text-gray-900"}`}>
                 {stat.value}
               </h2>
               {stat.caption && (

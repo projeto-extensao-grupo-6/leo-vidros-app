@@ -210,7 +210,7 @@ export default function PedidosList({ busca = "", triggerNovoRegistro, pedidoPar
 
             {/* Paginação corrigida */}
             {!loading && !isError && listaFiltrada.length > 0 && (
-                <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-slate-100 gap-3">
                     <div className="text-sm text-slate-500">
                         Mostrando <span className="font-medium text-slate-800">{start + 1}</span> a <span className="font-medium text-slate-800">{Math.min(end, listaFiltrada.length)}</span> de {listaFiltrada.length}
                     </div>

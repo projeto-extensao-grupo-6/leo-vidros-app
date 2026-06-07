@@ -223,7 +223,7 @@ export const pedidoServicoEtapa0Schema = z
           code: z.ZodIssueCode.custom,
           message: "CPF e obrigatorio",
         });
-      } else if (cpfDigitos.length !== 11) {
+      } else if (!validarCPF(cpfDigitos)) {
         ctx.addIssue({
           path: ["clienteCpf"],
           code: z.ZodIssueCode.custom,
@@ -243,11 +243,18 @@ export const pedidoServicoEtapa0Schema = z
           message: "Email invalido",
         });
       }
-      if (!data.clienteTelefone?.trim()) {
+      const telefoneDigitos = (data.clienteTelefone || "").replace(/\D/g, "");
+      if (!telefoneDigitos) {
         ctx.addIssue({
           path: ["clienteTelefone"],
           code: z.ZodIssueCode.custom,
           message: "Telefone do cliente e obrigatorio",
+        });
+      } else if (!(telefoneDigitos.length === 10 || telefoneDigitos.length === 11)) {
+        ctx.addIssue({
+          path: ["clienteTelefone"],
+          code: z.ZodIssueCode.custom,
+          message: "Telefone invalido",
         });
       }
     }
