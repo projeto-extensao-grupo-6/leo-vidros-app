@@ -31,6 +31,7 @@ export default function FuncionarioForm({
   const [novoFuncionario, setNovoFuncionario] = useState(
     getFuncionarioInicial(),
   );
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (modoEdicao && funcionario) {
@@ -72,13 +73,21 @@ export default function FuncionarioForm({
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!novoFuncionario.nome.trim()) {
       Swal.fire({ icon: "warning", title: "Campo obrigatório", text: "Por favor, informe o nome do funcionário.", confirmButtonColor: "#2563eb" });
       return;
     }
-    salvarFuncionario(novoFuncionario);
+    setSubmitting(true);
+    try {
+      const result = salvarFuncionario(novoFuncionario);
+      if (result && typeof result.then === "function") {
+        await result;
+      }
+    } finally {
+      setSubmitting(false);
+    }
     handleClose();
   };
 
@@ -189,11 +198,15 @@ export default function FuncionarioForm({
           </div>
 
           <div className={modalClasses.footer}>
-            <Button variant="ghost" onClick={handleClose}>
+            <Button variant="ghost" onClick={handleClose} disabled={submitting}>
               Cancelar
             </Button>
-            <Button type="submit" variant="primary">
-              {modoEdicao ? "Salvar Alterações" : "Criar Funcionário"}
+            <Button type="submit" variant="primary" disabled={submitting}>
+              {submitting
+                ? "Salvando..."
+                : modoEdicao
+                  ? "Salvar Alterações"
+                  : "Criar Funcionário"}
             </Button>
           </div>
         </form>

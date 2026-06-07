@@ -1,10 +1,29 @@
 import { z } from "zod";
 
+function validarCPF(cpf) {
+  const digits = cpf.replace(/\D/g, "");
+  if (digits.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(digits)) return false;
+
+  const calc = (len) =>
+    digits
+      .slice(0, len)
+      .split("")
+      .reduce((sum, d, i) => sum + Number(d) * (len + 1 - i), 0);
+
+  const mod = (n) => ((n * 10) % 11) % 10;
+
+  return (
+    mod(calc(9)) === Number(digits[9]) &&
+    mod(calc(10)) === Number(digits[10])
+  );
+}
+
 const cpfRequired = z
   .string()
   .transform((v) => v.replace(/\D/g, ""))
-  .refine((v) => v.length > 0, { message: "CPF e obrigatorio" })
-  .refine((v) => v.length === 11, { message: "CPF invalido" });
+  .refine((v) => v.length > 0, { message: "CPF é obrigatório" })
+  .refine(validarCPF, { message: "CPF inválido" });
 
 const telefoneRequired = z
   .string()
@@ -84,7 +103,7 @@ export const clienteSchema = z.object({
 // Schema relaxado para editar clientes avulsos (sem dados completos)
 export const clienteAvulsoSchema = z.object({
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  cpf: z.string().optional().transform((v) => (v ? v.replace(/\D/g, "") : "")).refine((v) => v === "" || v.length === 11, { message: "CPF invalido" }),
+  cpf: z.string().optional().transform((v) => (v ? v.replace(/\D/g, "") : "")).refine((v) => v === "" || (v.length === 11 && validarCPF(v)), { message: "CPF invalido" }),
   contato: z.string().optional().transform((v) => (v ? v.replace(/\D/g, "") : "")).refine((v) => v === "" || v.length === 10 || v.length === 11, { message: "Telefone invalido" }),
   email: z.string().trim().optional().refine((v) => !v || v === "" || z.string().email().safeParse(v).success, { message: "Email invalido" }).default(""),
   status: z.enum(["Ativo", "Inativo", "Finalizado", "Avulso"]).default("Avulso"),
@@ -177,6 +196,9 @@ export const pedidoServicoEtapa0Schema = z
     tipoCliente: z.enum(["existente", "novo", "nenhum"]),
     clienteId: z.union([z.string(), z.number()]).optional(),
     clienteNome: z.string().optional().default(""),
+    clienteCpf: z.string().optional().default(""),
+    clienteEmail: z.string().optional().default(""),
+    clienteTelefone: z.string().optional().default(""),
   })
   .superRefine((data, ctx) => {
     if (data.tipoCliente === "existente" && !data.clienteId) {
@@ -194,6 +216,40 @@ export const pedidoServicoEtapa0Schema = z
           message: "Nome do cliente e obrigatorio",
         });
       }
+      const cpfDigitos = (data.clienteCpf || "").replace(/\D/g, "");
+      if (!cpfDigitos) {
+        ctx.addIssue({
+          path: ["clienteCpf"],
+          code: z.ZodIssueCode.custom,
+          message: "CPF e obrigatorio",
+        });
+      } else if (cpfDigitos.length !== 11) {
+        ctx.addIssue({
+          path: ["clienteCpf"],
+          code: z.ZodIssueCode.custom,
+          message: "CPF invalido",
+        });
+      }
+      if (!data.clienteEmail?.trim()) {
+        ctx.addIssue({
+          path: ["clienteEmail"],
+          code: z.ZodIssueCode.custom,
+          message: "Email e obrigatorio",
+        });
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.clienteEmail.trim())) {
+        ctx.addIssue({
+          path: ["clienteEmail"],
+          code: z.ZodIssueCode.custom,
+          message: "Email invalido",
+        });
+      }
+      if (!data.clienteTelefone?.trim()) {
+        ctx.addIssue({
+          path: ["clienteTelefone"],
+          code: z.ZodIssueCode.custom,
+          message: "Telefone do cliente e obrigatorio",
+        });
+      }
     }
     if (data.tipoCliente === "nenhum" && !data.clienteNome?.trim()) {
       ctx.addIssue({
@@ -204,15 +260,15 @@ export const pedidoServicoEtapa0Schema = z
     }
   });
 
-export const pedidoServicoEtapa1Schema = z.object({
+export const pedidoServicoEnderecoSchema = z.object({
   endereco: z.object({
-    rua: z.string().min(1, "Endereco e obrigatorio"),
-    numero: z.coerce.string().optional().default(""),
-    cidade: z.string().min(1, "Cidade e obrigatoria"),
-    cep: z.string().optional().default(""),
+    rua: z.string().trim().min(1, "Rua e obrigatoria"),
+    numero: z.string().optional().default(""),
     complemento: z.string().optional().default(""),
     bairro: z.string().optional().default(""),
-    uf: z.string().max(2).optional().default(""),
+    cidade: z.string().trim().min(1, "Cidade e obrigatoria"),
+    cep: cepRequired,
+    uf: ufRequired,
   }),
 });
 

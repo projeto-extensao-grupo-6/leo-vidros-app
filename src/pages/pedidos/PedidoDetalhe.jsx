@@ -69,9 +69,21 @@ export default function PedidoDetalhe() {
     setSectionsOpen((prev) => ({ ...prev, [s]: !prev[s] }));
 
   useEffect(() => {
-    Api.get("/produtos?size=200").then((res) => {
+    // Busca /estoques (não /produtos): o id usado em handleProdutoSelect/save é o estoqueId.
+    // Buscar produtos gravava o id do produto como estoqueId e quebrava o update do pedido.
+    // Mantém itens sem filtrar por disponível para não perder a seleção atual ao editar.
+    Api.get("/estoques?size=200").then((res) => {
       const lista = Array.isArray(res.data) ? res.data : res.data?.content ?? [];
-      setProdutosDisponiveis(lista);
+      setProdutosDisponiveis(
+        lista
+          .map((e) => ({
+            id: e.id,
+            nome: e.produto?.nome,
+            preco: e.produto?.preco ?? 0,
+            disponivel: Number(e.quantidadeDisponivel ?? 0),
+          }))
+          .filter((p) => p.nome),
+      );
     }).catch(() => {});
   }, []);
 
@@ -192,11 +204,9 @@ export default function PedidoDetalhe() {
       };
 
       const response = await Api.put(`/pedidos/${id}`, requestBody);
-      console.log("🔄 Resposta do servidor:", response.data);
-      
+
       const mapped = PedidosService.mapearParaFrontend(response.data);
-      console.log("📋 Dados mapeados:", mapped);
-      
+
       setRawPedido(response.data);
       setPedido(mapped);
       
@@ -207,7 +217,6 @@ export default function PedidoDetalhe() {
         observacoes: mapped.observacoes || "",
         produtos: mapped.produtos || [],
       };
-      console.log("💾 Atualizando formData:", newFormData);
       setFormData(newFormData);
 
       setShowSuccessModal(true);

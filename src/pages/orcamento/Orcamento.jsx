@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import Api from "../../api/client/Api";
 import OrcamentosService from "../../api/services/orcamentosService";
+import servicosService from "../../api/services/servicosService";
 import { useOrcamentoProgress } from "../../context/OrcamentoProgressContext.jsx";
 import {
   Plus,
@@ -73,19 +74,47 @@ const criarItemVazio = (ordem = 1) => ({
 });
 
 const mapearItensDoPedido = (pedido) => {
-  if (!pedido?.produtos?.length) return [];
+  if (pedido?.produtos?.length) {
+    return pedido.produtos.map((produto, index) => ({
+      id: `pedido-${pedido.id}-${produto.id ?? produto.produtoId ?? index}`,
+      produto_id: produto.produtoId || "",
+      descricao: produto.nomeProduto || produto.nome || "",
+      quantidade: String(produto.quantidadeSolicitada ?? produto.quantidade ?? ""),
+      preco_unitario: String(produto.precoUnitarioNegociado ?? produto.preco ?? ""),
+      desconto: "0",
+      observacao: produto.observacao || "",
+      ordem: index + 1,
+    }));
+  }
 
-  return pedido.produtos.map((produto, index) => ({
-    id: `pedido-${pedido.id}-${produto.id ?? produto.produtoId ?? index}`,
-    produto_id: produto.produtoId || "",
-    descricao: produto.nomeProduto || produto.nome || "",
-    quantidade: String(produto.quantidadeSolicitada ?? produto.quantidade ?? ""),
-    preco_unitario: String(produto.precoUnitarioNegociado ?? produto.preco ?? ""),
+  if (pedido?.servico?.nome) {
+    return [{
+      id: `pedido-${pedido.id}-servico`,
+      produto_id: "",
+      descricao: pedido.servico.descricao || pedido.servico.nome,
+      quantidade: "1",
+      preco_unitario: pedido.servico.precoBase != null ? String(pedido.servico.precoBase) : "",
+      desconto: "0",
+      observacao: "",
+      ordem: 1,
+    }];
+  }
+
+  return [];
+};
+
+// Itens iniciais derivados da fonte única do serviço (servico_produto).
+const mapearItensDoServico = (lista = []) =>
+  lista.map((sp, index) => ({
+    id: `sp-${sp.id ?? sp.produtoId}-${index}`,
+    produto_id: sp.produtoId || "",
+    descricao: sp.produtoNome || "",
+    quantidade: String(sp.quantidadePlanejada ?? ""),
+    preco_unitario: String(sp.precoUnitario ?? ""),
     desconto: "0",
-    observacao: produto.observacao || "",
+    observacao: sp.observacao || "",
     ordem: index + 1,
   }));
-};
 
 const SectionCard = ({ title, badge, action, children, className = "" }) => (
   <div className={`${tw.card} ${className}`.trim()}>
@@ -205,13 +234,6 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
           />
 
           <UniversalInput
-            label="Prazo de Instalação"
-            type="date"
-            value={dados.prazo_instalacao}
-            onChange={(e) => onChange("prazo_instalacao", e.target.value)}
-          />
-
-          <UniversalInput
             label="Garantia"
             placeholder="Ex: 12 meses"
             value={dados.garantia}
@@ -219,19 +241,19 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
           />
 
           <UniversalInput
-            as="select"
+            label="Prazo de Instalação"
+            wrapperClassName="col-span-full"
+            placeholder="Ex: 15 dias úteis"
+            value={dados.prazo_instalacao}
+            onChange={(e) => onChange("prazo_instalacao", e.target.value)}
+          />
+
+          <UniversalInput
             label="Forma de Pagamento"
+            wrapperClassName="col-span-full"
+            placeholder="Ex: 50% de entrada e 50% após a finalização do serviço"
             value={dados.forma_pagamento}
             onChange={(e) => onChange("forma_pagamento", e.target.value)}
-            placeholder="Selecione"
-            options={[
-              { value: "BOLETO", label: "Boleto Bancário" },
-              { value: "PIX", label: "PIX" },
-              { value: "CARTAO_CREDITO", label: "Cartão de Crédito" },
-              { value: "TRANSFERENCIA", label: "Transferência Bancária" },
-              { value: "CHEQUE", label: "Cheque" },
-              { value: "DINHEIRO", label: "Dinheiro" },
-            ]}
           />
 
           <UniversalInput
@@ -241,7 +263,7 @@ const OrcamentoInformacoes = ({ dados, onChange, errors, pedidos = [] }) => {
             placeholder="Anotações internas..."
             value={dados.observacoes}
             onChange={(e) => onChange("observacoes", e.target.value)}
-            className="min-h-[88px] resize-y"
+            className="h-[72px] resize-none"
           />
         </div>
       </div>
@@ -264,6 +286,9 @@ const OrcamentoItemRow = ({
     item.desconto,
   );
   const errItem = errors[item.id] || {};
+  const produtoSelecionado = produtos.find((p) => String(p.id) === String(item.produto_id));
+  const disponivel = produtoSelecionado?.disponivel;
+  const isOverStock = disponivel !== undefined && parseFloat(item.quantidade) > disponivel;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
@@ -294,7 +319,7 @@ const OrcamentoItemRow = ({
             placeholder="Sem produto vinculado"
             options={produtos.map((p) => ({
               value: p.id,
-              label: p.nome,
+              label: `${p.nome}${p.disponivel !== undefined ? ` · ${p.disponivel} disp.` : ""}`,
             }))}
           />
           <div className="md:col-span-2">
@@ -308,14 +333,24 @@ const OrcamentoItemRow = ({
             />
           </div>
         </div>
-
-        <div className="mb-7 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <UniversalInput
-            label="Quantidade"
-            type="number"
-            value={item.quantidade}
-            onChange={(e) => onChange(item.id, "quantidade", e.target.value)}
-          />
+        <div className="mb-7 grid grid-cols-4 gap-6">
+          <div className="flex flex-col gap-1">
+            <UniversalInput
+              label="Quantidade"
+              type="number"
+              value={item.quantidade}
+              onChange={(e) => onChange(item.id, "quantidade", e.target.value)}
+            />
+            {disponivel !== undefined && (
+              <span
+                className={`text-xs font-semibold ${
+                  isOverStock ? "text-red-600" : "text-green-600"
+                }`}
+              >
+                Disp: {disponivel}
+              </span>
+            )}
+          </div>
           <UniversalInput
             label="Preço Unitário (R$)"
             type="number"
@@ -460,10 +495,10 @@ export default function OrcamentoPage() {
     pedido_id: pedidoId || "",
     status_id: "RASCUNHO",
     data_orcamento: new Date().toISOString().split("T")[0],
-    prazo_instalacao: "",
+    prazo_instalacao: "15 dias úteis",
     garantia: "",
-    forma_pagamento: "",
-    observacoes: "",
+    forma_pagamento: "50% de entrada e 50% após a finalização do serviço",
+    observacoes: "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
   });
 
   const [itens, setItens] = useState([]);
@@ -496,11 +531,19 @@ export default function OrcamentoPage() {
             id: p.id,
             clienteId: p.cliente?.id || "",
             clienteNome: p.cliente?.nome || "",
+            servicoId: p.servico?.id || null,
             produtos: Array.isArray(p.produtos) ? p.produtos : [],
             produtosDesc:
               p.servico?.nome ||
               p.produtos?.map((i) => i.nomeProduto).join(", ") ||
               "",
+            servico: p.servico
+              ? {
+                  nome: p.servico.nome,
+                  descricao: p.servico.descricao,
+                  precoBase: p.servico.precoBase,
+                }
+              : null,
           })),
         );
       })
@@ -515,7 +558,11 @@ export default function OrcamentoPage() {
               id: e.produto?.id,
               nome: e.produto?.nome,
               preco: e.produto?.preco ?? "",
+              disponivel: Number(e.quantidadeDisponivel ?? 0),
             }))
+            // Mantém produtos sem estoque na lista: ao editar um orçamento existente, um item
+            // cujo produto ficou sem estoque continua selecionável (senão o select perde a seleção).
+            // Orçamento não dá baixa em estoque.
             .filter((p) => p.id && p.nome),
         );
       })
@@ -539,10 +586,12 @@ export default function OrcamentoPage() {
             pedido_id: String(orc.pedidoId || ""),
             status_id: orc.statusNome || orc.statusId || "RASCUNHO",
             data_orcamento: orc.dataOrcamento?.split("T")[0] || "",
-            prazo_instalacao: orc.prazoInstalacao?.split("T")[0] || "",
-            garantia: orc.garantia || "",
-            forma_pagamento: orc.formaPagamento || "",
-            observacoes: orc.observacoes || "",
+            // ?? em vez de ||: só aplica o default quando o campo é null/undefined. Strings vazias
+            // gravadas intencionalmente em orçamentos existentes são preservadas (não sobrescritas).
+            prazo_instalacao: orc.prazoInstalacao ?? "15 dias úteis",
+            garantia: orc.garantia ?? "",
+            forma_pagamento: orc.formaPagamento ?? "50% de entrada e 50% após a finalização do serviço",
+            observacoes: orc.observacoes ?? "Os itens estão com medidas, cores e espessura conforme a medida orçada.",
           });
 
           if (orc.itens && Array.isArray(orc.itens)) {
@@ -595,6 +644,20 @@ export default function OrcamentoPage() {
     }
   }, [pedidos, dadosGerais.pedido_id]); 
 
+  // Carrega itens iniciais: para serviço, da fonte única (servico_produto);
+  // para pedido de produto puro, dos itens do pedido.
+  const carregarItensDoPedido = useCallback(async (pedido) => {
+    if (!pedido) return [];
+    if (pedido.servicoId) {
+      const res = await servicosService.listarProdutos(pedido.servicoId);
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        return mapearItensDoServico(res.data);
+      }
+      return [];
+    }
+    return mapearItensDoPedido(pedido);
+  }, []);
+
   useEffect(() => {
     if (orcamentoId || !pedidos.length || !dadosGerais.pedido_id || itens.length > 0) {
       return;
@@ -606,11 +669,16 @@ export default function OrcamentoPage() {
 
     if (!pedidoSelecionado) return;
 
-    const itensDoPedido = mapearItensDoPedido(pedidoSelecionado);
-    if (itensDoPedido.length > 0) {
-      setItens(itensDoPedido);
-    }
-  }, [orcamentoId, pedidos, dadosGerais.pedido_id, itens.length]);
+    let cancelled = false;
+    carregarItensDoPedido(pedidoSelecionado).then((itensIniciais) => {
+      if (!cancelled && itensIniciais.length > 0) {
+        setItens(itensIniciais);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [orcamentoId, pedidos, dadosGerais.pedido_id, itens.length, carregarItensDoPedido]);
 
   const handleDadosChange = useCallback(
     (field, value) => {
@@ -632,7 +700,7 @@ export default function OrcamentoPage() {
       });
 
       if (field === "pedido_id") {
-        setItens(mapearItensDoPedido(pedidoSelecionado));
+        carregarItensDoPedido(pedidoSelecionado).then(setItens);
       }
 
       if (errors[field])
@@ -642,7 +710,7 @@ export default function OrcamentoPage() {
           return e;
         });
     },
-    [errors, pedidos],
+    [errors, pedidos, carregarItensDoPedido],
   );
 
   const handleAddItem = useCallback(

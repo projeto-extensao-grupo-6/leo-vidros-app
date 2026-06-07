@@ -91,12 +91,21 @@ export default function OrcamentosServico() {
         orcamento.id,
         orcamento.numeroOrcamento
       );
+
+      if (result.regenerating) {
+        setDownloadError(
+          "PDF não estava em cache. Re-geração iniciada — aguarde alguns segundos e tente novamente."
+        );
+        return;
+      }
+
       if (!result.success) {
         setDownloadError(
           result.error ?? "Não foi possível baixar o PDF. Tente novamente."
         );
         return;
       }
+
       const url = URL.createObjectURL(result.data);
       const link = document.createElement("a");
       link.href = url;

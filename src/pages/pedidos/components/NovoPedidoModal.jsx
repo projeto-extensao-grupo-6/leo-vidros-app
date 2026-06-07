@@ -237,7 +237,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
             ...novosProdutos[index],
             produtoId: produtoSelecionado.id,
             nome: produtoSelecionado.nome,
-            preco: produtoSelecionado.preco || 0,
+            preco: parseFloat(produtoSelecionado.preco ?? 0),
             subtotal:
               (produtoSelecionado.preco || 0) * novosProdutos[index].quantidade,
           };
@@ -633,7 +633,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                         placeholder="Selecione um produto"
                         options={produtosDisponiveis.map((p) => ({
                           value: p.id,
-                          label: `${p.nome} - R$ ${p.preco?.toFixed(2)}`,
+                          label: `${p.nome} - R$ ${parseFloat(p.preco ?? 0).toFixed(2)}`,
                         }))}
                         value={produto.produtoId}
                         onChange={(e) =>

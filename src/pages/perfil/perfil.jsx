@@ -140,12 +140,10 @@ export default function Perfil() {
   }, [message]);
 
   const getUserId = () => {
-    const userId = sessionStorage.getItem("userId");
-    if (!userId) {
-      console.error("ID do usuário não encontrado no sessionStorage.");
+    if (!user.id) {
       return null;
     }
-    return userId;
+    return user.id;
   };
 
   const handlePhotoClick = () => {
@@ -334,7 +332,7 @@ export default function Perfil() {
     Boolean(formData.confirmarSenha);
 
   const handleSave = () => {
-    const userId = sessionStorage.getItem("userId");
+    const userId = user.id;
 
     if (!userId) {
       setMessage({

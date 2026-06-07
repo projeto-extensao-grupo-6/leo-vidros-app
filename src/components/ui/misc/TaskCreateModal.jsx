@@ -9,6 +9,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import Api from "../../../api/client/Api";
+import servicosService from "../../../api/services/servicosService";
 import { cepMask } from "../../../utils/masks";
 import { modalClasses } from "../../../components/ui/modal/modalStyles";
 import UniversalInput from "../Input/UniversalInput";
@@ -263,10 +264,6 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           const raw = responseServicos.data;
           allOrders = raw?.content ?? (Array.isArray(raw) ? raw : []);
         } catch (_error) {
-          console.warn(
-            "⚠️ Endpoint /Pedidos/servicos não disponível, tentando alternativa...",
-          );
-
           try {
             const responseAll = await Api.get("/pedidos");
             const todosPedidos = responseAll.data || [];
@@ -297,40 +294,34 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
             return false;
           }
 
+          const normalizarEtapa = (s) =>
+            (s || "")
+              .normalize("NFD")
+              .replace(/[̀-ͯ]/g, "")
+              .toUpperCase()
+              .replace(/\s+/g, " ")
+              .trim();
+
+          const etapaNorm = normalizarEtapa(etapaNome);
           let etapaValida = false;
 
           if (tipoValue === "ORCAMENTO") {
-            const etapasAceitasOrcamento = [
-              "AGUARDANDO AGENDA DE ORÇAMENTO",
-              "AGUARDANDO AGENDA DE ORCAMENTO",
-            ];
+            // Só agenda orçamento (vistoria) enquanto aguarda agenda de orçamento.
+            etapaValida = etapaNorm === "AGUARDANDO AGENDA DE ORCAMENTO";
 
-            etapaValida = etapasAceitasOrcamento.some(
-              (e) =>
-                etapaNome.toUpperCase().includes(e.toUpperCase()) ||
-                e.toUpperCase().includes(etapaNome.toUpperCase()),
-            );
-
+            // Serviço recém-criado, sem etapa reconhecida e sem nenhum agendamento → permite vistoria.
             if (!etapaValida && agendamentos.length === 0) {
               etapaValida = true;
             }
           } else if (tipoValue === "SERVICO") {
+            // Só agenda serviço depois que o orçamento foi aprovado.
             const etapasAceitasServico = [
-              "ORÇAMENTO APROVADO",
               "ORCAMENTO APROVADO",
-              "AGUARDANDO AGENDA DE SERVIÇO/INSTALAÇÃO",
               "AGUARDANDO AGENDA DE SERVICO/INSTALACAO",
-              "ANÁLISE DO ORÇAMENTO",
-              "ANALISE DO ORCAMENTO",
-              "SERVIÇO AGENDADO",
               "SERVICO AGENDADO",
             ];
 
-            etapaValida = etapasAceitasServico.some(
-              (e) =>
-                etapaNome.toUpperCase().includes(e.toUpperCase()) ||
-                e.toUpperCase().includes(etapaNome.toUpperCase()),
-            );
+            etapaValida = etapasAceitasServico.includes(etapaNorm);
           }
 
           if (!etapaValida) {
@@ -610,6 +601,39 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
     }
   }, [step, showProdutosStep, estoqueOptions.length]);
 
+  // Pré-carrega os produtos do serviço (fonte única: GET /servicos/{id}/produtos)
+  // ao entrar no step de produtos, em vez de receber via props.
+  useEffect(() => {
+    if (!showProdutosStep || step !== 3) return;
+    if ((formData.produtos || []).length > 0) return;
+
+    const servicoId =
+      formData.pedido?.originalData?.servico?.id ||
+      initialData?.pedido?.originalData?.servico?.id ||
+      null;
+    if (!servicoId) return;
+
+    let cancelled = false;
+    servicosService.listarProdutos(servicoId).then((res) => {
+      if (cancelled || !res.success || !Array.isArray(res.data)) return;
+      const produtos = res.data
+        .filter((sp) => sp.produtoId)
+        .map((sp) => ({
+          id: sp.produtoId,
+          nome: sp.produtoNome || `Produto #${sp.produtoId}`,
+          quantidade: parseFloat(sp.quantidadePlanejada) || 1,
+        }));
+      if (produtos.length > 0) {
+        setFormData((prev) =>
+          (prev.produtos || []).length > 0 ? prev : { ...prev, produtos },
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [step, showProdutosStep, formData.pedido, formData.produtos, initialData]);
+
   useEffect(() => {
     if (isOpen) {
       setFormData({
@@ -769,7 +793,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
           rua: formData.rua || "",
           numero: formData.numero || null,
           complemento: formData.complemento || null,
-          cep: formData.cep || "",
+          cep: (formData.cep || "").replace(/\D/g, ""),
           cidade: formData.cidade || "",
           bairro: formData.bairro || null,
           uf: formData.uf || "",

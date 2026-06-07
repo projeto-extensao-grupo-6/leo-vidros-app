@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import { Search, Edit, Trash2, CalendarDays, Plus } from "lucide-react";
@@ -9,6 +9,8 @@ import AgendaFuncionario from "./components/ModalFuncionarios/AgendaFuncionario"
 import Api from "../../api/client/Api";
 import Button from "../../components/ui/Button/Button.component";
 import UniversalInput from "../../components/ui/Input/UniversalInput";
+import Toast from "../../components/feedback/Toast/Toast";
+import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
 
 export default function Funcionarios() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -16,8 +18,10 @@ export default function Funcionarios() {
 
   const [funcionarios, setFuncionarios] = useState([]);
   const [busca, setBusca] = useState("");
-  const [pagina, setPagina] = useState(1);
+  const [pagina, setPagina] = useState(0);
   const limitePorPagina = 6;
+  const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
 
   const [openForm, setOpenForm] = useState(false);
   const [modoEdicao, setModoEdicao] = useState(false);
@@ -31,12 +35,21 @@ export default function Funcionarios() {
 
   const fetchFuncionarios = async () => {
     try {
-      const response = await Api.get("/funcionarios");
-      const data = response.data?.content ?? response.data;
+      setLoading(true);
+      // Busca o conjunto completo: a busca é aplicada client-side sobre todos os funcionários.
+      // (A API só pagina por page/size; paginar no servidor faria a busca enxergar só a página atual.)
+      const response = await Api.get("/funcionarios", {
+        params: { page: 0, size: 1000 },
+      });
+      const pageData = response.data;
+      const data = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
       setFuncionarios(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar funcionários:", error);
       setFuncionarios([]);
+      setToast({ type: "error", message: "Erro ao carregar funcionários. Tente novamente." });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,21 +57,29 @@ export default function Funcionarios() {
     fetchFuncionarios();
   }, []);
 
-  const funcionariosFiltrados = Array.isArray(funcionarios)
-    ? funcionarios.filter(
-        (f) => f.nome && f.nome.toLowerCase().includes(busca.toLowerCase()),
-      )
-    : [];
+  // Ao mudar busca, voltar para a primeira página
+  useEffect(() => {
+    setPagina(0);
+  }, [busca]);
 
-  const indexUltimo = pagina * limitePorPagina;
-  const indexPrimeiro = indexUltimo - limitePorPagina;
+  // Filtragem client-side dentro da página atual
+  const funcionariosFiltrados = useMemo(() =>
+    Array.isArray(funcionarios)
+      ? funcionarios.filter(
+          (f) => f.nome && f.nome.toLowerCase().includes(busca.toLowerCase()),
+        )
+      : [],
+  [funcionarios, busca]);
+
+  // Paginação client-side sobre o conjunto filtrado completo.
+  const totalElementos = funcionariosFiltrados.length;
+  const totalPaginas = Math.max(1, Math.ceil(totalElementos / limitePorPagina));
+  const indexPrimeiro = pagina * limitePorPagina;
   const funcionariosPagina = funcionariosFiltrados.slice(
     indexPrimeiro,
-    indexUltimo,
+    indexPrimeiro + limitePorPagina,
   );
-  const totalPaginas = Math.ceil(
-    funcionariosFiltrados.length / limitePorPagina,
-  );
+  const indexUltimo = indexPrimeiro + funcionariosPagina.length;
 
   const abrirModalCriar = () => {
     setModoEdicao(false);
@@ -96,6 +117,7 @@ export default function Funcionarios() {
       fetchFuncionarios();
     } catch (error) {
       console.error("Erro ao salvar funcionário:", error);
+      setToast({ type: "error", message: "Erro ao salvar funcionário. Tente novamente." });
     }
   };
 
@@ -105,6 +127,7 @@ export default function Funcionarios() {
       setFuncionarios((prev) => prev.filter((f) => f.id !== id));
     } catch (error) {
       console.error("Erro ao deletar funcionário:", error);
+      setToast({ type: "error", message: "Erro ao deletar funcionário. Tente novamente." });
     }
   };
 
@@ -165,7 +188,9 @@ export default function Funcionarios() {
 
                 {/* Linhas da tabela */}
                 <div>
-                  {funcionariosPagina.length === 0 ? (
+                  {loading ? (
+                    <SkeletonLoader count={limitePorPagina} />
+                  ) : funcionariosPagina.length === 0 ? (
                     <div className="text-center p-8 text-gray-500">
                       <p>Nenhum funcionário encontrado.</p>
                       {busca && (
@@ -253,33 +278,35 @@ export default function Funcionarios() {
               </div>
 
               {/* Paginação */}
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4 text-sm text-gray-600">
-                <span>
-                  Mostrando {indexPrimeiro + 1} a{" "}
-                  {Math.min(indexUltimo, funcionariosFiltrados.length)} de{" "}
-                  {funcionariosFiltrados.length} resultados
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPagina((prev) => Math.max(prev - 1, 1))}
-                    disabled={pagina === 1}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setPagina((prev) => Math.min(prev + 1, totalPaginas))
-                    }
-                    disabled={pagina === totalPaginas}
-                  >
-                    Próximo
-                  </Button>
+              {totalElementos > 0 && (
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4 text-sm text-gray-600">
+                  <span>
+                    Mostrando {totalElementos > 0 ? indexPrimeiro + 1 : 0} a{" "}
+                    {indexUltimo} de{" "}
+                    {totalElementos} resultados
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPagina((prev) => Math.max(prev - 1, 0))}
+                      disabled={pagina === 0}
+                    >
+                      Anterior
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setPagina((prev) => Math.min(prev + 1, totalPaginas - 1))
+                      }
+                      disabled={pagina >= totalPaginas - 1}
+                    >
+                      Próximo
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </main>
@@ -305,6 +332,14 @@ export default function Funcionarios() {
         setOpen={setOpenAgenda}
         funcionario={funcionarioAgenda}
       />
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

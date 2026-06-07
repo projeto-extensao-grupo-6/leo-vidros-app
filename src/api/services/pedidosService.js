@@ -40,7 +40,27 @@ class PedidosService extends BaseService {
     });
   }
 
-  calcularEtapaServicoPorAgendamentos(servico, etapaBase = "AGUARDANDO AGENDA DE ORÇAMENTO") {
+  // Estágio derivado do status dos ORÇAMENTOS-DOCUMENTO (não dos agendamentos).
+  // Índice na ordem da região de orçamento: 0=AGENDADO, 1=ANÁLISE, 2=APROVADO.
+  // Retorna -1 quando nenhum documento indica avanço.
+  indiceEtapaPorStatusOrcamentos(orcamentos = []) {
+    if (!Array.isArray(orcamentos) || orcamentos.length === 0) return -1;
+    let indice = -1;
+    for (const orc of orcamentos) {
+      const status = this.normalizarEtapaOuStatus(orc?.status?.nome || orc?.statusNome);
+      if (status === "APROVADO") return 2;
+      if (status === "ENVIADO" || status === "EM ANALISE") {
+        indice = Math.max(indice, 1);
+      }
+    }
+    return indice;
+  }
+
+  calcularEtapaServicoPorAgendamentos(
+    servico,
+    etapaBase = "AGUARDANDO AGENDA DE ORÇAMENTO",
+    orcamentos = [],
+  ) {
     if (!servico) return etapaBase;
 
     const agendamentosAtivos = (servico.agendamentos || []).filter((ag) => {
@@ -62,10 +82,8 @@ class PedidosService extends BaseService {
     const agendamentoServico = agendamentosAtivos.find((ag) =>
       this.isTipoServicoAgendamento(ag?.tipoAgendamento),
     );
-    const agendamentoOrcamento = agendamentosAtivos.find((ag) =>
-      this.isTipoOrcamentoAgendamento(ag?.tipoAgendamento),
-    );
 
+    // Agendamento de SERVI\u00c7O ativo domina (j\u00e1 passamos da regi\u00e3o de or\u00e7amento).
     if (agendamentoServico) {
       const statusServico = this.normalizarEtapaOuStatus(
         agendamentoServico.statusAgendamento?.nome,
@@ -80,23 +98,15 @@ class PedidosService extends BaseService {
       return "SERVI\u00c7O AGENDADO";
     }
 
-    if (agendamentoOrcamento) {
-      const statusOrcamento = this.normalizarEtapaOuStatus(
-        agendamentoOrcamento.statusAgendamento?.nome,
-      );
-      if (statusOrcamento === "CONCLUIDO") {
-        return "OR\u00c7AMENTO APROVADO";
-      }
-      return "OR\u00c7AMENTO AGENDADO";
-    }
-
-    const orcamentoConcluido = (servico.agendamentos || []).find((ag) => {
-      const statusNorm = this.normalizarEtapaOuStatus(ag?.statusAgendamento?.nome);
-      return this.isTipoOrcamentoAgendamento(ag?.tipoAgendamento) && statusNorm === "CONCLUIDO";
-    });
-    if (orcamentoConcluido) return "OR\u00c7AMENTO APROVADO";
-
-    return etapaBase;
+    // Vistoria (agendamento de or\u00e7amento) ativa: parte de OR\u00c7AMENTO AGENDADO, mas avan\u00e7a
+    // conforme o status do or\u00e7amento-documento (an\u00e1lise/aprovado), pegando o mais avan\u00e7ado.
+    const ORC_ETAPAS = [
+      "OR\u00c7AMENTO AGENDADO",
+      "AN\u00c1LISE DO OR\u00c7AMENTO",
+      "OR\u00c7AMENTO APROVADO",
+    ];
+    const indice = Math.max(0, this.indiceEtapaPorStatusOrcamentos(orcamentos));
+    return ORC_ETAPAS[indice];
   }
 
   async buscarTodos() {
