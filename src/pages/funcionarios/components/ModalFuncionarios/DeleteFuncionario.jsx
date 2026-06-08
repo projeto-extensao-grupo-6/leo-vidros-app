@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
-import Swal from "sweetalert2";
 import FeedbackDialog from "../../../../components/feedback/FeedbackDialog/FeedbackDialog";
 import Button from "../../../../components/ui/Button/Button.component";
 
@@ -11,9 +10,11 @@ export default function DeleteFuncionario({
   deletarFuncionario,
 }) {
   const [confirmNome, setConfirmNome] = useState("");
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     setConfirmNome("");
+    setErro("");
   }, [open]);
 
   const handleDelete = () => {
@@ -21,12 +22,7 @@ export default function DeleteFuncionario({
       deletarFuncionario(funcionario.id);
       setOpen(false);
     } else {
-      Swal.fire({
-        icon: "warning",
-        title: "Nome incorreto",
-        text: "O nome digitado nÃ£o confere com o nome do funcionÃ¡rio.",
-        confirmButtonColor: "#dc2626",
-      });
+      setErro("O nome digitado não confere com o nome do funcionário.");
     }
   };
 
@@ -68,9 +64,16 @@ export default function DeleteFuncionario({
           <input
             type="text"
             value={confirmNome}
-            onChange={(e) => setConfirmNome(e.target.value)}
-            className="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#007EA7] focus:ring-4 focus:ring-sky-100"
+            onChange={(e) => { setConfirmNome(e.target.value); setErro(""); }}
+            className={`w-full rounded-2xl border px-4 py-3 text-sm text-slate-800 outline-none transition focus:ring-4 ${
+              erro
+                ? "border-red-400 focus:border-red-400 focus:ring-red-100"
+                : "border-slate-300 focus:border-[#007EA7] focus:ring-sky-100"
+            }`}
           />
+          {erro && (
+            <p className="mt-2 text-xs text-red-600">{erro}</p>
+          )}
         </label>
       </div>
     </FeedbackDialog>
