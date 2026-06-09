@@ -2,12 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "../../api/queryKeys";
 import {
   getQtdAgendamentosHoje,
-  getQtdAgendamentosFuturos,
   getAgendamentosFuturos,
   getEstoqueCritico,
-  getTaxaOcupacaoServicos,
   getQtdItensCriticos,
-  getQtdServicosHoje,
   getFaturamentoMes,
   getFaturamentoAnual,
   getOrcamentosAbertos,
@@ -24,15 +21,6 @@ export function useQtdAgendamentosHoje(options = {}) {
     queryKey: queryKeys.dashboard.qtdAgendamentosHoje(),
     queryFn: () =>
       unwrap("qtdAgendamentosHoje", 0)(() => getQtdAgendamentosHoje()),
-    ...options,
-  });
-}
-
-export function useQtdAgendamentosFuturos(options = {}) {
-  return useQuery({
-    queryKey: queryKeys.dashboard.qtdAgendamentosFuturos(),
-    queryFn: () =>
-      unwrap("qtdAgendamentosFuturos", 0)(() => getQtdAgendamentosFuturos()),
     ...options,
   });
 }
@@ -63,27 +51,10 @@ export function useEstoqueCritico(options = {}) {
   });
 }
 
-export function useTaxaOcupacaoServicos(options = {}) {
-  return useQuery({
-    queryKey: queryKeys.dashboard.taxaOcupacaoServicos(),
-    queryFn: () =>
-      unwrap("taxaOcupacaoServicos", 0)(() => getTaxaOcupacaoServicos()),
-    ...options,
-  });
-}
-
 export function useQtdItensCriticos(options = {}) {
   return useQuery({
     queryKey: queryKeys.dashboard.qtdItensCriticos(),
     queryFn: () => unwrap("quantidade", 0)(() => getQtdItensCriticos()),
-    ...options,
-  });
-}
-
-export function useQtdServicosHoje(options = {}) {
-  return useQuery({
-    queryKey: queryKeys.dashboard.qtdServicosHoje(),
-    queryFn: () => unwrap("qtdServicosHoje", 0)(() => getQtdServicosHoje()),
     ...options,
   });
 }
@@ -126,40 +97,32 @@ export function useOrcamentosAbertos(options = {}) {
 
 export function useDashboardKpis() {
   const qtdAgendamentosHoje = useQtdAgendamentosHoje();
-  const qtdAgendamentosFuturos = useQtdAgendamentosFuturos();
   const agendamentosFuturos = useAgendamentosFuturos();
   const estoqueCritico = useEstoqueCritico();
-  const taxaOcupacaoServicos = useTaxaOcupacaoServicos();
   const qtdItensCriticos = useQtdItensCriticos();
   const faturamentoMes = useFaturamentoMes();
   const orcamentosAbertos = useOrcamentosAbertos();
 
   const isLoading =
     qtdAgendamentosHoje.isLoading ||
-    qtdAgendamentosFuturos.isLoading ||
     agendamentosFuturos.isLoading ||
     estoqueCritico.isLoading ||
-    taxaOcupacaoServicos.isLoading ||
     qtdItensCriticos.isLoading ||
     faturamentoMes.isLoading ||
     orcamentosAbertos.isLoading;
 
   const isError =
     qtdAgendamentosHoje.isError ||
-    qtdAgendamentosFuturos.isError ||
     agendamentosFuturos.isError ||
     estoqueCritico.isError ||
-    taxaOcupacaoServicos.isError ||
     qtdItensCriticos.isError ||
     faturamentoMes.isError ||
     orcamentosAbertos.isError;
 
   return {
     qtdAgendamentosHoje: qtdAgendamentosHoje.data ?? 0,
-    qtdAgendamentosFuturos: qtdAgendamentosFuturos.data ?? 0,
     agendamentosFuturos: agendamentosFuturos.data ?? [],
     itensCriticos: estoqueCritico.data ?? [],
-    taxaOcupacaoServicos: taxaOcupacaoServicos.data ?? 0,
     qtdItensCriticos: qtdItensCriticos.data ?? 0,
     faturamentoMes: faturamentoMes.data?.faturamentoMes ?? 0,
     percentualFaturamento: faturamentoMes.data?.percentualVariacao ?? null,

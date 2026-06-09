@@ -28,7 +28,6 @@ export default function PaginaInicial() {
     faturamentoMes,
     percentualFaturamento,
     qtdAgendamentosHoje,
-    qtdAgendamentosFuturos,
     agendamentosFuturos = [],
     itensCriticos = [],
     qtdItensCriticos,
@@ -76,31 +75,6 @@ export default function PaginaInicial() {
     return `${dia}/${mes}`;
   };
 
-  const agendamentosDaSemana = useMemo(() => {
-    const hoje = new Date();
-    const inicioDaSemana = new Date(hoje);
-    const diaDaSemana = hoje.getDay();
-    const diffParaSegunda = diaDaSemana === 0 ? -6 : 1 - diaDaSemana;
-
-    inicioDaSemana.setDate(hoje.getDate() + diffParaSegunda);
-    inicioDaSemana.setHours(0, 0, 0, 0);
-
-    const fimDaSemana = new Date(inicioDaSemana);
-    fimDaSemana.setDate(inicioDaSemana.getDate() + 6);
-    fimDaSemana.setHours(23, 59, 59, 999);
-
-    return agendamentosFuturos.filter((agendamento) => {
-      if (!agendamento?.dataAgendamento) return false;
-
-      const dataNormalizada = String(agendamento.dataAgendamento).split("T")[0];
-      const dataAgendamento = new Date(`${dataNormalizada}T12:00:00`);
-
-      if (Number.isNaN(dataAgendamento.getTime())) return false;
-
-      return dataAgendamento >= inicioDaSemana && dataAgendamento <= fimDaSemana;
-    });
-  }, [agendamentosFuturos]);
-
   const mesAtual = new Date().toLocaleString("pt-BR", { month: "long", year: "numeric" });
 
   const calculatedKpiData = useMemo(
@@ -120,7 +94,7 @@ export default function PaginaInicial() {
         title: "Agendamentos de Hoje",
         value: qtdAgendamentosHoje || 0,
         icon: Calendar,
-        caption: `${qtdAgendamentosFuturos || 0} agendamentos nos proximos dias`,
+        caption: "Restantes a partir de agora",
         color: "green",
       },
       {
@@ -131,12 +105,12 @@ export default function PaginaInicial() {
         color: "orange",
       },
       {
-        title: "Orcamentos em Aberto",
+        title: "Orçamentos em Análise",
         value: orcamentosAberto || 0,
         icon: FileText,
         caption: valorOrcamentosAberto
-          ? `R$ ${Number(valorOrcamentosAberto).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} em negociacao`
-          : "R$ 0 em negociacao",
+          ? `R$ ${Number(valorOrcamentosAberto).toLocaleString("pt-BR", { minimumFractionDigits: 2 })} em negociação`
+          : "R$ 0 em negociação",
         color: "purple",
         onClick: handleOpenOrcamentosModal,
       },
@@ -145,7 +119,6 @@ export default function PaginaInicial() {
       faturamentoMes,
       percentualFaturamento,
       qtdAgendamentosHoje,
-      qtdAgendamentosFuturos,
       qtdItensCriticos,
       orcamentosAberto,
       valorOrcamentosAberto,
@@ -181,7 +154,7 @@ export default function PaginaInicial() {
 
           <div className="mx-auto flex w-full max-w-[1380px] flex-col gap-[3.75rem]">
             {qtdItensCriticos > 0 && (
-              <div className="flex w-full items-center justify-between gap-4 rounded-xl border border-[#ffe08a] bg-[#fff7db] px-5 py-4 shadow-sm">
+              <div className="flex w-full flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 rounded-xl border border-[#ffe08a] bg-[#fff7db] px-5 py-4 shadow-sm">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="mt-0.5 h-6 w-6 flex-shrink-0 text-[#856404]" />
                   <p className="text-sm text-[#856404]">
@@ -212,19 +185,19 @@ export default function PaginaInicial() {
                 <div className="flex items-center justify-between bg-[#002A4B] px-5 py-3 text-white">
                   <h2 className="text-base font-semibold">Próximos Agendamentos Desta Semana</h2>
                   <span className="rounded-full bg-blue-900/60 px-3 py-1 text-sm font-semibold">
-                    Total: {agendamentosDaSemana.length}
+                    Total: {agendamentosFuturos.length}
                   </span>
                 </div>
 
                 <div className="divide-y divide-gray-50">
-                  {agendamentosDaSemana.length === 0 ? (
+                  {agendamentosFuturos.length === 0 ? (
                     <div className="flex items-center justify-center py-10">
                       <p className="text-sm italic text-gray-400">
                         Nenhum agendamento para esta semana.
                       </p>
                     </div>
                   ) : (
-                    agendamentosDaSemana.map((ag) => (
+                    agendamentosFuturos.map((ag) => (
                       <button
                         key={ag.idAgendamento}
                         type="button"

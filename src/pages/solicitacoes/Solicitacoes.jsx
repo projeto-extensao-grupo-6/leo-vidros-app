@@ -418,7 +418,7 @@ export default function Acesso() {
                 onCancelar={cancelarAcao}
               />
 
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-gray-200 mt-4 gap-3">
                 <p className="text-sm text-gray-600">
                   {filteredSolicitacoes.length > 0 ? (
                     <>

@@ -18,6 +18,7 @@ import TaskCreateModal from "../../../components/ui/misc/TaskCreateModal";
 import Api from "../../../api/client/Api";
 import estoqueService from "../../../api/services/estoqueService";
 import PedidosService from "../../../api/services/pedidosService";
+import servicosService from "../../../api/services/servicosService";
 import orcamentosService from "../../../api/services/orcamentosService";
 import { formatCurrency, formatDate } from "../../../utils/formatters";
 import { getPedidoStatusConfig } from "../../../utils/agendamentoStatus";
@@ -61,7 +62,6 @@ const STEPS = [
   { label: "AGUARDANDO AGENDA DE ORÇAMENTO" },
   { label: "ORÇAMENTO AGENDADO" },
   { label: "ANÁLISE DO ORÇAMENTO" },
-  { label: "ORÇAMENTO APROVADO" },
   { label: "AGUARDANDO AGENDA DE SERVIÇO" },
   { label: "SERVIÇO AGENDADO" },
   { label: "AGENDAMENTO EM EXECUÇÃO" },
@@ -84,8 +84,9 @@ const ETAPA_NORM_MAP = {
   "PENDENTE":                                  "AGUARDANDO AGENDA DE ORÇAMENTO",
   "ORCAMENTO AGENDADO":                        "ORÇAMENTO AGENDADO",
   "ANALISE DO ORCAMENTO":                      "ANÁLISE DO ORÇAMENTO",
-  "ORCAMENTO APROVADO":                        "ORÇAMENTO APROVADO",
+  "ORCAMENTO APROVADO":                        "AGUARDANDO AGENDA DE SERVIÇO",
   "AGUARDANDO AGENDA DE SERVICO INSTALACAO":   "AGUARDANDO AGENDA DE SERVIÇO",
+  "AGUARDANDO AGENDA DE SERVICO/INSTALACAO":   "AGUARDANDO AGENDA DE SERVIÇO",
   "AGUARDANDO AGENDA DE SERVICO":              "AGUARDANDO AGENDA DE SERVIÇO",
   "SERVICO AGENDADO":                          "SERVIÇO AGENDADO",
   "AGENDAMENTO EM EXECUCAO":                   "AGENDAMENTO EM EXECUÇÃO",
@@ -113,19 +114,13 @@ const getQuantidadeDisponivelEstoque = (item = {}) => {
 
 function getStepIndex(status) {
   if (!status) return 0;
-  const s = status
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\u0300-\u036f]/g, "");
-
-  if (s.includes("conclu") || s.includes("finaliz")) return 6;
-  if (s.includes("execu") || s.includes("instal")) return 5;
-  if (s.includes("agendad")) return 4;
-  if (s.includes("aprovad")) return 3;
-  if (s.includes("analise")) return 2;
-  if (s.includes("orcamento") || s.includes("vistoria") || s.includes("aguardando")) return 1;
-  return 0;
+  const valor = typeof status === "string" ? status : status?.nome || "";
+  if (!valor) return 0;
+  // Mapeia para o r\u00f3tulo can\u00f4nico do STEPS e usa o \u00edndice correspondente.
+  // Evita colis\u00f5es por substring (ex.: "OR\u00c7AMENTO AGENDADO" cont\u00e9m "agendado",
+  // mas pertence ao bloco de or\u00e7amento, n\u00e3o ao de servi\u00e7o agendado).
+  const idx = ETAPA_OPTIONS.indexOf(normalizarEtapaParaOption(valor));
+  return idx >= 0 ? idx : 0;
 }
 
 function Stepper({ status }) {
@@ -143,7 +138,7 @@ function Stepper({ status }) {
         />
         <div
           className="absolute h-[2px] bg-[#0099bf] z-0 transition-all duration-500"
-          style={{ top: "18px", left: "4%", width: `${(activeStep / 6) * 92}%` }}
+          style={{ top: "18px", left: "4%", width: `${(activeStep / (STEPS.length - 1)) * 92}%` }}
         />
 
         {STEPS.map((step, i) => {
@@ -399,6 +394,10 @@ export default function PedidoDetalhe() {
 
   const [etapaOriginal, setEtapaOriginal] = useState("");
   const temMudancaEtapa = formData.etapaServico !== etapaOriginal;
+  const [orcamentosPedido, setOrcamentosPedido] = useState([]);
+  const [showAprovarOrcamentoModal, setShowAprovarOrcamentoModal] = useState(false);
+  const [orcamentoAprovarSelecionado, setOrcamentoAprovarSelecionado] = useState(null);
+  const [aprovandoOrcamento, setAprovandoOrcamento] = useState(false);
 
   const [showFinalizarModal, setShowFinalizarModal] = useState(false);
   const [produtosUsados, setProdutosUsados] = useState({});
@@ -444,6 +443,7 @@ export default function PedidoDetalhe() {
     ? PedidosService.calcularEtapaServicoPorAgendamentos(
         rawPedido.servico,
         rawPedido?.servico?.etapa?.nome || "PENDENTE",
+        orcamentosPedido,
       )
     : null;
   const etapaTravadaPorAgendamento = rawPedido?.servico
@@ -461,35 +461,21 @@ export default function PedidoDetalhe() {
       setPedido(mapped);
 
       const orcRes = await orcamentosService.buscarPorPedido(id);
-      let produtosOrcamento = [];
+      let orcamentosCarregados = [];
       if (orcRes.success && orcRes.data.length > 0) {
-        const orcAtivos = orcRes.data.filter((o) => o.ativo !== false);
-        const ultimo = orcAtivos.length > 0 ? orcAtivos[orcAtivos.length - 1] : orcRes.data[orcRes.data.length - 1];
+        orcamentosCarregados = orcRes.data.filter((o) => o.ativo !== false);
+        setOrcamentosPedido(orcamentosCarregados);
+        const ultimo = orcamentosCarregados.length > 0 ? orcamentosCarregados[orcamentosCarregados.length - 1] : orcRes.data[orcRes.data.length - 1];
         setDescontoOrcamento(parseFloat(ultimo.valorDesconto) || 0);
-        if (ultimo.itens && ultimo.itens.length > 0) {
-          const seen = new Set();
-          produtosOrcamento = ultimo.itens
-            .filter((item) => {
-              if (!item.produtoId || seen.has(item.produtoId)) return false;
-              seen.add(item.produtoId);
-              return true;
-            })
-            .map((item) => ({
-              nome: item.produtoNome || item.descricao || `Produto #${item.produtoId}`,
-              quantidade: parseFloat(item.quantidade) || 1,
-              preco: parseFloat(item.precoUnitario) || 0,
-              estoqueId: item.estoqueId ?? item.produtoId,
-              produtoId: item.produtoId,
-              subtotal: parseFloat(item.subtotal) || 0,
-              observacao: item.observacao || "",
-            }));
-        }
+      } else {
+        setOrcamentosPedido([]);
       }
 
       let etapa = raw?.servico
         ? PedidosService.calcularEtapaServicoPorAgendamentos(
             raw.servico,
             raw?.servico?.etapa?.nome || "PENDENTE",
+            orcamentosCarregados,
           )
         : "PENDENTE";
       if (!raw?.servico && mapped.status) {
@@ -501,82 +487,31 @@ export default function PedidoDetalhe() {
       const etapaNormalizada = normalizarEtapaParaOption(etapa);
       setEtapaOriginal(etapaNormalizada);
 
-      // Extrair produtos de agendamentos (apenas ORCAMENTO armazena agendamentoProdutos no backend)
-      const _extrairAgProdutos = (agendamentos) => {
-        const seen = new Set();
-        return agendamentos
-          .flatMap((ag) => ag.agendamentoProdutos ?? ag.produtos ?? [])
-          .filter((ap) => {
-            if (!ap.produto?.id || seen.has(ap.produto.id)) return false;
-            seen.add(ap.produto.id);
-            return true;
-          })
-          .map((ap) => ({
-            nome: ap.produto.nome || `Produto #${ap.produto.id}`,
-            quantidade: parseFloat(ap.quantidadeReservada) || 1,
-            preco: parseFloat(ap.produto.precoUnitario || ap.produto.preco || 0),
-            estoqueId: ap.produto.id,
-            produtoId: ap.produto.id,
-            subtotal: 0,
-            observacao: "",
-          }));
-      };
-
-      const _agsAtivas = (raw?.servico?.agendamentos || []).filter(
-        (ag) => ag.statusAgendamento?.nome !== "CANCELADO" && ag.statusAgendamento?.nome !== "INATIVO",
-      );
-
-      // Produtos reservados nos agendamentos de orçamento
-      const produtosAgendamento = _extrairAgProdutos(
-        _agsAtivas.filter((ag) => ag.tipoAgendamento === "ORCAMENTO"),
-      );
-
-      // Mesclar todas as fontes por estoqueId:
-      // base = orcamento_item (planejado), overlay = agendamentoProdutos (reservado, tem prioridade de quantidade)
-      const _mergeById = (base, overlay) => {
-        const map = new Map();
-        for (const p of base) {
-          if (p.estoqueId) map.set(p.estoqueId, { ...p });
+      // Fonte única de verdade da lista de produtos do serviço: GET /servicos/{id}/produtos.
+      let produtosServico = [];
+      if (raw?.servico?.id) {
+        const spRes = await servicosService.listarProdutos(raw.servico.id);
+        if (spRes.success && Array.isArray(spRes.data)) {
+          produtosServico = spRes.data.map((sp) => {
+            const quantidade = parseFloat(sp.quantidadePlanejada) || 0;
+            const preco = parseFloat(sp.precoUnitario) || 0;
+            return {
+              nome: sp.produtoNome || `Produto #${sp.produtoId}`,
+              quantidade,
+              preco,
+              estoqueId: sp.produtoId,
+              produtoId: sp.produtoId,
+              subtotal: quantidade * preco,
+              observacao: sp.observacao || "",
+              quantidadeUtilizada:
+                sp.quantidadeUtilizada != null ? parseFloat(sp.quantidadeUtilizada) : null,
+            };
+          });
         }
-        for (const p of overlay) {
-          if (!p.estoqueId) continue;
-          if (map.has(p.estoqueId)) {
-            // Quantidade reservada no agendamento substitui a planejada no orçamento
-            map.get(p.estoqueId).quantidade = p.quantidade;
-          } else {
-            map.set(p.estoqueId, { ...p });
-          }
-        }
-        return Array.from(map.values());
-      };
+      }
 
-      const mergeProdutosByProdutoId = (base, overlay) => {
-        const map = new Map();
-
-        for (const produto of base) {
-          const key = produto.produtoId ?? produto.estoqueId;
-          if (key) map.set(key, { ...produto });
-        }
-
-        for (const produto of overlay) {
-          const key = produto.produtoId ?? produto.estoqueId;
-          if (!key) continue;
-
-          if (map.has(key)) {
-            map.get(key).quantidade = produto.quantidade;
-          } else {
-            map.set(key, { ...produto });
-          }
-        }
-
-        return Array.from(map.values());
-      };
-
-      const produtosMesclados = mergeProdutosByProdutoId(
-        produtosOrcamento,
-        produtosAgendamento,
-      );
-      const produtosFinais = mapped.produtos?.length > 0 ? mapped.produtos : produtosMesclados;
+      // Pedido de produto puro continua usando item_pedido; serviço usa servico_produto.
+      const produtosFinais = mapped.produtos?.length > 0 ? mapped.produtos : produtosServico;
 
       setFormData({
         clienteNome:         mapped.clienteNome           || "",
@@ -688,6 +623,49 @@ export default function PedidoDetalhe() {
       produtos: p.produtos.filter((_, i) => i !== index),
     }));
 
+  const abrirModalAprovarOrcamento = () => {
+    if (orcamentosPedido.length === 0) {
+      setError(
+        "Não há orçamento criado para este pedido. Gere um orçamento antes de aprovar.",
+      );
+      return;
+    }
+    setError(null);
+    const jaAprovado = orcamentosPedido.find(
+      (o) => normalizeStatus(o.status?.nome || o.statusNome) === "APROVADO",
+    );
+    setOrcamentoAprovarSelecionado(
+      jaAprovado?.id ?? orcamentosPedido[orcamentosPedido.length - 1]?.id ?? null,
+    );
+    setShowAprovarOrcamentoModal(true);
+  };
+
+  const confirmarAprovacaoOrcamento = async () => {
+    if (!orcamentoAprovarSelecionado || aprovandoOrcamento) return;
+    setAprovandoOrcamento(true);
+    setError(null);
+    try {
+      const resp = await orcamentosService.atualizarStatus(
+        orcamentoAprovarSelecionado,
+        "APROVADO",
+      );
+      if (!resp.success) {
+        throw new Error(resp.error || "Erro ao aprovar orçamento");
+      }
+      // O backend marca o selecionado como APROVADO, reprova automaticamente os demais
+      // orçamentos do pedido, sincroniza os produtos e avança a etapa para "ORÇAMENTO APROVADO".
+      setShowAprovarOrcamentoModal(false);
+      setFormData((prev) => ({ ...prev, etapaServico: "AGUARDANDO AGENDA DE SERVIÇO" }));
+      await fetchPedido();
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), 2500);
+    } catch (err) {
+      setError(err?.message || "Erro ao aprovar orçamento");
+    } finally {
+      setAprovandoOrcamento(false);
+    }
+  };
+
   const executarSave = async (produtosObs = "") => {
     if (saving) return;
 
@@ -702,6 +680,17 @@ export default function PedidoDetalhe() {
       possuiAgendamentoOrcamentoEmAberto()
     ) {
       setError(mensagemBloqueioEtapaAnalise);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (
+      normalizeStatus(formData.etapaServico) === "ANALISE DO ORCAMENTO" &&
+      orcamentosPedido.length === 0
+    ) {
+      setError(
+        "Não há orçamento criado para este pedido. Gere um orçamento antes de avançar a etapa.",
+      );
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -758,11 +747,28 @@ export default function PedidoDetalhe() {
           : [],
       };
 
-      console.log("🔄 Enviando salvamento:", requestBody);
+      await Api.put(`/pedidos/${id}`, requestBody);
 
-      const response = await Api.put(`/pedidos/${id}`, requestBody);
-      
-      console.log("✅ Resposta da API:", response);
+      // Persiste a lista única de produtos do serviço (servico_produto), sempre.
+      if (rawPedido?.servico?.id) {
+        const produtosServico = formData.produtos
+          .map((p, index) => ({
+            produtoId: resolveProdutoId(p),
+            quantidadePlanejada: parseFloat(p.quantidade) || 0,
+            precoUnitario: parseFloat(p.preco) || 0,
+            observacao: p.observacao || "",
+            ordem: index,
+          }))
+          .filter((p) => p.produtoId);
+
+        const spResp = await servicosService.salvarProdutos(
+          rawPedido.servico.id,
+          produtosServico,
+        );
+        if (!spResp.success) {
+          throw new Error(spResp.error || "Erro ao salvar produtos do serviço");
+        }
+      }
 
       const etapaNormalizada = normalizeStatus(etapaParaSalvar);
       const etapaAnteriorNormalizada = normalizeStatus(etapaOriginal);
@@ -780,7 +786,7 @@ export default function PedidoDetalhe() {
         return;
       }
 
-      if (etapaFoiAlterada && etapaNormalizada === "ORCAMENTO APROVADO" && !temAgendamentoServicoAtivo) {
+      if (etapaFoiAlterada && etapaNormalizada === "AGUARDANDO AGENDA DE SERVICO" && !temAgendamentoServicoAtivo) {
         setShowServicoSuggestion(true);
         return;
       }
@@ -854,53 +860,55 @@ export default function PedidoDetalhe() {
       obs = `\n\nProdutos utilizados — ${produtosLivres.trim()}`;
     }
 
-    // Atualizar quantidadeUtilizada nos agendamentos vinculados
-    // Só tenta o PUT se o pedido tiver produtos diretos (item_pedido) no backend,
-    // pois o endpoint valida isso. Pedidos de serviço guardam produtos via agendamentoProdutos.
-    const pedidoTemProdutosDiretos = (rawPedido?.produtos?.length ?? 0) > 0;
-    if (pedidoTemProdutosDiretos) {
-      const agendamentosServico = (pedido?.servico?.agendamentos || []).filter(
-        (ag) => ag.tipoAgendamento === "SERVICO" && ag.id,
-      );
-      for (const ag of agendamentosServico) {
-        const agProdutos = ag.agendamentoProdutos ?? ag.produtos ?? [];
-        if (agProdutos.length > 0) {
-          try {
-            const produtosAtualizados = agProdutos.map((ap) => {
-              const idx = formData.produtos.findIndex(
-                (p) => resolveProdutoId(p) === ap.produto?.id || p.nome === ap.produto?.nome,
-              );
-              const usado = idx >= 0 ? produtosUsados[idx] !== false : true;
-              const qtdUsada = idx >= 0
-                ? (usado ? (parseFloat(produtosQuantidades[idx]) || ap.quantidadeReservada) : 0)
-                : ap.quantidadeUtilizada ?? 0;
-              return {
-                produtoId: ap.produto?.id,
-                quantidadeUtilizada: qtdUsada,
-                quantidadeReservada: ap.quantidadeReservada,
-              };
-            }).filter((p) => p.produtoId);
-            if (produtosAtualizados.length > 0) {
-              await Api.put(`/agendamentos/${ag.id}`, {
-                servicoId: ag.servico?.id ?? pedido?.servico?.id,
-                tipoAgendamento: ag.tipoAgendamento,
-                dataAgendamento: ag.dataAgendamento,
-                inicioAgendamento: ag.inicioAgendamento,
-                fimAgendamento: ag.fimAgendamento,
-                statusAgendamento: ag.statusAgendamento,
-                observacao: ag.observacao || "",
-                endereco: ag.endereco || {},
-                funcionariosIds: (ag.funcionarios || []).map((f) => f.id),
-                produtos: produtosAtualizados,
-              });
-            }
-          } catch (err) {
-            console.warn("Não foi possível atualizar produtos do agendamento:", err);
-          }
+    // Agendamento de serviço ativo a ser concluído (com informe de utilização).
+    const agendamentoServico = (pedido?.servico?.agendamentos || []).find(
+      (ag) =>
+        ag.tipoAgendamento === "SERVICO" &&
+        ag.id &&
+        !["CANCELADO", "CONCLUÍDO", "CONCLUIDO", "INATIVO"].includes(
+          ag.statusAgendamento?.nome,
+        ),
+    );
+
+    if (agendamentoServico) {
+      const produtosUtilizados = formData.produtos
+        .map((p, i) => {
+          const usado = produtosUsados[i] !== false;
+          const qtdReservada = parseFloat(p.quantidade) || 0;
+          const qtdUsada = usado
+            ? parseFloat(produtosQuantidades[i]) || qtdReservada
+            : 0;
+          return {
+            produtoId: resolveProdutoId(p),
+            quantidadeUtilizada: qtdUsada,
+          };
+        })
+        .filter((p) => p.produtoId != null);
+
+      setSaving(true);
+      setError(null);
+      try {
+        const resp = await servicosService.concluirAgendamento(
+          agendamentoServico.id,
+          produtosUtilizados,
+        );
+        if (!resp.success) {
+          throw new Error(resp.error || "Erro ao concluir o serviço");
         }
+        await fetchPedido();
+        setShowSuccessModal(true);
+        setTimeout(() => setShowSuccessModal(false), 2500);
+      } catch (err) {
+        console.error("Erro ao concluir serviço:", err);
+        setError(err.message || "Erro ao concluir o serviço");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } finally {
+        setSaving(false);
       }
+      return;
     }
 
+    // Sem agendamento de serviço: conclui via salvamento padrão (registra observação).
     executarSave(obs);
   };
 
@@ -938,6 +946,19 @@ export default function PedidoDetalhe() {
   const agendamentos  = pedido.servico?.agendamentos || [];
   const servicoInfo   = pedido.servico || null;
   const produtosCount = formData.produtos.length;
+
+  // Orçamento efetivamente aprovado — única fonte que reflete na seção de produtos.
+  const orcamentoAprovado = orcamentosPedido.find(
+    (o) => normalizeStatus(o.status?.nome || o.statusNome) === "APROVADO",
+  );
+
+  // Título dinâmico da seção de produtos do serviço (derivado do estado do serviço).
+  // "Orçados" só vale quando há um orçamento APROVADO (que é o que reflete na lista).
+  const tituloProdutos = etapaConcluida(formData.etapaServico)
+    ? "PRODUTOS UTILIZADOS"
+    : orcamentoAprovado
+      ? "PRODUTOS ORÇADOS QUE SERÃO USADOS"
+      : "PRODUTOS ESTIMADOS QUE SERÃO USADOS";
 
   return (
     <div className="app-page flex bg-[#f7f9fa] min-h-screen overflow-x-hidden">
@@ -984,8 +1005,16 @@ export default function PedidoDetalhe() {
               </div>
             )}
 
-            {/* Stepper */}
-            <Stepper status={formData.etapaServico || pedido.servico?.etapa || pedido.status} />
+            {/* Stepper — usa a etapa efetiva derivada do agendamento ativo (mesma regra do save),
+                evitando exibir etapa legada/desatualizada (ex.: orçamento em andamento aparecendo como etapa 5). */}
+            <Stepper
+              status={
+                (etapaTravadaPorAgendamento && etapaObrigatoriaPorAgendamento) ||
+                formData.etapaServico ||
+                pedido.servico?.etapa ||
+                pedido.status
+              }
+            />
 
             {/* Grid principal */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1234,6 +1263,13 @@ export default function PedidoDetalhe() {
                               setShowTaskModal(true);
                               return;
                             }
+                            if (
+                              normalizeStatus(novaEtapa) === "AGUARDANDO AGENDA DE SERVICO" &&
+                              normalizeStatus(formData.etapaServico) === "ANALISE DO ORCAMENTO"
+                            ) {
+                              abrirModalAprovarOrcamento();
+                              return;
+                            }
                             setFormData((prev) => ({
                               ...prev,
                               etapaServico: novaEtapa,
@@ -1309,24 +1345,44 @@ export default function PedidoDetalhe() {
                 <SectionCard
                   title={
                     <>
-                      <span className="text-white/80 pr-2 hidden sm:inline">PRODUTOS UTILIZADOS</span>
+                      <span className="text-white/80 pr-2 hidden sm:inline">{tituloProdutos}</span>
                       <span className="text-white/80 pr-2 sm:hidden">PROD.</span>
                       <span className="ml-1 bg-white text-[#002A4B] px-2 py-0.5 rounded-full font-extrabold text-xs">
                         {produtosCount}
                       </span>
+                      {orcamentoAprovado && (
+                        <span className="ml-2 inline-flex items-center gap-1 bg-green-500/90 text-white px-2 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wide">
+                          <FileText className="w-3 h-3" />
+                          Orçamento {orcamentoAprovado.numeroOrcamento || `#${orcamentoAprovado.id}`} aprovado
+                        </span>
+                      )}
                     </>
                   }
                   collapsible
                   isOpen={expandedSections.instalacao}
                   onToggle={() => toggleSection("instalacao")}
                   action={
-                    <button
-                      onClick={handleAdicionarProduto}
-                      className="flex items-center gap-2 bg-white/25 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-white/35 transition-all cursor-pointer font-semibold text-sm shadow-md hover:shadow-lg hover:scale-105"
-                    >
-                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                      <span className="hidden sm:inline">Adicionar Produto</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {orcamentosPedido.length > 0 && !etapaConcluida(formData.etapaServico) && (
+                        <button
+                          onClick={abrirModalAprovarOrcamento}
+                          className="flex items-center gap-2 bg-green-500/90 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-500 transition-all cursor-pointer font-semibold text-sm shadow-md hover:shadow-lg hover:scale-105"
+                          title="Definir qual orçamento foi aprovado"
+                        >
+                          <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <span className="hidden sm:inline">
+                            {orcamentoAprovado ? "Trocar orçamento aprovado" : "Aprovar orçamento"}
+                          </span>
+                        </button>
+                      )}
+                      <button
+                        onClick={handleAdicionarProduto}
+                        className="flex items-center gap-2 bg-white/25 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-white/35 transition-all cursor-pointer font-semibold text-sm shadow-md hover:shadow-lg hover:scale-105"
+                      >
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="hidden sm:inline">Adicionar Produto</span>
+                      </button>
+                    </div>
                   }
                 >
                   <div className="p-6">
@@ -1417,6 +1473,17 @@ export default function PedidoDetalhe() {
                                               key={item.id}
                                               type="button"
                                               onMouseDown={() => {
+                                                const jaAdicionado = formData.produtos.some(
+                                                  (p, i) =>
+                                                    i !== index &&
+                                                    ((item.produto?.id != null && p.produtoId === item.produto.id) ||
+                                                      p.estoqueId === item.id),
+                                                );
+                                                if (jaAdicionado) {
+                                                  setError("Produto já adicionado. Ajuste a quantidade na linha existente.");
+                                                  setProdutoDropdownOpen((p) => ({ ...p, [index]: false }));
+                                                  return;
+                                                }
                                                 const updated = [...formData.produtos];
                                                 updated[index] = {
                                                   ...updated[index],
@@ -1425,6 +1492,7 @@ export default function PedidoDetalhe() {
                                                   nome,
                                                   preco: item.produto?.preco ?? item.produto?.precoVenda ?? item.preco ?? updated[index].preco ?? 0,
                                                 };
+                                                setError(null);
                                                 setFormData((p) => ({ ...p, produtos: updated }));
                                                 setProdutoDropdownOpen((p) => ({ ...p, [index]: false }));
                                               }}
@@ -1719,6 +1787,83 @@ export default function PedidoDetalhe() {
               >
                 <Calendar className="w-4 h-4" />
                 Agendar Serviço
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAprovarOrcamentoModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-xl bg-white shadow-2xl flex flex-col overflow-hidden">
+            <div className="bg-[#002A4B] px-6 py-4">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Qual orçamento foi aprovado?
+              </h3>
+              <p className="text-xs text-white/70 mt-1">
+                Selecione o orçamento aprovado. Só pode existir um aprovado — os demais serão
+                reprovados automaticamente e os produtos do aprovado passam a valer para o serviço.
+              </p>
+            </div>
+
+            <div className="p-6 flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+              {orcamentosPedido.map((orc) => {
+                const statusNome = normalizeStatus(orc.status?.nome || orc.statusNome || "");
+                const selecionado = orcamentoAprovarSelecionado === orc.id;
+                return (
+                  <label
+                    key={orc.id}
+                    className={`flex items-center gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                      selecionado ? "border-[#007EA7] bg-[#eef8fc]" : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="orcamentoAprovado"
+                      checked={selecionado}
+                      onChange={() => setOrcamentoAprovarSelecionado(orc.id)}
+                      className="w-4 h-4 accent-[#007EA7] cursor-pointer shrink-0"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {orc.numeroOrcamento ? `Orçamento ${orc.numeroOrcamento}` : `Orçamento #${orc.id}`}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatCurrency(parseFloat(orc.valorTotal) || 0)}
+                        {orc.dataOrcamento ? ` • ${formatDate(orc.dataOrcamento)}` : ""}
+                      </p>
+                    </div>
+                    {statusNome === "APROVADO" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                        Aprovado atual
+                      </span>
+                    )}
+                    {statusNome === "RECUSADO" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                        Reprovado
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4">
+              <button
+                onClick={() => setShowAprovarOrcamentoModal(false)}
+                disabled={aprovandoOrcamento}
+                className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarAprovacaoOrcamento}
+                disabled={aprovandoOrcamento || !orcamentoAprovarSelecionado}
+                className="px-5 py-2 text-sm font-semibold text-white bg-[#007EA7] rounded-lg hover:bg-[#006891] transition-colors cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              >
+                <FileText className="w-4 h-4" />
+                {aprovandoOrcamento ? "Aprovando..." : "Aprovar orçamento"}
               </button>
             </div>
           </div>

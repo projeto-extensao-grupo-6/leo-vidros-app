@@ -66,6 +66,32 @@ class ServicosService extends BaseService {
     return this.delete(`/Pedidos/${id}`);
   }
 
+  /**
+   * Lista a fonte única de produtos de um serviço (servico_produto).
+   * @param {number} servicoId id do serviço (não do pedido).
+   */
+  listarProdutos(servicoId) {
+    return this.get(`/servicos/${servicoId}/produtos`);
+  }
+
+  /**
+   * Substitui a lista completa de produtos do serviço.
+   * @param {number} servicoId id do serviço.
+   * @param {Array<{produtoId:number, quantidadePlanejada:number, precoUnitario?:number, observacao?:string, ordem?:number}>} produtos
+   */
+  salvarProdutos(servicoId, produtos) {
+    return this.put(`/servicos/${servicoId}/produtos`, { produtos });
+  }
+
+  /**
+   * Conclui um agendamento de serviço informando as quantidades utilizadas.
+   * @param {number} agendamentoId
+   * @param {Array<{produtoId:number, quantidadeUtilizada:number}>} produtos
+   */
+  concluirAgendamento(agendamentoId, produtos) {
+    return this.put(`/agendamentos/${agendamentoId}/concluir`, { produtos });
+  }
+
   mapearParaBackend(dadosFrontend) {
     const servicoRequest = {
       pedido: {

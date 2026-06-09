@@ -138,7 +138,7 @@ function Cadastro() {
   const fieldError = errorType === "field" ? error : null;
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center text-center bg-gradient-to-t from-[#dff0f5] via-[#edf6f9] to-white">
+    <div className="min-h-screen w-full flex items-center justify-center text-center bg-gradient-to-t from-[#dff0f5] via-[#edf6f9] to-white p-4 sm:p-6">
       <div className="w-full max-w-6xl flex items-center justify-center gap-6 lg:items-stretch lg:gap-12">
         <div className="hidden lg:flex flex-1 h-[620px] rounded-2xl overflow-hidden shadow-2xl relative">
           <div
@@ -151,7 +151,7 @@ function Cadastro() {
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          className="h-[620px] w-full max-w-md rounded-2xl border border-gray-100 bg-white px-6 py-8 shadow-xl sm:px-10"
+          className="min-h-0 w-full max-w-md rounded-2xl border border-gray-100 bg-white px-6 py-8 shadow-xl sm:px-10 lg:h-[620px]"
         >
           <div className="mx-auto flex h-full w-full max-w-[372px] flex-col items-center justify-center gap-6">
             <div className="flex w-full flex-shrink-0 flex-col items-center gap-2 text-center">

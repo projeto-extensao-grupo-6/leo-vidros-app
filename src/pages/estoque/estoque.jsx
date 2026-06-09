@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { usePagination } from "../../hooks/usePagination";
 import Api from "../../api/client/Api";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../../components/ui/Button/Button.component";
 import Header from "../../components/layout/Header/Header";
 import Sidebar from "../../components/layout/Sidebar/Sidebar";
+import Toast from "../../components/feedback/Toast/Toast";
+import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
 import {
   Search,
   Filter,
@@ -32,6 +33,7 @@ export default function Estoque() {
   const [estoque, setEstoque] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const [isNovoItemModalOpen, setIsNovoItemModalOpen] = useState(false);
   const [isEntradaSaidaModalOpen, setIsEntradaSaidaModalOpen] = useState(false);
@@ -93,8 +95,14 @@ export default function Estoque() {
       setLoading(true);
       setError(null);
 
-      const response = await Api.get("/estoques");
-      const data = response.data?.content ?? response.data;
+      // Busca o conjunto completo: busca/filtros/paginação são aplicados client-side sobre todo
+      // o estoque. (A API só pagina por page/size; paginar no servidor faria a busca/filtro
+      // enxergarem apenas a página atual.)
+      const response = await Api.get("/estoques", {
+        params: { page: 0, size: 1000 },
+      });
+      const pageData = response.data;
+      const data = pageData?.content ?? (Array.isArray(pageData) ? pageData : []);
 
       if (!data || data.length === 0) {
         setEstoque([]);
@@ -106,6 +114,7 @@ export default function Estoque() {
     } catch (error) {
       console.error("Erro ao buscar estoque:", error);
       setError("Não foi possível carregar o estoque. Tente novamente.");
+      setToast({ type: "error", message: "Erro ao carregar estoque. Tente novamente." });
       setEstoque([]);
     } finally {
       setLoading(false);
@@ -166,22 +175,25 @@ export default function Estoque() {
     return items;
   }, [estoque, busca, selectedFilterDate, activeFilters]);
 
-  const {
-    page: pagina,
-    setPage: setPagina,
-    paginated: paginaItems,
-    totalPages: totalPaginasHook,
-    startIndex,
-    endIndex,
-    total,
-  } = usePagination(filteredEstoque, ITENS_POR_PAGINA);
+  // Paginação visual client-side dos itens filtrados da página atual do servidor
+  const [pagina, setPagina] = useState(1);
+
+  const totalPaginasLocal = Math.max(1, Math.ceil(filteredEstoque.length / ITENS_POR_PAGINA));
+  const startIndex = (pagina - 1) * ITENS_POR_PAGINA;
+  const endIndex = Math.min(startIndex + ITENS_POR_PAGINA, filteredEstoque.length);
+  const paginaItems = filteredEstoque.slice(startIndex, startIndex + ITENS_POR_PAGINA);
+
+  // Quando filteredEstoque muda, reseta para página 1
+  useEffect(() => {
+    setPagina(1);
+  }, [filteredEstoque.length]);
 
   const paginationData = {
     items: paginaItems,
-    totalPaginas: totalPaginasHook,
+    totalPaginas: totalPaginasLocal,
     startIndex,
     endIndex,
-    total,
+    total: filteredEstoque.length,
   };
 
   useEffect(() => {
@@ -593,10 +605,7 @@ export default function Estoque() {
                 {/* Linhas da tabela */}
                 <div>
                   {loading ? (
-                    <div className="text-center p-8">
-                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#007EA7]"></div>
-                      <p className="mt-2 text-gray-600">Carregando...</p>
-                    </div>
+                    <SkeletonLoader count={ITENS_POR_PAGINA} />
                   ) : renderedItems.length === 0 ? (
                     <div className="text-center p-8 text-gray-500">
                       <p>Nenhum item encontrado.</p>
@@ -647,7 +656,7 @@ export default function Estoque() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => setPagina((p) => Math.max(p - 1, 1))}
+                      onClick={() => setPagina((p) => Math.max(1, p - 1))}
                       disabled={pagina === 1}
                     >
                       Anterior
@@ -656,14 +665,9 @@ export default function Estoque() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setPagina((p) =>
-                          Math.min(p + 1, paginationData.totalPaginas),
-                        )
+                        setPagina((p) => Math.min(totalPaginasLocal, p + 1))
                       }
-                      disabled={
-                        pagina === paginationData.totalPaginas ||
-                        paginationData.totalPaginas === 0
-                      }
+                      disabled={pagina >= totalPaginasLocal}
                     >
                       Próximo
                     </Button>
@@ -709,6 +713,14 @@ export default function Estoque() {
       />
 
       <ExportarModal isOpen={isExportModalOpen} onClose={closeExportModal} />
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

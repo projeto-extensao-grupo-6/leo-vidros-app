@@ -17,10 +17,11 @@ import {
   Minimize2,
   List,
   CheckCircle2,
-  Clock,
+  Package,
+  FileText,
+  ArrowRight,
 } from "lucide-react";
 import agendamentosService from "../../../api/services/agendamentosService";
-import Swal from "sweetalert2";
 import {
   useEventDetails,
   useDeleteAgendamento,
@@ -77,7 +78,7 @@ const DeleteConfirmationModal = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[10200] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
@@ -132,16 +133,7 @@ const DeleteConfirmationModal = ({
   );
 };
 
-// --- MODAL DE FINALIZAÇÃO ---
-const FinalizarExecucaoModal = ({ isOpen, onClose, onConfirm, agendamento, isSaving }) => {
-  const [horaFim, setHoraFim] = useState("");
-
-  useEffect(() => {
-    if (isOpen && agendamento) {
-      setHoraFim(agendamento.fimAgendamento?.substring(0, 5) || agendamento.endTime?.substring(0, 5) || "");
-    }
-  }, [isOpen, agendamento]);
-
+const useEscapeToClose = (isOpen, onClose) => {
   useEffect(() => {
     if (!isOpen) return undefined;
     const handleKeyDown = (event) => {
@@ -156,12 +148,15 @@ const FinalizarExecucaoModal = ({ isOpen, onClose, onConfirm, agendamento, isSav
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
+};
 
-  const horaInicio = agendamento?.inicioAgendamento?.substring(0, 5) || agendamento?.startTime?.substring(0, 5) || "";
-  const horaFimOriginal = agendamento?.fimAgendamento?.substring(0, 5) || agendamento?.endTime?.substring(0, 5) || "";
-  const horaAtual = format(new Date(), "HH:mm");
+// --- MODAL: FINALIZAR VISTORIA (ORÇAMENTO) → GERAR ORÇAMENTO ---
+// Agendamento de orçamento (vistoria) não dá baixa em estoque: ao finalizar, leva o
+// usuário para a tela de orçamentos do pedido.
+const GerarOrcamentoModal = ({ isOpen, onClose, onConfirm, isSaving }) => {
+  useEscapeToClose(isOpen, onClose);
 
-  if (!isOpen || !agendamento) return null;
+  if (!isOpen) return null;
 
   return createPortal(
     <AnimatePresence>
@@ -180,40 +175,19 @@ const FinalizarExecucaoModal = ({ isOpen, onClose, onConfirm, agendamento, isSav
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50 px-6 py-4">
-            <div className="rounded-lg bg-blue-100 p-2">
-              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+            <div className="rounded-lg bg-amber-100 p-2">
+              <FileText className="h-5 w-5 text-amber-600" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-900">Finalizar Execução</h3>
-              <p className="text-xs text-gray-500">Informe o horário real de término</p>
+              <h3 className="text-base font-bold text-gray-900">Gerar Orçamento</h3>
+              <p className="text-xs text-gray-500">Finalizar vistoria</p>
             </div>
           </div>
 
-          <div className="space-y-4 px-6 py-5">
-            <div className="flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm">
-              <Clock className="h-4 w-4 shrink-0 text-gray-400" />
-              <span className="text-gray-500">Horário previsto:</span>
-              <span className="ml-auto font-semibold text-gray-700">{horaInicio} – {horaFimOriginal}</span>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Horário real de término
-              </label>
-              <input
-                type="time"
-                value={horaFim}
-                onChange={(e) => setHoraFim(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              />
-              <button
-                type="button"
-                onClick={() => setHoraFim(horaAtual)}
-                className="mt-1.5 cursor-pointer text-xs text-[#007EA7] hover:underline"
-              >
-                Usar horário atual ({horaAtual})
-              </button>
-            </div>
+          <div className="px-6 py-5 text-sm leading-relaxed text-gray-600">
+            A vistoria será concluída e você será levado para a tela de orçamentos
+            do pedido para gerar o orçamento. Nenhuma baixa de estoque é realizada
+            nesta etapa.
           </div>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
@@ -225,14 +199,189 @@ const FinalizarExecucaoModal = ({ isOpen, onClose, onConfirm, agendamento, isSav
               Cancelar
             </button>
             <button
-              onClick={() => onConfirm(horaFim)}
-              disabled={isSaving || !horaFim}
+              onClick={onConfirm}
+              disabled={isSaving}
+              className="flex cursor-pointer items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-600 disabled:opacity-60"
+            >
+              {isSaving ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Gerando...</>
+              ) : (
+                <>Gerar Orçamento <ArrowRight className="h-4 w-4" /></>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>,
+    document.body,
+  );
+};
+
+// --- MODAL: FINALIZAR SERVIÇO → VALIDAÇÃO/BAIXA DE ESTOQUE ---
+// Agendamento de serviço: confirma a quantidade utilizada de cada produto reservado
+// e conclui via PUT /agendamentos/{id}/concluir (dá baixa e libera o excedente).
+const ConcluirServicoModal = ({ isOpen, onClose, onConfirm, servicoId, isSaving }) => {
+  const [produtos, setProdutos] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  useEscapeToClose(isOpen, onClose);
+
+  useEffect(() => {
+    if (!isOpen || !servicoId) return undefined;
+    let cancelado = false;
+    setLoading(true);
+    setErro(null);
+
+    agendamentosService.listarProdutosServico(servicoId).then((res) => {
+      if (cancelado) return;
+      if (res.success) {
+        const lista = (res.data || [])
+          .filter((p) => p.ativo !== false)
+          .map((p) => {
+            const planejada = Number(p.quantidadePlanejada) || 0;
+            return {
+              produtoId: p.produtoId,
+              nome: p.produtoNome,
+              unidade: p.unidadeMedida || "",
+              planejada,
+              utilizada: String(planejada),
+            };
+          });
+        setProdutos(lista);
+      } else {
+        setErro(res.error || "Não foi possível carregar os produtos do serviço.");
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [isOpen, servicoId]);
+
+  const handleQuantidade = (idx, value) => {
+    const limpo = value.replace(/[^0-9.,]/g, "").replace(",", ".");
+    setProdutos((prev) =>
+      prev.map((p, i) => (i === idx ? { ...p, utilizada: limpo } : p)),
+    );
+  };
+
+  const linhaInvalida = (p) => {
+    const v = Number(p.utilizada);
+    return p.utilizada === "" || Number.isNaN(v) || v < 0 || v > p.planejada;
+  };
+
+  const temInvalido = produtos.some(linhaInvalida);
+
+  const handleConfirm = () => {
+    const payload = produtos.map((p) => ({
+      produtoId: p.produtoId,
+      quantidadeUtilizada: Number(p.utilizada) || 0,
+    }));
+    onConfirm(payload);
+  };
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[10200] flex items-center justify-center bg-black/50 p-4"
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          className="flex max-h-[85vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50 px-6 py-4">
+            <div className="rounded-lg bg-blue-100 p-2">
+              <Package className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900">Finalizar Serviço</h3>
+              <p className="text-xs text-gray-500">
+                Confirme a quantidade utilizada de cada produto
+              </p>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin" /> Carregando produtos...
+              </div>
+            ) : erro ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {erro}
+              </div>
+            ) : produtos.length === 0 ? (
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+                Nenhum produto reservado para este serviço. O agendamento será
+                concluído sem baixa de estoque.
+              </div>
+            ) : (
+              produtos.map((p, idx) => (
+                <div
+                  key={p.produtoId}
+                  className="rounded-lg border border-gray-200 p-3"
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-gray-800">
+                      {p.nome}
+                    </span>
+                    <span className="shrink-0 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-500">
+                      Reservado: {p.planejada}
+                      {p.unidade ? ` ${p.unidade}` : ""}
+                    </span>
+                  </div>
+                  <label className="mb-1 block text-xs font-medium text-gray-600">
+                    Quantidade utilizada
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={p.utilizada}
+                    onChange={(e) => handleQuantidade(idx, e.target.value)}
+                    className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+                      linhaInvalida(p)
+                        ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    }`}
+                  />
+                  {linhaInvalida(p) && (
+                    <p className="mt-1 text-xs text-red-600">
+                      Informe um valor entre 0 e {p.planejada}.
+                    </p>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+            <button
+              onClick={onClose}
+              disabled={isSaving}
+              className="cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleConfirm}
+              disabled={isSaving || loading || !!erro || temInvalido}
               className="flex cursor-pointer items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
             >
               {isSaving ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Finalizando...</>
               ) : (
-                <><CheckCircle2 className="h-4 w-4" /> Finalizar</>
+                <><CheckCircle2 className="h-4 w-4" /> Concluir Serviço</>
               )}
             </button>
           </div>
@@ -259,13 +408,18 @@ const EventDetailsModal = ({
   };
 
   const { deleteAgendamento, deleting } = useDeleteAgendamento(onDeleteSuccess);
+  const navigate = useNavigate();
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isFinalizarModalOpen, setIsFinalizarModalOpen] = useState(false);
+  const [isConcluirServicoOpen, setIsConcluirServicoOpen] = useState(false);
+  const [isGerarOrcamentoOpen, setIsGerarOrcamentoOpen] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   const isFinalizado = isFinalizedStatus(details?.statusAgendamento);
   const canFinalizar = !isFinalizado;
+  const tipoAgendamento =
+    details?.tipoAgendamento?.value || details?.tipoAgendamento;
+  const isOrcamento = tipoAgendamento === "ORCAMENTO";
 
   const handleDeleteClick = () => {
     if (isFinalizado) return;
@@ -279,33 +433,60 @@ const EventDetailsModal = ({
     }
   };
 
-  const handleFinalizarConfirm = async (horaFim) => {
+  // Botão "Finalizar Execução": vistoria (orçamento) abre o modal de gerar orçamento;
+  // serviço abre o modal de validação/baixa de estoque.
+  const handleFinalizarClick = () => {
+    if (isOrcamento) {
+      setIsGerarOrcamentoOpen(true);
+    } else {
+      setIsConcluirServicoOpen(true);
+    }
+  };
+
+  // Vistoria concluída → não dá baixa em estoque, leva para a tela de orçamentos.
+  const handleGerarOrcamento = async () => {
     if (!details) return;
     setIsFinalizing(true);
     try {
+      const fim = details.fimAgendamento
+        || (details.endTime?.length === 5 ? `${details.endTime}:00` : details.endTime);
       const result = await agendamentosService.update(details.id, {
         tipoAgendamento: details.tipoAgendamento,
         dataAgendamento: details.dataAgendamento,
         inicioAgendamento: details.inicioAgendamento || details.startTime,
-        fimAgendamento: horaFim.length === 5 ? `${horaFim}:00` : horaFim,
+        fimAgendamento: fim,
         statusAgendamento: { tipo: "AGENDAMENTO", nome: "CONCLUIDO" },
         observacao: details.observacao || null,
       });
       if (result.success) {
-        setIsFinalizarModalOpen(false);
+        const pedidoId = details.servico?.pedidoId;
+        setIsGerarOrcamentoOpen(false);
         onEventDeleted?.(details.id);
         onClose?.();
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Erro ao finalizar",
-          text: result.error || "Não foi possível finalizar o agendamento.",
-          timer: 4000,
-          showConfirmButton: true,
-        });
+        if (pedidoId) {
+          navigate(`/pedidos/${pedidoId}/orcamento`);
+        }
       }
     } catch (err) {
-      console.error("Erro ao finalizar agendamento:", err);
+      console.error("Erro ao finalizar vistoria:", err);
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
+
+  // Serviço concluído → dá baixa do utilizado e libera o excedente reservado.
+  const handleConcluirServico = async (produtos) => {
+    if (!details) return;
+    setIsFinalizing(true);
+    try {
+      const result = await agendamentosService.concluir(details.id, produtos);
+      if (result.success) {
+        setIsConcluirServicoOpen(false);
+        onEventDeleted?.(details.id);
+        onClose?.();
+      }
+    } catch (err) {
+      console.error("Erro ao concluir serviço:", err);
     } finally {
       setIsFinalizing(false);
     }
@@ -322,8 +503,12 @@ const EventDetailsModal = ({
       event.stopPropagation();
       event.stopImmediatePropagation?.();
 
-      if (isFinalizarModalOpen) {
-        setIsFinalizarModalOpen(false);
+      if (isConcluirServicoOpen) {
+        setIsConcluirServicoOpen(false);
+        return;
+      }
+      if (isGerarOrcamentoOpen) {
+        setIsGerarOrcamentoOpen(false);
         return;
       }
       if (isDeleteModalOpen) {
@@ -335,7 +520,7 @@ const EventDetailsModal = ({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [details, isDeleteModalOpen, isFinalizarModalOpen, onClose]);
+  }, [details, isDeleteModalOpen, isConcluirServicoOpen, isGerarOrcamentoOpen, onClose]);
 
   if (!details) return null;
 
@@ -430,7 +615,7 @@ const EventDetailsModal = ({
                   onDelete={handleDeleteClick}
                   onViewMap={() => onGeoLocationClick?.(details.endereco)}
                   onEdit={() => onEdit?.(details)}
-                  onFinalizar={() => setIsFinalizarModalOpen(true)}
+                  onFinalizar={handleFinalizarClick}
                   isDeleting={deleting}
                   isLoading={loading}
                   hasAddress={!!details.endereco}
@@ -451,11 +636,18 @@ const EventDetailsModal = ({
         isDeleting={deleting}
       />
 
-      <FinalizarExecucaoModal
-        isOpen={isFinalizarModalOpen}
-        onClose={() => setIsFinalizarModalOpen(false)}
-        onConfirm={handleFinalizarConfirm}
-        agendamento={details}
+      <GerarOrcamentoModal
+        isOpen={isGerarOrcamentoOpen}
+        onClose={() => setIsGerarOrcamentoOpen(false)}
+        onConfirm={handleGerarOrcamento}
+        isSaving={isFinalizing}
+      />
+
+      <ConcluirServicoModal
+        isOpen={isConcluirServicoOpen}
+        onClose={() => setIsConcluirServicoOpen(false)}
+        onConfirm={handleConcluirServico}
+        servicoId={details.servico?.id}
         isSaving={isFinalizing}
       />
     </>

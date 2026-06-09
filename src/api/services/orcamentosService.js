@@ -58,44 +58,31 @@ class OrcamentosService extends BaseService {
   }
 
   async baixarPdf(id, numeroOrcamento) {
+    const tentarBaixar = async (url) => {
+      const response = await this.api.get(url, { responseType: "blob" });
+      if (response.status === 202) {
+        return { success: false, regenerating: true };
+      }
+      return { success: true, data: response.data, status: response.status };
+    };
+
     try {
       if (numeroOrcamento) {
         try {
-          const response = await this.api.get(
-            `/orcamentos/numero/${numeroOrcamento}/pdf`,
-            {
-              responseType: "blob",
-            }
-          );
-          return {
-            success: true,
-            data: response.data,
-            status: response.status,
-          };
-        } catch (cacheError) {
-          console.warn(
-            `PDF não está disponível via número ${numeroOrcamento}, tentando por ID...`,
-            cacheError.response?.status
-          );
+          const result = await tentarBaixar(`/orcamentos/numero/${numeroOrcamento}/pdf`);
+          if (result.success || result.regenerating) return result;
+          // PDF indisponível por número — segue para a busca por ID abaixo.
+        } catch {
+          // segue para a busca por ID abaixo.
         }
       }
 
-      const response = await this.api.get(`/orcamentos/id/${id}/pdf`, {
-        responseType: "blob",
-      });
-      return {
-        success: true,
-        data: response.data,
-        status: response.status,
-      };
+      return await tentarBaixar(`/orcamentos/id/${id}/pdf`);
     } catch (error) {
       return {
         success: false,
         data: null,
-        error:
-          error.response?.data?.message ??
-          error.message ??
-          "Erro ao baixar PDF",
+        error: error.response?.data?.message ?? error.message ?? "Erro ao baixar PDF",
         status: error.response?.status,
       };
     }
@@ -121,9 +108,6 @@ class OrcamentosService extends BaseService {
         
         tentativa++;
         if (tentativa < maxTentativas) {
-          console.log(
-            `⏳ PDF não pronto ainda... tentativa ${tentativa}/${maxTentativas}`
-          );
           await new Promise((resolve) => setTimeout(resolve, intervalo));
         }
       } catch (error) {
@@ -154,12 +138,6 @@ class OrcamentosService extends BaseService {
       signal: abortController.signal,
     })
       .then(async (response) => {
-        console.log({
-          contentType: response.headers.get("content-type"),
-          cacheControl: response.headers.get("cache-control"),
-          transferEncoding: response.headers.get("transfer-encoding"),
-        });
-        
         if (!response.ok) {
           throw new Error(`SSE request failed: ${response.status}`);
         }

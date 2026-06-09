@@ -51,7 +51,7 @@ export default function FeedbackDialog({
   contentClassName = "",
   bodyClassName = "",
   footerClassName = "",
-  zIndexClassName = "z-[9999]",
+  zIndexClassName = "z-[99999]",
   onMouseEnter,
   onMouseLeave,
 }) {
