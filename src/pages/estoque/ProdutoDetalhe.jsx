@@ -34,6 +34,11 @@ import UniversalInput from "../../components/ui/Input/UniversalInput";
 import { repairEncoding } from "../../utils/fixEncoding";
 import Swal from "sweetalert2";
 
+const formatQtd = (n) => {
+  const num = parseFloat(n) || 0;
+  return parseFloat(num.toFixed(2));
+};
+
 const formatObservacao = (observacao) => {
   if (!observacao) return "N/A";
   return observacao.replace(/(\d+\.\d{3,})/g, (match) => {
@@ -497,21 +502,21 @@ export default function ProductDetailPage() {
   const estoqueKpiStats = [
     {
       title: "Quantidade Total",
-      value: estoque.quantidadeTotal,
+      value: formatQtd(estoque.quantidadeTotal),
       caption: produto.unidademedida,
       icon: Package,
       ...estoqueKpiBaseClasses,
     },
     {
       title: "Disponível",
-      value: quantidadeDisponivel,
+      value: formatQtd(quantidadeDisponivel),
       caption: "Pronto para uso",
       icon: TrendingUp,
       ...getStatusClasses(disponibilidadeStatus),
     },
     {
       title: "Reservado",
-      value: estoque.reservado,
+      value: formatQtd(estoque.reservado),
       caption: "Em separação",
       icon: TrendingDown,
       ...getStatusClasses(reservadoStatus),

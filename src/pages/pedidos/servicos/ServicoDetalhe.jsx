@@ -1513,22 +1513,23 @@ export default function PedidoDetalhe() {
                                 </div>
                               </FieldGroup>
                               <div className="grid grid-cols-3 gap-3">
-                                <FieldGroup label="Qtd">
+                                <FieldGroup label="Quantidade">
                                   <input
                                     type="number"
                                     min="1"
-                                    value={produto.quantidade}
+                                    step="0.01"
+                                    value={parseFloat((produto.quantidade || 0).toFixed(2))}
                                     onChange={(e) => handleProdutoChange(index, "quantidade", e.target.value)}
                                     placeholder="0"
                                     className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] outline-none shadow-sm"
                                   />
                                 </FieldGroup>
-                                <FieldGroup label="Preço Unit.">
+                                <FieldGroup label="Preço Unitário">
                                   <input
                                     type="number"
                                     step="0.01"
                                     min="0"
-                                    value={produto.preco}
+                                    value={parseFloat((produto.preco || 0).toFixed(2))}
                                     onChange={(e) => handleProdutoChange(index, "preco", e.target.value)}
                                     placeholder="0,00"
                                     className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] outline-none shadow-sm"

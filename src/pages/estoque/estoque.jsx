@@ -9,14 +9,12 @@ import SkeletonLoader from "../../components/feedback/Skeleton/SkeletonLoader";
 import {
   Search,
   Filter,
-  Download,
   ChevronDown,
   ArrowRightLeft,
   Plus
 } from "lucide-react";
 import NovoProdutoModal from "./components/ModalEstoque/NovoProdutoModal";
 import FeedbackModal from "../../components/feedback/FeedbackModal/FeedbackModal";
-import ExportarModal from "./components/ModalEstoque/ExportarModal";
 import EstoqueItemRow from "./components/ModalEstoque/EstoqueItemRow";
 import FilterDropdown from "./components/EstoqueList/FilterDropdown";
 import EntradaSaidaEstoque from "./components/ModalEstoque/EntradaSaidaEstoque";
@@ -38,8 +36,6 @@ export default function Estoque() {
   const [isNovoItemModalOpen, setIsNovoItemModalOpen] = useState(false);
   const [isEntradaSaidaModalOpen, setIsEntradaSaidaModalOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-
   const [editingItem, setEditingItem] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
 
@@ -398,14 +394,6 @@ export default function Estoque() {
     setIsEntradaSaidaModalOpen(false);
   }, [fetchEstoque]);
 
-  const openExportModal = useCallback(() => {
-    setIsExportModalOpen(true);
-  }, []);
-
-  const closeExportModal = useCallback(() => {
-    setIsExportModalOpen(false);
-  }, []);
-
   const closeSuccessModal = useCallback(() => {
     setIsSuccessModalOpen(false);
   }, []);
@@ -562,13 +550,6 @@ export default function Estoque() {
                       onFilterChange={handleFilterChange}
                     />
                   </div>
-                  <Button
-                    variant="secondary"
-                    onClick={openExportModal}
-                    startIcon={<Download className="w-4 h-4" />}
-                  >
-                    Exportar
-                  </Button>
                 </div>
               </div>
 
@@ -711,8 +692,6 @@ export default function Estoque() {
         description="O produto foi atualizado no sistema"
         duration={3000}
       />
-
-      <ExportarModal isOpen={isExportModalOpen} onClose={closeExportModal} />
 
       {toast && (
         <Toast
