@@ -6,6 +6,25 @@ export const formatCurrency = (value) => {
   }).format(Number(value));
 };
 
+// Formata quantidades e demais números que NÃO são preço.
+// Coage strings (ex.: "4.00" vindo da API) e remove zeros decimais à direita:
+// 4.00 -> "4", 2.50 -> "2,5", 1234.5 -> "1.234,5".
+export const formatQuantidade = (value) => {
+  const n = typeof value === "number" ? value : parseFloat(value);
+  if (value == null || isNaN(n)) return "0";
+  return n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+};
+
+// Limpa números com excesso de casas decimais embutidos em textos legados
+// (ex.: observações antigas com "3,000000 unidades" -> "3 unidades").
+// Só atinge números com 3+ casas decimais; valores monetários "85,00" ficam intactos.
+export const limparNumerosObservacao = (texto) => {
+  if (!texto) return texto;
+  return String(texto).replace(/\d+[.,]\d{3,}/g, (m) =>
+    formatQuantidade(m.replace(",", ".")),
+  );
+};
+
 export const parseCurrency = (value) => {
   if (!value) return 0;
   return Number(

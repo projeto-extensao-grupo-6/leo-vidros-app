@@ -15,6 +15,7 @@ import {
 import { getAgendamentoDisplayName, getInitials } from "../utils/eventHelpers";
 import Button from "../../../components/ui/Button/Button.component";
 import { cn } from "../../../utils/cn";
+import { formatQuantidade } from "../../../utils/formatters";
 
 export const EventInfoRow = ({
   icon: Icon,
@@ -221,7 +222,7 @@ export const EventInfo = ({
                       Reserva:
                     </span>
                     <span className="rounded-md border border-gray-100 bg-gray-50 px-2.5 py-1 text-sm font-bold text-gray-700">
-                      {item.quantidadeReservada}
+                      {formatQuantidade(item.quantidadeReservada)}
                     </span>
                   </div>
                 </div>

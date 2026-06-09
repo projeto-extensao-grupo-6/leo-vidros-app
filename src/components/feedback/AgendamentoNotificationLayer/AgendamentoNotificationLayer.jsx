@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import { X, Plus } from "lucide-react";
+import { formatQuantidade } from "../../../utils/formatters";
 import { queryKeys } from "../../../api/queryKeys";
 import agendamentosService from "../../../api/services/agendamentosService";
 import { appRouter } from "../../../router/AppRouter";
@@ -427,7 +428,7 @@ export default function AgendamentoNotificationLayer() {
                           />
                           {devolve > 0 && (
                             <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
-                              devolve {devolve.toFixed(2)} ao estoque
+                              devolve {formatQuantidade(devolve)} ao estoque
                             </span>
                           )}
                         </div>
@@ -521,7 +522,7 @@ export default function AgendamentoNotificationLayer() {
                             </div>
                             {devolve > 0 && (
                               <span className="self-start text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
-                                devolve {devolve.toFixed(2)} ao estoque
+                                devolve {formatQuantidade(devolve)} ao estoque
                               </span>
                             )}
                           </div>

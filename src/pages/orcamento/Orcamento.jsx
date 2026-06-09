@@ -6,6 +6,7 @@ import Api from "../../api/client/Api";
 import OrcamentosService from "../../api/services/orcamentosService";
 import servicosService from "../../api/services/servicosService";
 import { useOrcamentoProgress } from "../../context/OrcamentoProgressContext.jsx";
+import { formatQuantidade } from "../../utils/formatters";
 import {
   Plus,
   ArrowLeft,
@@ -37,6 +38,14 @@ const formatCurrencyBR = (value) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
     value || 0,
   );
+
+// Normaliza valores numéricos vindos da API (ex.: "20.00000") removendo
+// zeros decimais à direita para exibição em inputs: "20.00000" -> "20", "2.50" -> "2.5".
+const numeroLimpo = (v) => {
+  if (v == null || v === "") return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : String(v);
+};
 
 const calcularSubtotalItem = (quantidade, preco_unitario, desconto) => {
   const qtd = parseFloat(quantidade) || 0;
@@ -79,8 +88,8 @@ const mapearItensDoPedido = (pedido) => {
       id: `pedido-${pedido.id}-${produto.id ?? produto.produtoId ?? index}`,
       produto_id: produto.produtoId || "",
       descricao: produto.nomeProduto || produto.nome || "",
-      quantidade: String(produto.quantidadeSolicitada ?? produto.quantidade ?? ""),
-      preco_unitario: String(produto.precoUnitarioNegociado ?? produto.preco ?? ""),
+      quantidade: numeroLimpo(produto.quantidadeSolicitada ?? produto.quantidade),
+      preco_unitario: numeroLimpo(produto.precoUnitarioNegociado ?? produto.preco),
       desconto: "0",
       observacao: produto.observacao || "",
       ordem: index + 1,
@@ -93,7 +102,7 @@ const mapearItensDoPedido = (pedido) => {
       produto_id: "",
       descricao: pedido.servico.descricao || pedido.servico.nome,
       quantidade: "1",
-      preco_unitario: pedido.servico.precoBase != null ? String(pedido.servico.precoBase) : "",
+      preco_unitario: numeroLimpo(pedido.servico.precoBase),
       desconto: "0",
       observacao: "",
       ordem: 1,
@@ -109,8 +118,8 @@ const mapearItensDoServico = (lista = []) =>
     id: `sp-${sp.id ?? sp.produtoId}-${index}`,
     produto_id: sp.produtoId || "",
     descricao: sp.produtoNome || "",
-    quantidade: String(sp.quantidadePlanejada ?? ""),
-    preco_unitario: String(sp.precoUnitario ?? ""),
+    quantidade: numeroLimpo(sp.quantidadePlanejada),
+    preco_unitario: numeroLimpo(sp.precoUnitario),
     desconto: "0",
     observacao: sp.observacao || "",
     ordem: index + 1,
@@ -319,7 +328,7 @@ const OrcamentoItemRow = ({
             placeholder="Sem produto vinculado"
             options={produtos.map((p) => ({
               value: p.id,
-              label: `${p.nome}${p.disponivel !== undefined ? ` · ${p.disponivel} disp.` : ""}`,
+              label: `${p.nome}${p.disponivel !== undefined ? ` · ${formatQuantidade(p.disponivel)} disp.` : ""}`,
             }))}
           />
           <div className="md:col-span-2">
@@ -347,7 +356,7 @@ const OrcamentoItemRow = ({
                   isOverStock ? "text-red-600" : "text-green-600"
                 }`}
               >
-                Disp: {disponivel}
+                Disp: {formatQuantidade(disponivel)}
               </span>
             )}
           </div>
@@ -600,9 +609,9 @@ export default function OrcamentoPage() {
                 id: item.id || Date.now() + Math.random(),
                 produto_id: item.produtoId || "",
                 descricao: item.descricao || "",
-                quantidade: String(item.quantidade || ""),
-                preco_unitario: String(item.precoUnitario || ""),
-                desconto: String(item.desconto || ""),
+                quantidade: numeroLimpo(item.quantidade),
+                preco_unitario: numeroLimpo(item.precoUnitario),
+                desconto: numeroLimpo(item.desconto),
                 observacao: item.observacao || "",
                 ordem: item.ordem || 1,
               })),

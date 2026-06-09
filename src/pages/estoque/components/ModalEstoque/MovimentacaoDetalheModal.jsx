@@ -14,7 +14,7 @@ import {
   Settings,
   Edit3,
 } from "lucide-react";
-import { formatCurrency, formatDateTime } from "../../../../utils/formatters";
+import { formatCurrency, formatDateTime, limparNumerosObservacao } from "../../../../utils/formatters";
 import Button from "../../../../components/ui/Button/Button.component";
 
 const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
@@ -245,7 +245,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
                   </span>
                 </div>
                 <p className="text-base text-yellow-700 leading-relaxed text-center">
-                  {movimento.observacao}
+                  {limparNumerosObservacao(movimento.observacao)}
                 </p>
               </div>
             </div>
@@ -372,7 +372,7 @@ const MovimentacaoDetalheModal = ({ isOpen, onClose, movimento, produto }) => {
                                     Quantidade
                                   </span>
                                   <span className="font-bold text-purple-900">
-                                    {prod.quantidadeSolicitada}{" "}
+                                    {formatQuantity(prod.quantidadeSolicitada)}{" "}
                                     {produto?.unidademedida}
                                   </span>
                                 </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Search, ChevronDown, X } from "lucide-react";
+import { formatQuantidade } from "../../../utils/formatters";
 
 const ProdutoSearchSelect = ({
   produtos = [],
@@ -104,7 +105,7 @@ const ProdutoSearchSelect = ({
                       : "bg-green-50 text-green-700"
                   }`}
                 >
-                  {p.disponivel} disp.
+                  {formatQuantidade(p.disponivel)} disp.
                 </span>
               )}
               <span className="text-gray-400 text-xs">

@@ -14,6 +14,7 @@ import Kpis from "../../components/kpis/Kpis";
 import FaturamentoAnualModal from "../../components/kpis/FaturamentoAnualModal";
 import OrcamentosAbertosModal from "../../components/kpis/OrcamentosAbertosModal";
 import { useDashboardKpis } from "../../hooks/queries/useDashboard";
+import { formatQuantidade } from "../../utils/formatters";
 
 export default function PaginaInicial() {
   const navigate = useNavigate();
@@ -297,7 +298,7 @@ export default function PaginaInicial() {
                               item.status === "Critico" ? "text-red-600" : "text-orange-600"
                             }`}
                           >
-                            {item.quantidadeTotal} {item.unidadeMedida || "un"}
+                            {formatQuantidade(item.quantidadeTotal)} {item.unidadeMedida || "un"}
                           </span>
                           <span
                             className={`rounded px-2 py-0.5 text-[10px] font-bold uppercase ${

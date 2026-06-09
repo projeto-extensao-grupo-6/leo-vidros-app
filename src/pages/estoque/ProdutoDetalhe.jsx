@@ -28,7 +28,7 @@ import Sidebar from "../../components/layout/Sidebar/Sidebar";
 import Kpis from "../../components/kpis/Kpis";
 import MovimentacaoDetalheModal from "./components/ModalEstoque/MovimentacaoDetalheModal";
 import Api from "../../api/client/Api";
-import { formatCurrency } from "../../utils/formatters";
+import { formatCurrency, limparNumerosObservacao } from "../../utils/formatters";
 import Button from "../../components/ui/Button/Button.component";
 import UniversalInput from "../../components/ui/Input/UniversalInput";
 import { repairEncoding } from "../../utils/fixEncoding";
@@ -41,9 +41,7 @@ const formatQtd = (n) => {
 
 const formatObservacao = (observacao) => {
   if (!observacao) return "N/A";
-  return observacao.replace(/(\d+\.\d{3,})/g, (match) => {
-    return parseFloat(match).toFixed(2);
-  });
+  return limparNumerosObservacao(observacao);
 };
 
 export default function ProductDetailPage() {
@@ -996,10 +994,10 @@ export default function ProductDetailPage() {
                               {movimento.tipoMovimentacao === "ENTRADA"
                                 ? "+"
                                 : "-"}
-                              {movimento.quantidade} {produto.unidademedida}
+                              {formatQtd(movimento.quantidade)} {produto.unidademedida}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-center font-semibold">
-                              {movimento.quantidadeAtual}{" "}
+                              {formatQtd(movimento.quantidadeAtual)}{" "}
                               {produto.unidademedida}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-800 text-center">

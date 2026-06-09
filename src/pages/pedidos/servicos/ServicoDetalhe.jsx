@@ -20,7 +20,7 @@ import estoqueService from "../../../api/services/estoqueService";
 import PedidosService from "../../../api/services/pedidosService";
 import servicosService from "../../../api/services/servicosService";
 import orcamentosService from "../../../api/services/orcamentosService";
-import { formatCurrency, formatDate } from "../../../utils/formatters";
+import { formatCurrency, formatDate, formatQuantidade } from "../../../utils/formatters";
 import { getPedidoStatusConfig } from "../../../utils/agendamentoStatus";
 import Swal from "sweetalert2";
 
@@ -346,7 +346,7 @@ function AgendamentoTabs({ agendamentos }) {
                           {ap.produto?.nome || `Produto #${ap.produto?.id}`}
                         </span>
                         <span className="text-gray-500">
-                          Qtd: {ap.quantidadeUtilizada > 0 ? ap.quantidadeUtilizada : (ap.quantidadeReservada || "—")}
+                          Qtd: {ap.quantidadeUtilizada > 0 ? formatQuantidade(ap.quantidadeUtilizada) : (ap.quantidadeReservada ? formatQuantidade(ap.quantidadeReservada) : "—")}
                         </span>
                       </div>
                     ))}
@@ -850,8 +850,8 @@ export default function PedidoDetalhe() {
           const qtdUsada = usado ? (parseFloat(produtosQuantidades[i]) || qtdReservada) : 0;
           const diff = qtdReservada - qtdUsada;
           const descricao = usado
-            ? `Utilizado: ${qtdUsada} un${diff > 0 ? ` (devolve ${diff.toFixed(2)} ao estoque)` : diff < 0 ? ` (retirou ${Math.abs(diff).toFixed(2)} a mais do estoque)` : ""}`
-            : `Não utilizado (devolve ${qtdReservada} ao estoque)`;
+            ? `Utilizado: ${formatQuantidade(qtdUsada)} un${diff > 0 ? ` (devolve ${formatQuantidade(diff)} ao estoque)` : diff < 0 ? ` (retirou ${formatQuantidade(Math.abs(diff))} a mais do estoque)` : ""}`
+            : `Não utilizado (devolve ${formatQuantidade(qtdReservada)} ao estoque)`;
           return `${p.nome || `Item #${i + 1}`}: ${descricao}`;
         })
         .join("; ");
@@ -1518,7 +1518,7 @@ export default function PedidoDetalhe() {
                                     type="number"
                                     min="1"
                                     step="0.01"
-                                    value={parseFloat((produto.quantidade || 0).toFixed(2))}
+                                    value={Number(produto.quantidade) || 0}
                                     onChange={(e) => handleProdutoChange(index, "quantidade", e.target.value)}
                                     placeholder="0"
                                     className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] outline-none shadow-sm"
@@ -1529,7 +1529,7 @@ export default function PedidoDetalhe() {
                                     type="number"
                                     step="0.01"
                                     min="0"
-                                    value={parseFloat((produto.preco || 0).toFixed(2))}
+                                    value={Number(produto.preco) || 0}
                                     onChange={(e) => handleProdutoChange(index, "preco", e.target.value)}
                                     placeholder="0,00"
                                     className="w-full px-2.5 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-[#007EA7] focus:border-[#007EA7] outline-none shadow-sm"
@@ -1900,7 +1900,7 @@ export default function PedidoDetalhe() {
                         <span className="text-sm font-semibold text-gray-800 flex-1">
                           {p.nome || `Item #${i + 1}`}
                           <span className="text-gray-400 font-normal ml-2 text-xs">
-                            (reservado: {p.quantidade ?? 0} un)
+                            (reservado: {formatQuantidade(p.quantidade)} un)
                           </span>
                         </span>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${usado ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
@@ -1928,12 +1928,12 @@ export default function PedidoDetalhe() {
                             const diff = reservado - utilizado;
                             if (diff > 0) return (
                               <span className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full font-medium">
-                                devolve {diff.toFixed(2)} ao estoque
+                                devolve {formatQuantidade(diff)} ao estoque
                               </span>
                             );
                             if (diff < 0) return (
                               <span className="text-xs text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full font-medium">
-                                +{Math.abs(diff).toFixed(2)} a mais do estoque
+                                +{formatQuantidade(Math.abs(diff))} a mais do estoque
                               </span>
                             );
                             return null;

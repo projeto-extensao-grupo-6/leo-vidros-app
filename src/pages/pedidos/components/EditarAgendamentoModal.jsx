@@ -13,6 +13,7 @@ import {
 import agendamentosService from "../../../api/services/agendamentosService";
 import Button from "../../../components/ui/Button/Button.component";
 import UniversalInput from "../../../components/ui/Input/UniversalInput";
+import { formatQuantidade } from "../../../utils/formatters";
 
 // Status disponíveis para agendamentos
 const STATUS_AGENDAMENTO = [
@@ -452,7 +453,7 @@ const EditarAgendamentoModal = ({
                         <div key={index} className="text-sm text-purple-700">
                           <p className="font-medium">{item.produto.nome}</p>
                           <p className="text-xs">
-                            Qtd: {item.quantidadeReservada}
+                            Qtd: {formatQuantidade(item.quantidadeReservada)}
                           </p>
                         </div>
                       ))}

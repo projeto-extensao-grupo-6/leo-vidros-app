@@ -7,6 +7,7 @@ import UniversalInput from "../../../components/ui/Input/UniversalInput";
 import FeedbackModal from "../../../components/feedback/FeedbackModal/FeedbackModal";
 import ProdutoSearchSelect from "../../../components/ui/misc/ProdutoSearchSelect";
 import { modalClasses } from "../../../components/ui/modal/modalStyles";
+import { formatQuantidade } from "../../../utils/formatters";
 
 const METODOS_COM_PARCELA = ["Cartão de crédito"];
 
@@ -319,7 +320,7 @@ const EditarPedidoModal = ({ isOpen, onClose, pedido, onSuccess }) => {
                               : "text-green-600"
                           }`}
                         >
-                          Disp: {produto.disponivel}
+                          Disp: {formatQuantidade(produto.disponivel)}
                         </span>
                       )}
                     </div>

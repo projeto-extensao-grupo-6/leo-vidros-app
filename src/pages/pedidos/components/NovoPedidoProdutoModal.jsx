@@ -24,6 +24,7 @@ import {
   zodFirstError,
 } from "../../../lib/schemas";
 import { modalClasses } from "../../../components/ui/modal/modalStyles";
+import { formatQuantidade } from "../../../utils/formatters";
 
 const usePedidoAPI = () => {
   const cadastrarCliente = async (clienteData) => {
@@ -348,7 +349,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
       );
       if (overStock) {
         setError(
-          `Estoque insuficiente para "${overStock.nome}". Disponível: ${overStock.disponivel}, solicitado: ${overStock.quantidade}.`,
+          `Estoque insuficiente para "${overStock.nome}". Disponível: ${formatQuantidade(overStock.disponivel)}, solicitado: ${formatQuantidade(overStock.quantidade)}.`,
         );
         return false;
       }
@@ -715,7 +716,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                             placeholder="Selecione um produto"
                             options={produtosDisponiveis.map((p) => ({
                               value: String(p.id),
-                              label: `${p.nome} — R$ ${p.preco?.toFixed(2)} · ${p.disponivel} disp.`,
+                              label: `${p.nome} — R$ ${p.preco?.toFixed(2)} · ${formatQuantidade(p.disponivel)} disp.`,
                             }))}
                             value={produto.produtoId}
                             onChange={(e) =>
@@ -751,7 +752,7 @@ const NovoPedidoModal = ({ isOpen, onClose, onSuccess }) => {
                                   : "text-green-600"
                               }`}
                             >
-                              Disp: {produto.disponivel}
+                              Disp: {formatQuantidade(produto.disponivel)}
                             </span>
                           )}
                         </div>

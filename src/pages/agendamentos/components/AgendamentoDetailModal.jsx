@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import { cn } from "../../../utils/cn";
+import { formatQuantidade } from "../../../utils/formatters";
 import {
   normalizeStatus,
   statusConfig,
@@ -183,7 +184,7 @@ export default function AgendamentoDetailModal({
                       </span>
                       {p.quantidade && (
                         <span className="text-xs text-gray-400">
-                          x{p.quantidade}
+                          x{formatQuantidade(p.quantidade)}
                         </span>
                       )}
                     </div>

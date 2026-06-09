@@ -11,6 +11,7 @@ import {
 import Api from "../../../api/client/Api";
 import servicosService from "../../../api/services/servicosService";
 import { cepMask } from "../../../utils/masks";
+import { formatQuantidade } from "../../../utils/formatters";
 import { modalClasses } from "../../../components/ui/modal/modalStyles";
 import UniversalInput from "../Input/UniversalInput";
 import Button from "../Button/Button.component";
@@ -1431,7 +1432,7 @@ const TaskCreateModal = ({ isOpen, onClose, onSave, initialData = {} }) => {
                           className="flex w-full items-center justify-between px-3 py-2 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0"
                         >
                           <span className="font-medium text-gray-800">{o.nomeProduto}</span>
-                          <span className="text-xs text-gray-400">{o.disponivel} disponível</span>
+                          <span className="text-xs text-gray-400">{formatQuantidade(o.disponivel)} disponível</span>
                         </button>
                       ))}
                     {estoqueOptions.filter((o) =>

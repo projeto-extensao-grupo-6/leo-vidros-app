@@ -5,6 +5,7 @@ import Api from "../../../../api/client/Api";
 import Button from "../../../../components/ui/Button/Button.component";
 import UniversalInput from "../../../../components/ui/Input/UniversalInput";
 import { modalClasses } from "../../../../components/ui/modal/modalStyles";
+import { formatQuantidade } from "../../../../utils/formatters";
 
 const EntradaSaidaEstoque = ({
   isOpen,
@@ -156,14 +157,14 @@ const EntradaSaidaEstoque = ({
                 <p className="mt-1 text-xs text-gray-500">
                   Disponivel:{" "}
                   <span className="font-semibold text-gray-700">
-                    {currentItem?.disponivel}
+                    {formatQuantidade(currentItem?.disponivel)}
                   </span>
                   {(currentItem?.reservado ?? 0) > 0 && (
                     <>
                       {" "}
                       · Reservado:{" "}
                       <span className="font-semibold text-amber-600">
-                        {currentItem?.reservado}
+                        {formatQuantidade(currentItem?.reservado)}
                       </span>
                     </>
                   )}
@@ -178,12 +179,12 @@ const EntradaSaidaEstoque = ({
               <p className="text-sm text-red-800">
                 <strong>Saida bloqueada.</strong> A quantidade solicitada
                 ultrapassa o disponivel para retirada. Disponivel:{" "}
-                <strong>{currentItem?.disponivel}</strong>
+                <strong>{formatQuantidade(currentItem?.disponivel)}</strong>
                 {(currentItem?.reservado ?? 0) > 0 && (
                   <>
                     {" "}
                     · Reservado em agendamentos ativos:{" "}
-                    <strong>{currentItem?.reservado}</strong>
+                    <strong>{formatQuantidade(currentItem?.reservado)}</strong>
                   </>
                 )}
               </p>
@@ -194,7 +195,7 @@ const EntradaSaidaEstoque = ({
             <div className="flex items-start gap-3 rounded-r-lg border-l-4 border-amber-500 bg-amber-50 p-4">
               <AlertTriangle className={`${modalClasses.alertIcon} text-amber-600`} />
               <p className="text-sm text-amber-800">
-                Este item possui <strong>{currentItem?.reservado}</strong>{" "}
+                Este item possui <strong>{formatQuantidade(currentItem?.reservado)}</strong>{" "}
                 {unidadeMedida.toLowerCase()}(s) reservada(s), mas ainda ha saldo
                 disponivel para retirada.
               </p>

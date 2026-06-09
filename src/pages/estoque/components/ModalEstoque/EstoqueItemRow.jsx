@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Eye, Trash2 } from "lucide-react";
 import UniversalInput from "../../../../components/ui/Input/UniversalInput";
+import { formatQuantidade } from "../../../../utils/formatters";
 
 const EstoqueItemRow = ({
   item,
@@ -60,7 +61,7 @@ const EstoqueItemRow = ({
       </div>
 
       <div className="py-3 w-[20%] text-center font-semibold text-gray-800">
-        {quantidade}
+        {formatQuantidade(quantidade)}
       </div>
 
       <div
