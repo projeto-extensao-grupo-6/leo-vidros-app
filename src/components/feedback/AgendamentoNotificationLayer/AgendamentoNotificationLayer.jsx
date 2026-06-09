@@ -151,54 +151,47 @@ export default function AgendamentoNotificationLayer() {
       agendamento.id,
       buildPayload(agendamento, nomeStatus),
     );
-    if (!result.success) {
-      throw new Error(result.error || "Não foi possível atualizar o agendamento.");
-    }
+    if (!result.success) return false;
     await queryClient.invalidateQueries({ queryKey: queryKeys.agendamentos.all() });
     await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all() });
+    return true;
   };
 
   const handleIniciar = async (agendamento) => {
-    try {
-      await handleAtualizarStatus(agendamento, "EM ANDAMENTO");
-      dismissNotification(`${agendamento.id}:iniciar`);
-      Swal.fire({
-        icon: "success",
-        title: "Agendamento iniciado",
-        text: "O agendamento foi marcado como em andamento.",
-        timer: 2000,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      Swal.fire({ icon: "error", title: "Erro ao iniciar", text: err.message });
-    }
+    const ok = await handleAtualizarStatus(agendamento, "EM ANDAMENTO");
+    if (!ok) return;
+    dismissNotification(`${agendamento.id}:iniciar`);
+    Swal.fire({
+      icon: "success",
+      title: "Agendamento iniciado",
+      text: "O agendamento foi marcado como em andamento.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
   };
 
   const handleFinalizar = async (agendamento) => {
     const tipo = (agendamento.tipoAgendamento || "").toUpperCase();
     if (tipo !== "SERVICO") {
-      try {
-        await handleAtualizarStatus(agendamento, "CONCLUÍDO");
-        dismissNotification(`${agendamento.id}:finalizar`);
+      const ok = await handleAtualizarStatus(agendamento, "CONCLUÍDO");
+      if (!ok) return;
+      dismissNotification(`${agendamento.id}:finalizar`);
 
-        const pedidoId = agendamento.servico?.pedidoId;
-        const result = await Swal.fire({
-          icon: "success",
-          title: "Vistoria concluída!",
-          text: "Deseja gerar o orçamento agora?",
-          showConfirmButton: true,
-          confirmButtonText: "Gerar Orçamento",
-          confirmButtonColor: "#007EA7",
-          showDenyButton: true,
-          denyButtonText: "Agora não",
-          denyButtonColor: "#6b7280",
-        });
+      const pedidoId = agendamento.servico?.pedidoId;
+      const swalResult = await Swal.fire({
+        icon: "success",
+        title: "Vistoria concluída!",
+        text: "Deseja gerar o orçamento agora?",
+        showConfirmButton: true,
+        confirmButtonText: "Gerar Orçamento",
+        confirmButtonColor: "#007EA7",
+        showDenyButton: true,
+        denyButtonText: "Agora não",
+        denyButtonColor: "#6b7280",
+      });
 
-        if (result.isConfirmed && pedidoId) {
-          appRouter.navigate(`/pedidos/${pedidoId}/orcamento`);
-        }
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "Erro ao finalizar", text: err.message });
+      if (swalResult.isConfirmed && pedidoId) {
+        appRouter.navigate(`/pedidos/${pedidoId}/orcamento`);
       }
       return;
     }
@@ -306,7 +299,8 @@ export default function AgendamentoNotificationLayer() {
           produtos: produtosPayload,
         });
       } else {
-        await handleAtualizarStatus(agendamento, "CONCLUÍDO");
+        const ok = await handleAtualizarStatus(agendamento, "CONCLUÍDO");
+        if (!ok) return;
       }
 
       await queryClient.invalidateQueries({ queryKey: queryKeys.agendamentos.all() });
@@ -320,8 +314,8 @@ export default function AgendamentoNotificationLayer() {
         timer: 2000,
         showConfirmButton: false,
       });
-    } catch (err) {
-      Swal.fire({ icon: "error", title: "Erro ao finalizar", text: err.message });
+    } catch {
+      // erro já exibido pelo interceptor global via FeedbackDialog
     } finally {
       setFinalizarLoading(false);
     }
@@ -336,19 +330,13 @@ export default function AgendamentoNotificationLayer() {
   };
 
   const handleCancelar = async (agendamento) => {
-    try {
-      const result = await agendamentosService.delete(agendamento.id);
-      if (!result.success) {
-        throw new Error(result.error || "Não foi possível cancelar o agendamento.");
-      }
-      await queryClient.invalidateQueries({ queryKey: queryKeys.agendamentos.all() });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all() });
-      dismissNotification(
-        `${agendamento.id}:${agendamento.tipoAgendamento === "ORCAMENTO" ? "finalizar" : "iniciar"}`,
-      );
-    } catch (err) {
-      Swal.fire({ icon: "error", title: "Erro ao cancelar", text: err.message });
-    }
+    const result = await agendamentosService.delete(agendamento.id);
+    if (!result.success) return;
+    await queryClient.invalidateQueries({ queryKey: queryKeys.agendamentos.all() });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.all() });
+    dismissNotification(
+      `${agendamento.id}:${agendamento.tipoAgendamento === "ORCAMENTO" ? "finalizar" : "iniciar"}`,
+    );
   };
 
   const produtosFiltrados = estoqueItems.filter((item) => {

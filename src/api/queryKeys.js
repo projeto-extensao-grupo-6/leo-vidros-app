@@ -2,12 +2,9 @@ export const queryKeys = {
   dashboard: {
     all: () => ["dashboard"],
     qtdAgendamentosHoje: () => ["dashboard", "qtdAgendamentosHoje"],
-    qtdAgendamentosFuturos: () => ["dashboard", "qtdAgendamentosFuturos"],
     agendamentosFuturos: () => ["dashboard", "agendamentosFuturos"],
     estoqueCritico: () => ["dashboard", "estoqueCritico"],
-    taxaOcupacaoServicos: () => ["dashboard", "taxaOcupacaoServicos"],
     qtdItensCriticos: () => ["dashboard", "qtdItensCriticos"],
-    qtdServicosHoje: () => ["dashboard", "qtdServicosHoje"],
     faturamentoMes: () => ["dashboard", "faturamentoMes"],
     faturamentoAnual: () => ["dashboard", "faturamentoAnual"],
     orcamentosAbertos: () => ["dashboard", "orcamentosAbertos"],

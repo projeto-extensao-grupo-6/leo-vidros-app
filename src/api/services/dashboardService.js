@@ -16,10 +16,6 @@ class DashboardService extends BaseService {
     return this.get(`${BASE}/qtd-agendamentos-hoje`);
   }
 
-  getQtdAgendamentosFuturos() {
-    return this.get(`${BASE}/qtd-agendamentos-futuros`);
-  }
-
   getEstoqueCritico() {
     return this.get(`${BASE}/estoque-critico`);
   }
@@ -28,28 +24,6 @@ class DashboardService extends BaseService {
     return this.get(`${BASE}/agendamentos-futuros`);
   }
 
-  async getTaxaOcupacaoServicos() {
-    const result = await this.get(`${BASE}/taxa-ocupacao-servicos`);
-    if (result.success && result.data?.taxaOcupacaoServicos == null) {
-      return { ...result, data: { ...result.data, taxaOcupacaoServicos: 0 } };
-    }
-    return result;
-  }
-
-  async getQtdServicosHoje() {
-    const result = await this.get(`${BASE}/qtd-servicos-hoje`);
-    if (!result.success) {
-      return {
-        success: false,
-        data: { qtdServicosHoje: 0 },
-        error: result.error,
-      };
-    }
-    if (result.data?.qtdServicosHoje == null) {
-      return { ...result, data: { ...result.data, qtdServicosHoje: 0 } };
-    }
-    return result;
-  }
 }
 
 const dashboardService = new DashboardService();
@@ -62,10 +36,6 @@ export const getQtdAgendamentosHoje = async () => {
   const r = await dashboardService.getQtdAgendamentosHoje();
   return r.success ? r : { ...r, data: { qtdAgendamentosHoje: 0 } };
 };
-export const getQtdAgendamentosFuturos = async () => {
-  const r = await dashboardService.getQtdAgendamentosFuturos();
-  return r.success ? r : { ...r, data: { qtdAgendamentosFuturos: 0 } };
-};
 export const getEstoqueCritico = async () => {
   const r = await dashboardService.getEstoqueCritico();
   return r.success ? r : { ...r, data: [] };
@@ -74,9 +44,6 @@ export const getAgendamentosFuturos = async () => {
   const r = await dashboardService.getAgendamentosFuturos();
   return r.success ? r : { ...r, data: [] };
 };
-export const getTaxaOcupacaoServicos = () =>
-  dashboardService.getTaxaOcupacaoServicos();
-export const getQtdServicosHoje = () => dashboardService.getQtdServicosHoje();
 export const getFaturamentoMes = async () => {
   const r = await dashboardService.get(`${BASE}/faturamento-mes`);
   return r.success ? r : { ...r, data: { faturamentoMes: 0, percentualVariacao: null } };

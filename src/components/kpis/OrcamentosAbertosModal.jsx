@@ -2,11 +2,9 @@ import { X, FileText, ExternalLink, User, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useOrcamentos } from "../../hooks/queries/useOrcamentos";
 
-const STATUS_ABERTOS = ["ENVIADO", "EM ANALISE", "RASCUNHO"];
+const STATUS_ABERTOS = ["EM ANALISE"];
 
 const STATUS_CONFIG = {
-  RASCUNHO: { label: "Rascunho", className: "bg-gray-100 text-gray-600" },
-  ENVIADO: { label: "Enviado", className: "bg-blue-100 text-blue-700" },
   "EM ANALISE": { label: "Em análise", className: "bg-yellow-100 text-yellow-700" },
 };
 
@@ -44,9 +42,9 @@ export default function OrcamentosAbertosModal({ onClose }) {
           <div className="flex items-center gap-3">
             <FileText className="h-5 w-5" />
             <div>
-              <h2 className="text-base font-semibold">Orçamentos em Aberto</h2>
+              <h2 className="text-base font-semibold">Orçamentos em Análise</h2>
               <p className="text-xs text-blue-200">
-                {isLoading ? "Carregando..." : `${abertos.length} orçamento${abertos.length !== 1 ? "s" : ""} pendente${abertos.length !== 1 ? "s" : ""}`}
+                {isLoading ? "Carregando..." : `${abertos.length} orçamento${abertos.length !== 1 ? "s" : ""} em análise`}
               </p>
             </div>
           </div>
@@ -68,7 +66,7 @@ export default function OrcamentosAbertosModal({ onClose }) {
           ) : abertos.length === 0 ? (
             <div className="flex h-48 flex-col items-center justify-center gap-2 text-gray-400">
               <FileText className="h-10 w-10 opacity-30" />
-              <p className="text-sm">Nenhum orçamento em aberto.</p>
+              <p className="text-sm">Nenhum orçamento em análise.</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
