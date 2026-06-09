@@ -783,7 +783,7 @@ export default function OrcamentoPage() {
     setIsSaving(true);
     try {
       const payload = OrcamentosService.mapearParaBackend(
-        { ...dadosGerais, status_id: "RASCUNHO" },
+        dadosGerais,
         itens,
         subtotalGeral,
         descontoGeral,

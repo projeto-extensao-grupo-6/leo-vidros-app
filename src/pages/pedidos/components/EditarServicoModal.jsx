@@ -282,10 +282,7 @@ const EditarServicoModal = ({ isOpen, onClose, servico, onSuccess }) => {
           descricao: formData.descricao || "",
           precoBase: parseFloat(formData.precoBase) || 0.0,
           ativo: servicoDeveFicarAtivo,
-          etapa: {
-            tipo: "PEDIDO",
-            nome: etapaParaBackend, // Enviando COM acento e espaço, igual ao banco
-          },
+          etapaNome: etapaParaBackend,
         },
       };
 
