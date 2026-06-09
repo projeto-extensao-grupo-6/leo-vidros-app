@@ -22,7 +22,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 import agendamentosService from "../../../api/services/agendamentosService";
-import Swal from "sweetalert2";
 import {
   useEventDetails,
   useDeleteAgendamento,
@@ -154,7 +153,7 @@ const useEscapeToClose = (isOpen, onClose) => {
 // --- MODAL: FINALIZAR VISTORIA (ORÇAMENTO) → GERAR ORÇAMENTO ---
 // Agendamento de orçamento (vistoria) não dá baixa em estoque: ao finalizar, leva o
 // usuário para a tela de orçamentos do pedido.
-const GerarOrcamentoModal = ({ isOpen, onClose, onConfirm, isSaving }) => {
+const GerarOrcamentoModal = ({ isOpen, onClose, onConfirm, isSaving, erroExterno }) => {
   useEscapeToClose(isOpen, onClose);
 
   if (!isOpen) return null;
@@ -186,9 +185,17 @@ const GerarOrcamentoModal = ({ isOpen, onClose, onConfirm, isSaving }) => {
           </div>
 
           <div className="px-6 py-5 text-sm leading-relaxed text-gray-600">
-            A vistoria será concluída e você será levado para a tela de orçamentos
-            do pedido para gerar o orçamento. Nenhuma baixa de estoque é realizada
-            nesta etapa.
+            {erroExterno ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {erroExterno}
+              </div>
+            ) : (
+              <>
+                A vistoria será concluída e você será levado para a tela de orçamentos
+                do pedido para gerar o orçamento. Nenhuma baixa de estoque é realizada
+                nesta etapa.
+              </>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
@@ -221,7 +228,7 @@ const GerarOrcamentoModal = ({ isOpen, onClose, onConfirm, isSaving }) => {
 // --- MODAL: FINALIZAR SERVIÇO → VALIDAÇÃO/BAIXA DE ESTOQUE ---
 // Agendamento de serviço: confirma a quantidade utilizada de cada produto reservado
 // e conclui via PUT /agendamentos/{id}/concluir (dá baixa e libera o excedente).
-const ConcluirServicoModal = ({ isOpen, onClose, onConfirm, servicoId, isSaving }) => {
+const ConcluirServicoModal = ({ isOpen, onClose, onConfirm, servicoId, isSaving, erroExterno }) => {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState(null);
@@ -314,7 +321,11 @@ const ConcluirServicoModal = ({ isOpen, onClose, onConfirm, servicoId, isSaving 
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto px-6 py-5">
-            {loading ? (
+            {erroExterno ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {erroExterno}
+              </div>
+            ) : loading ? (
               <div className="flex items-center justify-center gap-2 py-8 text-sm text-gray-500">
                 <Loader2 className="h-4 w-4 animate-spin" /> Carregando produtos...
               </div>
@@ -415,6 +426,7 @@ const EventDetailsModal = ({
   const [isConcluirServicoOpen, setIsConcluirServicoOpen] = useState(false);
   const [isGerarOrcamentoOpen, setIsGerarOrcamentoOpen] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [erroApi, setErroApi] = useState(null);
 
   const isFinalizado = isFinalizedStatus(details?.statusAgendamento);
   const canFinalizar = !isFinalizado;
@@ -437,6 +449,7 @@ const EventDetailsModal = ({
   // Botão "Finalizar Execução": vistoria (orçamento) abre o modal de gerar orçamento;
   // serviço abre o modal de validação/baixa de estoque.
   const handleFinalizarClick = () => {
+    setErroApi(null);
     if (isOrcamento) {
       setIsGerarOrcamentoOpen(true);
     } else {
@@ -468,16 +481,11 @@ const EventDetailsModal = ({
           navigate(`/pedidos/${pedidoId}/orcamento`);
         }
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Erro ao finalizar",
-          text: result.error || "Não foi possível finalizar a vistoria.",
-          timer: 4000,
-          showConfirmButton: true,
-        });
+        setErroApi(result.error || "Não foi possível finalizar a vistoria.");
       }
     } catch (err) {
       console.error("Erro ao finalizar vistoria:", err);
+      setErroApi("Erro inesperado ao finalizar a vistoria.");
     } finally {
       setIsFinalizing(false);
     }
@@ -494,16 +502,11 @@ const EventDetailsModal = ({
         onEventDeleted?.(details.id);
         onClose?.();
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Erro ao concluir serviço",
-          text: result.error || "Não foi possível concluir o serviço.",
-          timer: 4000,
-          showConfirmButton: true,
-        });
+        setErroApi(result.error || "Não foi possível concluir o serviço.");
       }
     } catch (err) {
       console.error("Erro ao concluir serviço:", err);
+      setErroApi("Erro inesperado ao concluir o serviço.");
     } finally {
       setIsFinalizing(false);
     }
@@ -655,17 +658,19 @@ const EventDetailsModal = ({
 
       <GerarOrcamentoModal
         isOpen={isGerarOrcamentoOpen}
-        onClose={() => setIsGerarOrcamentoOpen(false)}
+        onClose={() => { setIsGerarOrcamentoOpen(false); setErroApi(null); }}
         onConfirm={handleGerarOrcamento}
         isSaving={isFinalizing}
+        erroExterno={erroApi}
       />
 
       <ConcluirServicoModal
         isOpen={isConcluirServicoOpen}
-        onClose={() => setIsConcluirServicoOpen(false)}
+        onClose={() => { setIsConcluirServicoOpen(false); setErroApi(null); }}
         onConfirm={handleConcluirServico}
         servicoId={details.servico?.id}
         isSaving={isFinalizing}
+        erroExterno={erroApi}
       />
     </>
   );

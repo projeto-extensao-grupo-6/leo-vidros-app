@@ -62,7 +62,6 @@ const STEPS = [
   { label: "AGUARDANDO AGENDA DE ORÇAMENTO" },
   { label: "ORÇAMENTO AGENDADO" },
   { label: "ANÁLISE DO ORÇAMENTO" },
-  { label: "ORÇAMENTO APROVADO" },
   { label: "AGUARDANDO AGENDA DE SERVIÇO" },
   { label: "SERVIÇO AGENDADO" },
   { label: "AGENDAMENTO EM EXECUÇÃO" },
@@ -85,8 +84,9 @@ const ETAPA_NORM_MAP = {
   "PENDENTE":                                  "AGUARDANDO AGENDA DE ORÇAMENTO",
   "ORCAMENTO AGENDADO":                        "ORÇAMENTO AGENDADO",
   "ANALISE DO ORCAMENTO":                      "ANÁLISE DO ORÇAMENTO",
-  "ORCAMENTO APROVADO":                        "ORÇAMENTO APROVADO",
+  "ORCAMENTO APROVADO":                        "AGUARDANDO AGENDA DE SERVIÇO",
   "AGUARDANDO AGENDA DE SERVICO INSTALACAO":   "AGUARDANDO AGENDA DE SERVIÇO",
+  "AGUARDANDO AGENDA DE SERVICO/INSTALACAO":   "AGUARDANDO AGENDA DE SERVIÇO",
   "AGUARDANDO AGENDA DE SERVICO":              "AGUARDANDO AGENDA DE SERVIÇO",
   "SERVICO AGENDADO":                          "SERVIÇO AGENDADO",
   "AGENDAMENTO EM EXECUCAO":                   "AGENDAMENTO EM EXECUÇÃO",
@@ -655,7 +655,7 @@ export default function PedidoDetalhe() {
       // O backend marca o selecionado como APROVADO, reprova automaticamente os demais
       // orçamentos do pedido, sincroniza os produtos e avança a etapa para "ORÇAMENTO APROVADO".
       setShowAprovarOrcamentoModal(false);
-      setFormData((prev) => ({ ...prev, etapaServico: "ORÇAMENTO APROVADO" }));
+      setFormData((prev) => ({ ...prev, etapaServico: "AGUARDANDO AGENDA DE SERVIÇO" }));
       await fetchPedido();
       setShowSuccessModal(true);
       setTimeout(() => setShowSuccessModal(false), 2500);
@@ -685,9 +685,7 @@ export default function PedidoDetalhe() {
     }
 
     if (
-      ["ORCAMENTO APROVADO", "ANALISE DO ORCAMENTO"].includes(
-        normalizeStatus(formData.etapaServico),
-      ) &&
+      normalizeStatus(formData.etapaServico) === "ANALISE DO ORCAMENTO" &&
       orcamentosPedido.length === 0
     ) {
       setError(
@@ -788,7 +786,7 @@ export default function PedidoDetalhe() {
         return;
       }
 
-      if (etapaFoiAlterada && etapaNormalizada === "ORCAMENTO APROVADO" && !temAgendamentoServicoAtivo) {
+      if (etapaFoiAlterada && etapaNormalizada === "AGUARDANDO AGENDA DE SERVICO" && !temAgendamentoServicoAtivo) {
         setShowServicoSuggestion(true);
         return;
       }
@@ -1265,7 +1263,10 @@ export default function PedidoDetalhe() {
                               setShowTaskModal(true);
                               return;
                             }
-                            if (normalizeStatus(novaEtapa) === "ORCAMENTO APROVADO") {
+                            if (
+                              normalizeStatus(novaEtapa) === "AGUARDANDO AGENDA DE SERVICO" &&
+                              normalizeStatus(formData.etapaServico) === "ANALISE DO ORCAMENTO"
+                            ) {
                               abrirModalAprovarOrcamento();
                               return;
                             }
